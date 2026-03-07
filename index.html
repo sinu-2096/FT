@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Pali Ghat Hatchlings</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+}
+
+#container{
+display:flex;
+height:100vh;
+}
+
+#sidebar{
+width:320px;
+background:#f2f2f2;
+padding:10px;
+overflow:auto;
+}
+
+#map{
+flex:1;
+}
+
+select{
+width:100%;
+padding:8px;
+margin-bottom:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:6px;
+}
+
+th{
+background:#eee;
+}
+
+@media(max-width:768px){
+
+#container{
+flex-direction:column;
+}
+
+#sidebar{
+width:100%;
+height:40%;
+}
+
+#map{
+height:60%;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="sidebar">
+
+<h3>Pali Ghat Hatchlings</h3>
+
+<select id="idSelector">
+<option value="">Select Hatchling</option>
+</select>
+
+<div id="tableContainer"></div>
+
+</div>
+
+<div id="map"></div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const sheetURL="https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
+
+let dataset=[];
+let trackLayer=null;
+
+const map=L.map('map',{closePopupOnClick:false}).setView([25.844,76.56],12);
+
+
+/* GOOGLE SATELLITE HYBRID */
+
+L.tileLayer(
+'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+{
+maxZoom:20,
+attribution:'Google'
+}).addTo(map);
+
+
+
+function csvToArray(str){
+
+const rows=str.trim().split("\n");
+const headers=rows.shift().split(",");
+
+return rows.map(r=>{
+
+const values=r.split(",");
+let obj={};
+
+headers.forEach((h,i)=>{
+obj[h.trim()]=values[i];
+});
+
+return obj;
+
+});
+
+}
+
+
+
+function getLatestPoints(data){
+
+const latest={};
+
+data.forEach(row=>{
+
+const id=row["Animal ID"];
+const time=new Date(row["Timestamp"]);
+
+if(!latest[id] || new Date(latest[id]["Timestamp"]) < time){
+
+latest[id]=row;
+
+}
+
+});
+
+return Object.values(latest);
+
+}
+
+
+
+function buildTable(points){
+
+let html="<table>";
+html+="<tr><th>Time</th><th>Place</th><th>Activity</th><th>Signal</th></tr>";
+
+points.forEach(p=>{
+
+html+=`
+<tr>
+<td>${p["Timestamp"]}</td>
+<td>${p["Place"]}</td>
+<td>${p["Activity"]}</td>
+<td>${p["Signal Stength"]}</td>
+</tr>
+`;
+
+});
+
+html+="</table>";
+
+document.getElementById("tableContainer").innerHTML=html;
+
+}
+
+
+
+function drawTrack(id){
+
+if(trackLayer) map.removeLayer(trackLayer);
+
+const points=dataset.filter(d=>d["Animal ID"]==id);
+
+const latlngs=points.map(p=>[
+parseFloat(p["Latitude"]),
+parseFloat(p["Longitude"])
+]);
+
+trackLayer=L.polyline(latlngs,{
+color:"red",
+weight:3
+}).addTo(map);
+
+map.fitBounds(trackLayer.getBounds());
+
+buildTable(points);
+
+}
+
+
+
+fetch(sheetURL)
+.then(r=>r.text())
+.then(csv=>{
+
+dataset=csvToArray(csv);
+
+
+const ids=[...new Set(dataset.map(d=>d["Animal ID"]))];
+
+ids.forEach(id=>{
+
+const opt=document.createElement("option");
+opt.value=id;
+opt.text="ID "+id;
+
+document.getElementById("idSelector").appendChild(opt);
+
+});
+
+
+const latestPoints=getLatestPoints(dataset);
+
+latestPoints.forEach(point=>{
+
+const marker=L.marker([
+parseFloat(point["Latitude"]),
+parseFloat(point["Longitude"])
+]).addTo(map);
+
+marker.bindPopup(`
+<b>ID ${point["Animal ID"]}</b><br>
+${point["Timestamp"]}<br>
+${point["Place"]}<br>
+Activity: ${point["Activity"]}
+`);
+
+});
+
+
+});
+
+
+
+document.getElementById("idSelector")
+.addEventListener("change",function(){
+
+const id=this.value;
+
+if(id){
+drawTrack(id);
+}
+
+});
+
+
+</script>
+
+</body>
+</html>
