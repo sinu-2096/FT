@@ -13,7 +13,6 @@
 body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
-background:#f2f4f7;
 }
 
 #container{
@@ -33,40 +32,23 @@ overflow:auto;
 flex:1;
 }
 
-h3{
-margin-top:0;
-font-size:18px;
-}
-
 select{
 width:100%;
 padding:8px;
 margin-bottom:12px;
 font-size:14px;
-border:1px solid #ccc;
-border-radius:5px;
-}
-
-.stats{
-background:#f7f7f7;
-padding:8px;
-border-radius:5px;
-margin-bottom:10px;
-font-size:13px;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
 font-size:13px;
-background:white;
 }
 
 th{
 background:#2f3e46;
 color:white;
 padding:8px;
-font-size:12px;
 }
 
 td{
@@ -74,38 +56,14 @@ padding:7px;
 border-bottom:1px solid #eee;
 }
 
-tr:nth-child(even){
-background:#f7f7f7;
-}
-
-tr:hover{
-background:#e9f5ff;
-}
-
-.radio-id{
-background:#ffcc00;
-border:1px solid #333;
-border-radius:4px;
-padding:2px 5px;
-font-size:11px;
+.radio-marker{
+background:#ffd400;
+border:2px solid black;
+border-radius:6px;
+padding:4px 6px;
 font-weight:bold;
-}
-
-@media(max-width:768px){
-
-#container{
-flex-direction:column;
-}
-
-#sidebar{
-width:100%;
-height:40%;
-}
-
-#map{
-height:60%;
-}
-
+font-size:12px;
+box-shadow:0 0 4px rgba(0,0,0,0.4);
 }
 
 </style>
@@ -140,12 +98,25 @@ const sheetURL="https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_Bjx
 let dataset=[];
 let markers=[];
 
-const map=L.map('map',{closePopupOnClick:false}).setView([25.844,76.56],12);
+const map=L.map('map').setView([25.844,76.56],12);
 
 L.tileLayer(
 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
 {maxZoom:20}
 ).addTo(map);
+
+
+
+function parseDate(str){
+
+let parts=str.split(" ");
+
+let date=parts[0].split("-");
+let time=parts[1];
+
+return new Date(date[2],date[1]-1,date[0],time.split(":")[0],time.split(":")[1]);
+
+}
 
 
 
@@ -178,6 +149,27 @@ markers=[];
 
 
 
+function createMarker(lat,lon,id){
+
+const icon=L.divIcon({
+className:"",
+html:`<div class="radio-marker">${id}</div>`,
+iconSize:[30,20]
+});
+
+const jitter=0.00015;
+
+lat=lat+(Math.random()-0.5)*jitter;
+lon=lon+(Math.random()-0.5)*jitter;
+
+const m=L.marker([lat,lon],{icon}).addTo(map);
+
+markers.push(m);
+
+}
+
+
+
 function showLatestPoints(){
 
 clearMarkers();
@@ -189,34 +181,23 @@ const latest={};
 dataset.forEach(row=>{
 
 const id=row["Animal ID"];
-const time=new Date(row["Timestamp"]);
+const t=parseDate(row["Timestamp"]);
 
-if(!latest[id] || new Date(latest[id]["Timestamp"]) < time){
+if(!latest[id] || parseDate(latest[id]["Timestamp"])<t){
+
 latest[id]=row;
+
 }
 
 });
 
 Object.values(latest).forEach(p=>{
 
-const icon=L.divIcon({
-className:"",
-html:`<div class="radio-id">${p["Animal ID"]}</div>`
-});
-
-const m=L.marker([
+createMarker(
 parseFloat(p["Latitude"]),
-parseFloat(p["Longitude"])
-],{icon}).addTo(map);
-
-m.bindPopup(`
-<b>ID ${p["Animal ID"]}</b><br>
-${p["Timestamp"]}<br>
-${p["Place"]}<br>
-Activity: ${p["Activity"] || "-"}
-`);
-
-markers.push(m);
+parseFloat(p["Longitude"]),
+p["Animal ID"]
+);
 
 });
 
@@ -243,9 +224,14 @@ dist+=map.distance([lat1,lon1],[lat2,lon2]);
 
 }
 
-dist=(dist/1000).toFixed(2);
+return{
 
-return {entries,days,dist};
+entries:entries,
+days:days,
+dist:(dist/1000).toFixed(2)
+
+};
+
 }
 
 
@@ -256,28 +242,15 @@ clearMarkers();
 
 let points=dataset
 .filter(d=>d["Animal ID"]==id)
-.sort((a,b)=> new Date(b["Timestamp"]) - new Date(a["Timestamp"]));
+.sort((a,b)=>parseDate(b["Timestamp"])-parseDate(a["Timestamp"]));
 
 points.forEach(p=>{
 
-const icon=L.divIcon({
-className:"",
-html:`<div class="radio-id">${p["Animal ID"]}</div>`
-});
-
-const m=L.marker([
+createMarker(
 parseFloat(p["Latitude"]),
-parseFloat(p["Longitude"])
-],{icon}).addTo(map);
-
-m.bindPopup(`
-<b>ID ${p["Animal ID"]}</b><br>
-${p["Timestamp"]}<br>
-${p["Place"]}<br>
-Activity: ${p["Activity"] || "-"}
-`);
-
-markers.push(m);
+parseFloat(p["Longitude"]),
+p["Animal ID"]
+);
 
 });
 
@@ -294,9 +267,9 @@ function buildTable(points){
 
 const stats=computeStats(points);
 
-let html=`<div class="stats">
+let html=`<div style="margin-bottom:10px;">
 <b>Entries:</b> ${stats.entries} |
-<b>Days tracked:</b> ${stats.days} |
+<b>Days:</b> ${stats.days} |
 <b>Distance:</b> ${stats.dist} km
 </div>`;
 
@@ -309,8 +282,8 @@ html+=`
 <tr>
 <td>${p["Timestamp"]}</td>
 <td>${p["Place"]}</td>
-<td>${p["Activity"] || "-"}</td>
-<td>${p["Signal Stength"] || "-"}</td>
+<td>${p["Activity"]||"-"}</td>
+<td>${p["Signal Stength"]||"-"}</td>
 </tr>
 `;
 
@@ -360,7 +333,6 @@ showAnimal(id);
 }
 
 });
-
 
 </script>
 
