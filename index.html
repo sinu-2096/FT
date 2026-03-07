@@ -1,340 +1,526 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Pali Ghat Hatchlings</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gharial Telemetry Dashboard</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --border: #e2e8f0;
+            --marker-bg: #ef4444;
+            --marker-text: #ffffff;
+        }
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-}
+        /* Layout */
+        #sidebar {
+            width: 420px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+        }
 
-#container{
-display:flex;
-height:100vh;
-}
+        #map-container {
+            flex-grow: 1;
+            position: relative;
+        }
 
-#sidebar{
-width:340px;
-background:white;
-padding:15px;
-border-right:1px solid #ddd;
-overflow:auto;
-}
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
 
-#map{
-flex:1;
-}
+        /* Sidebar Elements */
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
 
-select{
-width:100%;
-padding:8px;
-margin-bottom:12px;
-font-size:14px;
-}
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
 
-table{
-width:100%;
-border-collapse:collapse;
-font-size:13px;
-}
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-th{
-background:#2f3e46;
-color:white;
-padding:8px;
-}
+        .control-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
 
-td{
-padding:7px;
-border-bottom:1px solid #eee;
-}
+        select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            background-color: #fdfdfd;
+            transition: border-color 0.2s;
+        }
 
-.radio-marker{
-background:#ffd400;
-border:2px solid black;
-border-radius:6px;
-padding:4px 6px;
-font-weight:bold;
-font-size:12px;
-box-shadow:0 0 4px rgba(0,0,0,0.4);
-}
+        select:focus { border-color: var(--primary); }
 
-</style>
+        /* Stats Panel */
+        #stats-panel {
+            padding: 20px 24px;
+            background-color: #f1f5f9;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Table Area */
+        #table-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tbody tr:hover { background-color: #f1f5f9; }
+
+        /* Custom Map Marker */
+        .gharial-marker {
+            background-color: var(--marker-bg);
+            color: var(--marker-text);
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .gharial-marker:hover {
+            transform: scale(1.15);
+            z-index: 1000 !important;
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar { width: 100%; height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+            #map-container { height: 50vh; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="container">
-
-<div id="sidebar">
-
-<h3>Pali Ghat Hatchlings</h3>
-
-<select id="idSelector">
-<option value="">All Hatchlings (Latest Locations)</option>
-</select>
-
-<div id="tableContainer"></div>
-
-</div>
-
-<div id="map"></div>
-
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-
-const sheetURL="https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
-
-let dataset=[];
-let markers=[];
-
-const map=L.map('map').setView([25.844,76.56],12);
-
-L.tileLayer(
-'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-{maxZoom:20}
-).addTo(map);
-
-
-
-function parseDate(str){
-
-let parts=str.split(" ");
-
-let date=parts[0].split("-");
-let time=parts[1];
-
-return new Date(date[2],date[1]-1,date[0],time.split(":")[0],time.split(":")[1]);
-
-}
-
-
-
-function csvToArray(str){
-
-const rows=str.trim().split("\n");
-const headers=rows.shift().split(",");
-
-return rows.map(r=>{
-const values=r.split(",");
-let obj={};
-
-headers.forEach((h,i)=>{
-obj[h.trim()]=values[i];
-});
-
-return obj;
-});
-
-}
-
-
-
-function clearMarkers(){
-
-markers.forEach(m=>map.removeLayer(m));
-markers=[];
-
-}
-
-
-
-function createMarker(lat,lon,id){
-
-const icon=L.divIcon({
-className:"",
-html:`<div class="radio-marker">${id}</div>`,
-iconSize:[30,20]
-});
-
-const jitter=0.00015;
-
-lat=lat+(Math.random()-0.5)*jitter;
-lon=lon+(Math.random()-0.5)*jitter;
-
-const m=L.marker([lat,lon],{icon}).addTo(map);
-
-markers.push(m);
-
-}
-
-
-
-function showLatestPoints(){
-
-clearMarkers();
-
-document.getElementById("tableContainer").innerHTML="";
-
-const latest={};
-
-dataset.forEach(row=>{
-
-const id=row["Animal ID"];
-const t=parseDate(row["Timestamp"]);
-
-if(!latest[id] || parseDate(latest[id]["Timestamp"])<t){
-
-latest[id]=row;
-
-}
-
-});
-
-Object.values(latest).forEach(p=>{
-
-createMarker(
-parseFloat(p["Latitude"]),
-parseFloat(p["Longitude"]),
-p["Animal ID"]
-);
-
-});
-
-}
-
-
-
-function computeStats(points){
-
-let entries=points.length;
-
-let days=[...new Set(points.map(p=>p["Timestamp"].split(" ")[0]))].length;
-
-let dist=0;
-
-for(let i=1;i<points.length;i++){
-
-let lat1=parseFloat(points[i-1]["Latitude"]);
-let lon1=parseFloat(points[i-1]["Longitude"]);
-let lat2=parseFloat(points[i]["Latitude"]);
-let lon2=parseFloat(points[i]["Longitude"]);
-
-dist+=map.distance([lat1,lon1],[lat2,lon2]);
-
-}
-
-return{
-
-entries:entries,
-days:days,
-dist:(dist/1000).toFixed(2)
-
-};
-
-}
-
-
-
-function showAnimal(id){
-
-clearMarkers();
-
-let points=dataset
-.filter(d=>d["Animal ID"]==id)
-.sort((a,b)=>parseDate(b["Timestamp"])-parseDate(a["Timestamp"]));
-
-points.forEach(p=>{
-
-createMarker(
-parseFloat(p["Latitude"]),
-parseFloat(p["Longitude"]),
-p["Animal ID"]
-);
-
-});
-
-let group=L.featureGroup(markers);
-map.fitBounds(group.getBounds(),{padding:[40,40]});
-
-buildTable(points);
-
-}
-
-
-
-function buildTable(points){
-
-const stats=computeStats(points);
-
-let html=`<div style="margin-bottom:10px;">
-<b>Entries:</b> ${stats.entries} |
-<b>Days:</b> ${stats.days} |
-<b>Distance:</b> ${stats.dist} km
-</div>`;
-
-html+="<table>";
-html+="<tr><th>Time</th><th>Place</th><th>Activity</th><th>Signal</th></tr>";
-
-points.forEach(p=>{
-
-html+=`
-<tr>
-<td>${p["Timestamp"]}</td>
-<td>${p["Place"]}</td>
-<td>${p["Activity"]||"-"}</td>
-<td>${p["Signal Stength"]||"-"}</td>
-</tr>
-`;
-
-});
-
-html+="</table>";
-
-document.getElementById("tableContainer").innerHTML=html;
-
-}
-
-
-
-fetch(sheetURL)
-.then(r=>r.text())
-.then(csv=>{
-
-dataset=csvToArray(csv);
-
-const ids=[...new Set(dataset.map(d=>d["Animal ID"]))].sort((a,b)=>a-b);
-
-ids.forEach(id=>{
-
-const opt=document.createElement("option");
-opt.value=id;
-opt.text="ID "+id;
-
-document.getElementById("idSelector").appendChild(opt);
-
-});
-
-showLatestPoints();
-
-});
-
-
-
-document.getElementById("idSelector")
-.addEventListener("change",function(){
-
-const id=this.value;
-
-if(id===""){
-showLatestPoints();
-}else{
-showAnimal(id);
-}
-
-});
-
-</script>
-
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <h1>Gharial Telemetry</h1>
+            <div class="control-group">
+                <label for="animal-select">View Animal ID:</label>
+                <select id="animal-select">
+                    <option value="ALL">All Hatchlings (Latest Position)</option>
+                    </select>
+            </div>
+        </div>
+
+        <div id="stats-panel" class="hidden">
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-entries">-</div>
+                    <div class="stat-label">Entries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-days">-</div>
+                    <div class="stat-label">Days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-distance">-</div>
+                    <div class="stat-label">Km Moved</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="table-container" class="hidden">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Place</th>
+                        <th>Activity</th>
+                        <th>Signal</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    </tbody>
+            </table>
+        </div>
+    </aside>
+
+    <main id="map-container">
+        <div id="loading" class="loading-overlay">Loading Telemetry Data...</div>
+        <div id="map"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        // --- Configuration ---
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv';
+        
+        // --- Globals ---
+        let map;
+        let markersLayer = L.featureGroup();
+        let pathLayer = L.featureGroup();
+        let telemetryData = [];
+        let groupedData = {};
+
+        // --- Initialization ---
+        document.addEventListener("DOMContentLoaded", init);
+
+        async function init() {
+            initMap();
+            await loadData();
+            setupEvents();
+            renderDefaultView();
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function initMap() {
+            map = L.map('map').setView([25.84, 76.56], 10);
+            
+            // Google Satellite Hybrid Tiles
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                attribution: 'Map data &copy; <a href="https://www.google.com/maps">Google</a>'
+            }).addTo(map);
+
+            markersLayer.addTo(map);
+            pathLayer.addTo(map);
+        }
+
+        // --- Data Fetching & Parsing ---
+        async function loadData() {
+            try {
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const csvText = await response.text();
+                parseCSV(csvText);
+            } catch (error) {
+                console.error("Failed to load data:", error);
+                document.getElementById('loading').innerText = "Error loading data. Check console.";
+            }
+        }
+
+        function parseCSV(text) {
+            // Robust vanilla CSV parser to handle quotes and internal commas
+            const rows = [];
+            let row = [];
+            let val = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                if (inQuotes) {
+                    if (c === '"') {
+                        if (i + 1 < text.length && text[i+1] === '"') { val += '"'; i++; } 
+                        else { inQuotes = false; }
+                    } else { val += c; }
+                } else {
+                    if (c === '"') { inQuotes = true; }
+                    else if (c === ',') { row.push(val.trim()); val = ''; }
+                    else if (c === '\n' || c === '\r') {
+                        row.push(val.trim());
+                        if (row.some(x => x !== '')) rows.push(row); // skip purely empty rows
+                        row = []; val = '';
+                        if (c === '\r' && text[i+1] === '\n') i++; // skip CRLF
+                    } else { val += c; }
+                }
+            }
+            if (row.length > 0 || val !== '') {
+                row.push(val.trim());
+                if (row.some(x => x !== '')) rows.push(row);
+            }
+
+            const headers = rows[0];
+            const data = rows.slice(1).map(r => {
+                let obj = {};
+                headers.forEach((h, i) => obj[h] = r[i]);
+                // Parse date and float safely
+                obj.parsedDate = new Date(obj['Timestamp']);
+                obj.Lat = parseFloat(obj['Latitude']);
+                obj.Lng = parseFloat(obj['Longitude']);
+                return obj;
+            }).filter(d => !isNaN(d.Lat) && !isNaN(d.Lng));
+
+            telemetryData = data;
+            
+            // Group and sort by time (latest first for tables/default)
+            const animalIds = new Set();
+            data.forEach(d => {
+                const id = d['Animal ID'];
+                if(!groupedData[id]) groupedData[id] = [];
+                groupedData[id].push(d);
+                animalIds.add(id);
+            });
+
+            // Sort internal arrays descending (Latest -> Oldest)
+            for (let id in groupedData) {
+                groupedData[id].sort((a, b) => b.parsedDate - a.parsedDate);
+            }
+
+            // Populate Dropdown
+            const select = document.getElementById('animal-select');
+            Array.from(animalIds).sort((a,b) => a.localeCompare(b, undefined, {numeric:true})).forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `ID: ${id}`;
+                select.appendChild(option);
+            });
+        }
+
+        // --- Event Listeners ---
+        function setupEvents() {
+            document.getElementById('animal-select').addEventListener('change', (e) => {
+                const selected = e.target.value;
+                if (selected === 'ALL') {
+                    renderDefaultView();
+                } else {
+                    renderIndividualView(selected);
+                }
+            });
+        }
+
+        // --- View Renderers ---
+        function renderDefaultView() {
+            // UI State
+            document.getElementById('stats-panel').classList.add('hidden');
+            document.getElementById('table-container').classList.add('hidden');
+            
+            markersLayer.clearLayers();
+            pathLayer.clearLayers();
+
+            const latestPoints = [];
+            const coordsTracker = {}; // For handling overlap (Jitter)
+
+            for (let id in groupedData) {
+                if (groupedData[id].length === 0) continue;
+                
+                const latest = groupedData[id][0]; // Already sorted descending
+                let lat = latest.Lat;
+                let lng = latest.Lng;
+                
+                // --- Overlap Resolution (Jitter) ---
+                // If hatchlings share the exact location, spread them in a tiny circle
+                const coordKey = `${lat.toFixed(5)}_${lng.toFixed(5)}`;
+                if (coordsTracker[coordKey] !== undefined) {
+                    coordsTracker[coordKey]++;
+                    const count = coordsTracker[coordKey];
+                    const angle = count * (Math.PI / 4); // 45 degree steps
+                    const radius = 0.0003; // Approx 30m spread
+                    lat += Math.sin(angle) * radius;
+                    lng += Math.cos(angle) * radius;
+                } else {
+                    coordsTracker[coordKey] = 0;
+                }
+
+                latestPoints.push([lat, lng]);
+                createMarker(lat, lng, id, latest);
+            }
+
+            if (latestPoints.length > 0) {
+                map.fitBounds(L.latLngBounds(latestPoints), { padding: [50, 50] });
+            }
+        }
+
+        function renderIndividualView(id) {
+            // UI State
+            document.getElementById('stats-panel').classList.remove('hidden');
+            document.getElementById('table-container').classList.remove('hidden');
+
+            markersLayer.clearLayers();
+            pathLayer.clearLayers();
+
+            const records = groupedData[id];
+            if (!records || records.length === 0) return;
+
+            const latLngs = [];
+            let totalDistMeters = 0;
+            const uniqueDays = new Set();
+
+            // Note: records are sorted Latest->Oldest. 
+            // We need Oldest->Latest for accurate chronological distance & polyline rendering.
+            const chronoRecords = [...records].reverse();
+
+            chronoRecords.forEach((rec, index) => {
+                const pt = [rec.Lat, rec.Lng];
+                latLngs.push(pt);
+                uniqueDays.add(rec.parsedDate.toDateString());
+
+                // Create Map Marker
+                createMarker(rec.Lat, rec.Lng, id, rec, index === chronoRecords.length - 1);
+
+                // Calculate Distance
+                if (index > 0) {
+                    const prevPt = [chronoRecords[index-1].Lat, chronoRecords[index-1].Lng];
+                    totalDistMeters += map.distance(prevPt, pt);
+                }
+            });
+
+            // Draw chronologial path
+            L.polyline(latLngs, {color: '#38bdf8', weight: 3, opacity: 0.8, dashArray: '5, 5'}).addTo(pathLayer);
+            map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
+
+            // Update Stats
+            document.getElementById('stat-entries').innerText = records.length;
+            document.getElementById('stat-days').innerText = uniqueDays.size;
+            document.getElementById('stat-distance').innerText = (totalDistMeters / 1000).toFixed(2);
+
+            // Render Table (Requires Latest->Oldest)
+            renderTable(records);
+        }
+
+        // --- UI Helpers ---
+        function createMarker(lat, lng, id, record, isLatest = false) {
+            // HTML custom icon for clear ID visibility
+            const iconHtml = `<div class="gharial-marker" ${isLatest ? 'style="background-color:#0284c7; width:36px; height:36px;"' : ''}>${id}</div>`;
+            
+            const icon = L.divIcon({
+                className: 'custom-div-icon',
+                html: iconHtml,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16] // Center the marker over coordinate
+            });
+
+            const popupContent = `
+                <strong>ID: ${id}</strong><br>
+                <b>Time:</b> ${record['Timestamp']}<br>
+                <b>Place:</b> ${record['Place']}<br>
+                <b>Activity:</b> ${record['Activity']}<br>
+                <b>Signal:</b> ${record['Signal Strength']}
+            `;
+
+            L.marker([lat, lng], {icon: icon}).bindPopup(popupContent).addTo(markersLayer);
+        }
+
+        function renderTable(records) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                
+                // Formatting Date for cleaner viewing
+                const dateStr = rec.parsedDate.toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
+                });
+
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${rec['Place'] || '-'}</td>
+                    <td>${rec['Activity'] || '-'}</td>
+                    <td>${rec['Signal Strength'] || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
 </body>
 </html>
