@@ -13,6 +13,7 @@
 body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
+background:#f2f4f7;
 }
 
 #container{
@@ -21,11 +22,11 @@ height:100vh;
 }
 
 #sidebar{
-width:360px;
-background:#f7f7f7;
-padding:12px;
-overflow:auto;
+width:340px;
+background:white;
+padding:15px;
 border-right:1px solid #ddd;
+overflow:auto;
 }
 
 #map{
@@ -34,51 +35,59 @@ flex:1;
 
 h3{
 margin-top:0;
+font-size:18px;
 }
 
 select{
 width:100%;
 padding:8px;
-margin-bottom:10px;
+margin-bottom:12px;
 font-size:14px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+.stats{
+background:#f7f7f7;
+padding:8px;
+border-radius:5px;
+margin-bottom:10px;
+font-size:13px;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
 font-size:13px;
+background:white;
 }
 
 th{
-background:#e9e9e9;
-padding:6px;
-text-align:left;
-border-bottom:1px solid #ccc;
+background:#2f3e46;
+color:white;
+padding:8px;
+font-size:12px;
 }
 
 td{
-padding:6px;
+padding:7px;
 border-bottom:1px solid #eee;
 }
 
+tr:nth-child(even){
+background:#f7f7f7;
+}
+
 tr:hover{
-background:#f0f0f0;
+background:#e9f5ff;
 }
 
-.time{
-font-weight:bold;
-}
-
-.place{
-color:#555;
-}
-
-.activity{
-font-style:italic;
-}
-
-.signal{
-color:#006600;
+.radio-id{
+background:#ffcc00;
+border:1px solid #333;
+border-radius:4px;
+padding:2px 5px;
+font-size:11px;
 font-weight:bold;
 }
 
@@ -90,11 +99,11 @@ flex-direction:column;
 
 #sidebar{
 width:100%;
-height:45%;
+height:40%;
 }
 
 #map{
-height:55%;
+height:60%;
 }
 
 }
@@ -173,6 +182,8 @@ function showLatestPoints(){
 
 clearMarkers();
 
+document.getElementById("tableContainer").innerHTML="";
+
 const latest={};
 
 dataset.forEach(row=>{
@@ -188,10 +199,15 @@ latest[id]=row;
 
 Object.values(latest).forEach(p=>{
 
+const icon=L.divIcon({
+className:"",
+html:`<div class="radio-id">${p["Animal ID"]}</div>`
+});
+
 const m=L.marker([
 parseFloat(p["Latitude"]),
 parseFloat(p["Longitude"])
-]).addTo(map);
+],{icon}).addTo(map);
 
 m.bindPopup(`
 <b>ID ${p["Animal ID"]}</b><br>
@@ -204,6 +220,32 @@ markers.push(m);
 
 });
 
+}
+
+
+
+function computeStats(points){
+
+let entries=points.length;
+
+let days=[...new Set(points.map(p=>p["Timestamp"].split(" ")[0]))].length;
+
+let dist=0;
+
+for(let i=1;i<points.length;i++){
+
+let lat1=parseFloat(points[i-1]["Latitude"]);
+let lon1=parseFloat(points[i-1]["Longitude"]);
+let lat2=parseFloat(points[i]["Latitude"]);
+let lon2=parseFloat(points[i]["Longitude"]);
+
+dist+=map.distance([lat1,lon1],[lat2,lon2]);
+
+}
+
+dist=(dist/1000).toFixed(2);
+
+return {entries,days,dist};
 }
 
 
@@ -218,10 +260,15 @@ let points=dataset
 
 points.forEach(p=>{
 
+const icon=L.divIcon({
+className:"",
+html:`<div class="radio-id">${p["Animal ID"]}</div>`
+});
+
 const m=L.marker([
 parseFloat(p["Latitude"]),
 parseFloat(p["Longitude"])
-]).addTo(map);
+],{icon}).addTo(map);
 
 m.bindPopup(`
 <b>ID ${p["Animal ID"]}</b><br>
@@ -234,6 +281,9 @@ markers.push(m);
 
 });
 
+let group=L.featureGroup(markers);
+map.fitBounds(group.getBounds(),{padding:[40,40]});
+
 buildTable(points);
 
 }
@@ -242,17 +292,25 @@ buildTable(points);
 
 function buildTable(points){
 
-let html="<table>";
+const stats=computeStats(points);
+
+let html=`<div class="stats">
+<b>Entries:</b> ${stats.entries} |
+<b>Days tracked:</b> ${stats.days} |
+<b>Distance:</b> ${stats.dist} km
+</div>`;
+
+html+="<table>";
 html+="<tr><th>Time</th><th>Place</th><th>Activity</th><th>Signal</th></tr>";
 
 points.forEach(p=>{
 
 html+=`
 <tr>
-<td class="time">${p["Timestamp"]}</td>
-<td class="place">${p["Place"]}</td>
-<td class="activity">${p["Activity"] || "-"}</td>
-<td class="signal">${p["Signal Stength"] || "-"}</td>
+<td>${p["Timestamp"]}</td>
+<td>${p["Place"]}</td>
+<td>${p["Activity"] || "-"}</td>
+<td>${p["Signal Stength"] || "-"}</td>
 </tr>
 `;
 
@@ -294,8 +352,6 @@ document.getElementById("idSelector")
 .addEventListener("change",function(){
 
 const id=this.value;
-
-document.getElementById("tableContainer").innerHTML="";
 
 if(id===""){
 showLatestPoints();
