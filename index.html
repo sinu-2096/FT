@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="utf-8"/>
-<title>Chambal Gharial Telemetry Dashboard</title>
+
+<meta charset="utf-8">
+<title>Gharial Telemetry Dashboard</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -12,54 +13,61 @@
 
 body{
 margin:0;
-font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
-background:#f5f6fa;
+font-family:system-ui;
 }
 
 #container{
 display:flex;
 height:100vh;
-width:100%;
 }
 
 #sidebar{
 width:360px;
 background:white;
 border-right:1px solid #ddd;
+padding:20px;
 display:flex;
 flex-direction:column;
-padding:20px;
-overflow:hidden;
+}
+
+#map{
+flex:1;
 }
 
 h2{
 margin-top:0;
-font-weight:600;
 }
 
 select{
-padding:10px;
+padding:8px;
 font-size:15px;
-border-radius:6px;
-border:1px solid #ccc;
 margin-bottom:15px;
 }
 
-#stats{
-font-size:14px;
-margin-bottom:10px;
+.statbox{
+display:flex;
+gap:10px;
+margin-bottom:15px;
 }
 
-#table-container{
-overflow-y:auto;
+.stat{
 flex:1;
+background:#f3f5f7;
+padding:12px;
+border-radius:8px;
+text-align:center;
+font-weight:600;
+}
+
+#tableContainer{
+flex:1;
+overflow:auto;
 border-top:1px solid #ddd;
-margin-top:10px;
 }
 
 table{
-border-collapse:collapse;
 width:100%;
+border-collapse:collapse;
 font-size:13px;
 }
 
@@ -75,20 +83,14 @@ position:sticky;
 top:0;
 }
 
-#map{
-flex:1;
-}
-
-.marker-label{
-background:#ff5722;
+.markerLabel{
+background:#e53935;
 color:white;
 font-weight:bold;
-padding:4px 6px;
-border-radius:6px;
-font-size:12px;
-text-align:center;
+padding:5px 8px;
+border-radius:20px;
 border:2px solid white;
-box-shadow:0 0 4px rgba(0,0,0,0.4);
+font-size:12px;
 }
 
 .hidden{
@@ -96,6 +98,7 @@ display:none;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -104,26 +107,50 @@ display:none;
 
 <div id="sidebar">
 
-<h2>Gharial Hatchlings</h2>
+<h2>Gharial Telemetry</h2>
+
+<label>View Animal ID:</label>
 
 <select id="animalSelect">
 <option value="">All Hatchlings</option>
 </select>
 
-<div id="stats" class="hidden"></div>
+<div class="statbox hidden" id="stats">
 
-<div id="table-container" class="hidden">
-<table id="dataTable">
+<div class="stat">
+<div id="entryCount">0</div>
+ENTRIES
+</div>
+
+<div class="stat">
+<div id="dayCount">0</div>
+DAYS
+</div>
+
+<div class="stat">
+<div id="distanceCount">0</div>
+KM MOVED
+</div>
+
+</div>
+
+<div id="tableContainer" class="hidden">
+
+<table>
+
 <thead>
 <tr>
-<th>Timestamp</th>
+<th>Date & Time</th>
 <th>Place</th>
 <th>Activity</th>
 <th>Signal</th>
 </tr>
 </thead>
-<tbody></tbody>
+
+<tbody id="tableBody"></tbody>
+
 </table>
+
 </div>
 
 </div>
@@ -136,10 +163,10 @@ display:none;
 
 <script>
 
-const sheetURL =
+const csvURL =
 "https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
 
-const map = L.map('map').setView([25.85,76.57],13);
+const map = L.map("map").setView([25.86,76.56],13);
 
 L.tileLayer(
 "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
@@ -147,194 +174,221 @@ L.tileLayer(
 ).addTo(map);
 
 let allData=[];
-let markersLayer=L.layerGroup().addTo(map);
-let trackLayer=L.layerGroup().addTo(map);
+let markers=L.layerGroup().addTo(map);
+let tracks=L.layerGroup().addTo(map);
+
+function parseDate(str){
+
+if(!str) return null;
+
+if(str.includes("-")){
+
+let parts=str.split(" ");
+let date=parts[0].split("-");
+let time=parts[1];
+
+return new Date(`${date[2]}-${date[1]}-${date[0]} ${time}`);
+
+}
+
+return new Date(str);
+
+}
 
 function parseCSV(text){
 
-const rows=text.split("\n").slice(1);
+let rows=text.trim().split("\n").slice(1);
 
 return rows.map(r=>{
-const c=r.split(",");
+
+let c=r.split(",");
 
 return{
+
 id:c[0],
-timestamp:new Date(c[1]),
+time:parseDate(c[1]),
 lat:parseFloat(c[2]),
 lon:parseFloat(c[3]),
 place:c[4],
 activity:c[5],
-signal:c[6],
-remarks:c[7]
+signal:c[6]
+
+};
+
+}).filter(d=>d.time && !isNaN(d.lat));
+
 }
 
-}).filter(d=>!isNaN(d.lat));
+function markerIcon(id){
+
+return L.divIcon({
+html:`<div class="markerLabel">${id}</div>`,
+iconSize:[30,30],
+className:""
+});
 
 }
 
 function loadData(){
 
-fetch(sheetURL)
+fetch(csvURL)
 .then(r=>r.text())
 .then(text=>{
 
 allData=parseCSV(text);
 
 populateDropdown();
-showLatestLocations();
 
-})
+showLatest();
+
+});
 
 }
 
 function populateDropdown(){
 
-const select=document.getElementById("animalSelect");
+let ids=[...new Set(allData.map(d=>d.id))].sort((a,b)=>a-b);
 
-const ids=[...new Set(allData.map(d=>d.id))].sort((a,b)=>a-b);
+let sel=document.getElementById("animalSelect");
 
 ids.forEach(id=>{
-const opt=document.createElement("option");
-opt.value=id;
-opt.textContent="ID "+id;
-select.appendChild(opt);
-})
+
+let o=document.createElement("option");
+
+o.value=id;
+o.textContent="ID: "+id;
+
+sel.appendChild(o);
+
+});
 
 }
 
-function createMarker(lat,lon,label){
+function showLatest(){
 
-return L.marker([lat,lon],{
-icon:L.divIcon({
-className:'',
-html:`<div class="marker-label">${label}</div>`
-})
-})
+markers.clearLayers();
+tracks.clearLayers();
 
-}
-
-function showLatestLocations(){
-
-markersLayer.clearLayers();
-trackLayer.clearLayers();
-
-const latest={};
+let latest={};
 
 allData.forEach(d=>{
-if(!latest[d.id] || latest[d.id].timestamp < d.timestamp){
+
+if(!latest[d.id] || latest[d.id].time < d.time){
+
 latest[d.id]=d;
+
 }
+
 });
 
 Object.values(latest).forEach(d=>{
 
-const marker=createMarker(d.lat,d.lon,d.id);
-markersLayer.addLayer(marker);
+L.marker([d.lat,d.lon],{icon:markerIcon(d.id)})
+.addTo(markers)
+.bindPopup(`ID: ${d.id}<br>${d.time}`);
 
-})
+});
 
 }
 
-function showAnimalTrack(id){
+function showAnimal(id){
 
-markersLayer.clearLayers();
-trackLayer.clearLayers();
+markers.clearLayers();
+tracks.clearLayers();
 
-const data=allData
+let data=allData
 .filter(d=>d.id==id)
-.sort((a,b)=>b.timestamp-a.timestamp);
+.sort((a,b)=>b.time-a.time);
 
-if(data.length===0) return;
-
-const points=[];
+let points=[];
 
 data.forEach(d=>{
 
 points.push([d.lat,d.lon]);
 
-const marker=createMarker(d.lat,d.lon,id);
-markersLayer.addLayer(marker);
+L.marker([d.lat,d.lon],{icon:markerIcon(id)})
+.addTo(markers)
+.bindPopup(`ID: ${id}<br>${d.time}<br>${d.place}`);
 
 });
 
-const poly=L.polyline(points,{color:"yellow"});
-trackLayer.addLayer(poly);
+let poly=L.polyline(points.reverse(),{color:"cyan"}).addTo(tracks);
 
 map.fitBounds(poly.getBounds(),{padding:[50,50]});
 
 populateTable(data);
+
 calculateStats(data);
 
 }
 
 function populateTable(data){
 
-const body=document.querySelector("#dataTable tbody");
+let body=document.getElementById("tableBody");
+
 body.innerHTML="";
 
 data.forEach(d=>{
 
-const row=document.createElement("tr");
+let row=document.createElement("tr");
 
-row.innerHTML=
-`<td>${d.timestamp.toLocaleString()}</td>
+row.innerHTML=`
+<td>${d.time.toLocaleString()}</td>
 <td>${d.place}</td>
 <td>${d.activity}</td>
-<td>${d.signal}</td>`;
+<td>${d.signal}</td>
+`;
 
 body.appendChild(row);
 
 });
 
-document.getElementById("table-container").classList.remove("hidden");
+document.getElementById("tableContainer").classList.remove("hidden");
 
 }
 
 function calculateStats(data){
 
-const entries=data.length;
+let entries=data.length;
 
-const days=[...new Set(data.map(d=>d.timestamp.toDateString()))].length;
+let days=new Set(data.map(d=>d.time.toDateString())).size;
 
-let distance=0;
+let dist=0;
 
 for(let i=1;i<data.length;i++){
 
-const p1=L.latLng(data[i-1].lat,data[i-1].lon);
-const p2=L.latLng(data[i].lat,data[i].lon);
+let p1=L.latLng(data[i-1].lat,data[i-1].lon);
+let p2=L.latLng(data[i].lat,data[i].lon);
 
-distance+=p1.distanceTo(p2);
+dist+=p1.distanceTo(p2);
 
 }
 
-distance=(distance/1000).toFixed(2);
+dist=(dist/1000).toFixed(2);
 
-const stats=document.getElementById("stats");
+document.getElementById("entryCount").textContent=entries;
+document.getElementById("dayCount").textContent=days;
+document.getElementById("distanceCount").textContent=dist;
 
-stats.innerHTML=
-`Entries: <b>${entries}</b><br>
-Tracking Days: <b>${days}</b><br>
-Distance: <b>${distance} km</b>`;
-
-stats.classList.remove("hidden");
+document.getElementById("stats").classList.remove("hidden");
 
 }
 
 document.getElementById("animalSelect")
 .addEventListener("change",e=>{
 
-const id=e.target.value;
+let id=e.target.value;
 
-if(id===""){
+if(!id){
 
 document.getElementById("stats").classList.add("hidden");
-document.getElementById("table-container").classList.add("hidden");
+document.getElementById("tableContainer").classList.add("hidden");
 
-showLatestLocations();
+showLatest();
 
 }else{
 
-showAnimalTrack(id);
+showAnimal(id);
 
 }
 
