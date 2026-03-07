@@ -1,526 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gharial Telemetry Dashboard</title>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<title>Chambal Gharial Telemetry Dashboard</title>
 
-    <style>
-        :root {
-            --bg-color: #f8fafc;
-            --sidebar-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --primary: #0284c7;
-            --primary-hover: #0369a1;
-            --border: #e2e8f0;
-            --marker-bg: #ef4444;
-            --marker-text: #ffffff;
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text-main);
-            background-color: var(--bg-color);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+<style>
 
-        /* Layout */
-        #sidebar {
-            width: 420px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
-            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
-        }
+body{
+margin:0;
+font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
+background:#f5f6fa;
+}
 
-        #map-container {
-            flex-grow: 1;
-            position: relative;
-        }
+#container{
+display:flex;
+height:100vh;
+width:100%;
+}
 
-        #map {
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+#sidebar{
+width:360px;
+background:white;
+border-right:1px solid #ddd;
+display:flex;
+flex-direction:column;
+padding:20px;
+overflow:hidden;
+}
 
-        /* Sidebar Elements */
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
-        }
+h2{
+margin-top:0;
+font-weight:600;
+}
 
-        .sidebar-header h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: var(--text-main);
-        }
+select{
+padding:10px;
+font-size:15px;
+border-radius:6px;
+border:1px solid #ccc;
+margin-bottom:15px;
+}
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+#stats{
+font-size:14px;
+margin-bottom:10px;
+}
 
-        .control-group label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
+#table-container{
+overflow-y:auto;
+flex:1;
+border-top:1px solid #ddd;
+margin-top:10px;
+}
 
-        select {
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            outline: none;
-            cursor: pointer;
-            background-color: #fdfdfd;
-            transition: border-color 0.2s;
-        }
+table{
+border-collapse:collapse;
+width:100%;
+font-size:13px;
+}
 
-        select:focus { border-color: var(--primary); }
+th,td{
+padding:6px;
+border-bottom:1px solid #eee;
+text-align:left;
+}
 
-        /* Stats Panel */
-        #stats-panel {
-            padding: 20px 24px;
-            background-color: #f1f5f9;
-            border-bottom: 1px solid var(--border);
-        }
+th{
+background:#fafafa;
+position:sticky;
+top:0;
+}
 
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
+#map{
+flex:1;
+}
 
-        .stat-card {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
+.marker-label{
+background:#ff5722;
+color:white;
+font-weight:bold;
+padding:4px 6px;
+border-radius:6px;
+font-size:12px;
+text-align:center;
+border:2px solid white;
+box-shadow:0 0 4px rgba(0,0,0,0.4);
+}
 
-        .stat-val {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 4px;
-        }
+.hidden{
+display:none;
+}
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Table Area */
-        #table-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            background: #ffffff;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        th {
-            position: sticky;
-            top: 0;
-            background-color: #f8fafc;
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-bottom: 2px solid var(--border);
-            z-index: 10;
-        }
-
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-main);
-        }
-
-        tbody tr:hover { background-color: #f1f5f9; }
-
-        /* Custom Map Marker */
-        .gharial-marker {
-            background-color: var(--marker-bg);
-            color: var(--marker-text);
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 12px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-
-        .gharial-marker:hover {
-            transform: scale(1.15);
-            z-index: 1000 !important;
-        }
-
-        /* Utilities */
-        .hidden { display: none !important; }
-        
-        .loading-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 1.2rem;
-            color: var(--primary);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            #sidebar { width: 100%; height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
-            #map-container { height: 50vh; }
-        }
-    </style>
+</style>
 </head>
+
 <body>
 
-    <aside id="sidebar">
-        <div class="sidebar-header">
-            <h1>Gharial Telemetry</h1>
-            <div class="control-group">
-                <label for="animal-select">View Animal ID:</label>
-                <select id="animal-select">
-                    <option value="ALL">All Hatchlings (Latest Position)</option>
-                    </select>
-            </div>
-        </div>
+<div id="container">
 
-        <div id="stats-panel" class="hidden">
-            <div class="stat-grid">
-                <div class="stat-card">
-                    <div class="stat-val" id="stat-entries">-</div>
-                    <div class="stat-label">Entries</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-val" id="stat-days">-</div>
-                    <div class="stat-label">Days</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-val" id="stat-distance">-</div>
-                    <div class="stat-label">Km Moved</div>
-                </div>
-            </div>
-        </div>
+<div id="sidebar">
 
-        <div id="table-container" class="hidden">
-            <table id="data-table">
-                <thead>
-                    <tr>
-                        <th>Date & Time</th>
-                        <th>Place</th>
-                        <th>Activity</th>
-                        <th>Signal</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    </tbody>
-            </table>
-        </div>
-    </aside>
+<h2>Gharial Hatchlings</h2>
 
-    <main id="map-container">
-        <div id="loading" class="loading-overlay">Loading Telemetry Data...</div>
-        <div id="map"></div>
-    </main>
+<select id="animalSelect">
+<option value="">All Hatchlings</option>
+</select>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-    <script>
-        // --- Configuration ---
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv';
-        
-        // --- Globals ---
-        let map;
-        let markersLayer = L.featureGroup();
-        let pathLayer = L.featureGroup();
-        let telemetryData = [];
-        let groupedData = {};
+<div id="stats" class="hidden"></div>
 
-        // --- Initialization ---
-        document.addEventListener("DOMContentLoaded", init);
+<div id="table-container" class="hidden">
+<table id="dataTable">
+<thead>
+<tr>
+<th>Timestamp</th>
+<th>Place</th>
+<th>Activity</th>
+<th>Signal</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 
-        async function init() {
-            initMap();
-            await loadData();
-            setupEvents();
-            renderDefaultView();
-            document.getElementById('loading').classList.add('hidden');
-        }
+</div>
 
-        function initMap() {
-            map = L.map('map').setView([25.84, 76.56], 10);
-            
-            // Google Satellite Hybrid Tiles
-            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                attribution: 'Map data &copy; <a href="https://www.google.com/maps">Google</a>'
-            }).addTo(map);
+<div id="map"></div>
 
-            markersLayer.addTo(map);
-            pathLayer.addTo(map);
-        }
+</div>
 
-        // --- Data Fetching & Parsing ---
-        async function loadData() {
-            try {
-                const response = await fetch(CSV_URL);
-                if (!response.ok) throw new Error("Network response was not ok");
-                const csvText = await response.text();
-                parseCSV(csvText);
-            } catch (error) {
-                console.error("Failed to load data:", error);
-                document.getElementById('loading').innerText = "Error loading data. Check console.";
-            }
-        }
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-        function parseCSV(text) {
-            // Robust vanilla CSV parser to handle quotes and internal commas
-            const rows = [];
-            let row = [];
-            let val = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < text.length; i++) {
-                let c = text[i];
-                if (inQuotes) {
-                    if (c === '"') {
-                        if (i + 1 < text.length && text[i+1] === '"') { val += '"'; i++; } 
-                        else { inQuotes = false; }
-                    } else { val += c; }
-                } else {
-                    if (c === '"') { inQuotes = true; }
-                    else if (c === ',') { row.push(val.trim()); val = ''; }
-                    else if (c === '\n' || c === '\r') {
-                        row.push(val.trim());
-                        if (row.some(x => x !== '')) rows.push(row); // skip purely empty rows
-                        row = []; val = '';
-                        if (c === '\r' && text[i+1] === '\n') i++; // skip CRLF
-                    } else { val += c; }
-                }
-            }
-            if (row.length > 0 || val !== '') {
-                row.push(val.trim());
-                if (row.some(x => x !== '')) rows.push(row);
-            }
+<script>
 
-            const headers = rows[0];
-            const data = rows.slice(1).map(r => {
-                let obj = {};
-                headers.forEach((h, i) => obj[h] = r[i]);
-                // Parse date and float safely
-                obj.parsedDate = new Date(obj['Timestamp']);
-                obj.Lat = parseFloat(obj['Latitude']);
-                obj.Lng = parseFloat(obj['Longitude']);
-                return obj;
-            }).filter(d => !isNaN(d.Lat) && !isNaN(d.Lng));
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
 
-            telemetryData = data;
-            
-            // Group and sort by time (latest first for tables/default)
-            const animalIds = new Set();
-            data.forEach(d => {
-                const id = d['Animal ID'];
-                if(!groupedData[id]) groupedData[id] = [];
-                groupedData[id].push(d);
-                animalIds.add(id);
-            });
+const map = L.map('map').setView([25.85,76.57],13);
 
-            // Sort internal arrays descending (Latest -> Oldest)
-            for (let id in groupedData) {
-                groupedData[id].sort((a, b) => b.parsedDate - a.parsedDate);
-            }
+L.tileLayer(
+"https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+{maxZoom:20}
+).addTo(map);
 
-            // Populate Dropdown
-            const select = document.getElementById('animal-select');
-            Array.from(animalIds).sort((a,b) => a.localeCompare(b, undefined, {numeric:true})).forEach(id => {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = `ID: ${id}`;
-                select.appendChild(option);
-            });
-        }
+let allData=[];
+let markersLayer=L.layerGroup().addTo(map);
+let trackLayer=L.layerGroup().addTo(map);
 
-        // --- Event Listeners ---
-        function setupEvents() {
-            document.getElementById('animal-select').addEventListener('change', (e) => {
-                const selected = e.target.value;
-                if (selected === 'ALL') {
-                    renderDefaultView();
-                } else {
-                    renderIndividualView(selected);
-                }
-            });
-        }
+function parseCSV(text){
 
-        // --- View Renderers ---
-        function renderDefaultView() {
-            // UI State
-            document.getElementById('stats-panel').classList.add('hidden');
-            document.getElementById('table-container').classList.add('hidden');
-            
-            markersLayer.clearLayers();
-            pathLayer.clearLayers();
+const rows=text.split("\n").slice(1);
 
-            const latestPoints = [];
-            const coordsTracker = {}; // For handling overlap (Jitter)
+return rows.map(r=>{
+const c=r.split(",");
 
-            for (let id in groupedData) {
-                if (groupedData[id].length === 0) continue;
-                
-                const latest = groupedData[id][0]; // Already sorted descending
-                let lat = latest.Lat;
-                let lng = latest.Lng;
-                
-                // --- Overlap Resolution (Jitter) ---
-                // If hatchlings share the exact location, spread them in a tiny circle
-                const coordKey = `${lat.toFixed(5)}_${lng.toFixed(5)}`;
-                if (coordsTracker[coordKey] !== undefined) {
-                    coordsTracker[coordKey]++;
-                    const count = coordsTracker[coordKey];
-                    const angle = count * (Math.PI / 4); // 45 degree steps
-                    const radius = 0.0003; // Approx 30m spread
-                    lat += Math.sin(angle) * radius;
-                    lng += Math.cos(angle) * radius;
-                } else {
-                    coordsTracker[coordKey] = 0;
-                }
+return{
+id:c[0],
+timestamp:new Date(c[1]),
+lat:parseFloat(c[2]),
+lon:parseFloat(c[3]),
+place:c[4],
+activity:c[5],
+signal:c[6],
+remarks:c[7]
+}
 
-                latestPoints.push([lat, lng]);
-                createMarker(lat, lng, id, latest);
-            }
+}).filter(d=>!isNaN(d.lat));
 
-            if (latestPoints.length > 0) {
-                map.fitBounds(L.latLngBounds(latestPoints), { padding: [50, 50] });
-            }
-        }
+}
 
-        function renderIndividualView(id) {
-            // UI State
-            document.getElementById('stats-panel').classList.remove('hidden');
-            document.getElementById('table-container').classList.remove('hidden');
+function loadData(){
 
-            markersLayer.clearLayers();
-            pathLayer.clearLayers();
+fetch(sheetURL)
+.then(r=>r.text())
+.then(text=>{
 
-            const records = groupedData[id];
-            if (!records || records.length === 0) return;
+allData=parseCSV(text);
 
-            const latLngs = [];
-            let totalDistMeters = 0;
-            const uniqueDays = new Set();
+populateDropdown();
+showLatestLocations();
 
-            // Note: records are sorted Latest->Oldest. 
-            // We need Oldest->Latest for accurate chronological distance & polyline rendering.
-            const chronoRecords = [...records].reverse();
+})
 
-            chronoRecords.forEach((rec, index) => {
-                const pt = [rec.Lat, rec.Lng];
-                latLngs.push(pt);
-                uniqueDays.add(rec.parsedDate.toDateString());
+}
 
-                // Create Map Marker
-                createMarker(rec.Lat, rec.Lng, id, rec, index === chronoRecords.length - 1);
+function populateDropdown(){
 
-                // Calculate Distance
-                if (index > 0) {
-                    const prevPt = [chronoRecords[index-1].Lat, chronoRecords[index-1].Lng];
-                    totalDistMeters += map.distance(prevPt, pt);
-                }
-            });
+const select=document.getElementById("animalSelect");
 
-            // Draw chronologial path
-            L.polyline(latLngs, {color: '#38bdf8', weight: 3, opacity: 0.8, dashArray: '5, 5'}).addTo(pathLayer);
-            map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
+const ids=[...new Set(allData.map(d=>d.id))].sort((a,b)=>a-b);
 
-            // Update Stats
-            document.getElementById('stat-entries').innerText = records.length;
-            document.getElementById('stat-days').innerText = uniqueDays.size;
-            document.getElementById('stat-distance').innerText = (totalDistMeters / 1000).toFixed(2);
+ids.forEach(id=>{
+const opt=document.createElement("option");
+opt.value=id;
+opt.textContent="ID "+id;
+select.appendChild(opt);
+})
 
-            // Render Table (Requires Latest->Oldest)
-            renderTable(records);
-        }
+}
 
-        // --- UI Helpers ---
-        function createMarker(lat, lng, id, record, isLatest = false) {
-            // HTML custom icon for clear ID visibility
-            const iconHtml = `<div class="gharial-marker" ${isLatest ? 'style="background-color:#0284c7; width:36px; height:36px;"' : ''}>${id}</div>`;
-            
-            const icon = L.divIcon({
-                className: 'custom-div-icon',
-                html: iconHtml,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16] // Center the marker over coordinate
-            });
+function createMarker(lat,lon,label){
 
-            const popupContent = `
-                <strong>ID: ${id}</strong><br>
-                <b>Time:</b> ${record['Timestamp']}<br>
-                <b>Place:</b> ${record['Place']}<br>
-                <b>Activity:</b> ${record['Activity']}<br>
-                <b>Signal:</b> ${record['Signal Strength']}
-            `;
+return L.marker([lat,lon],{
+icon:L.divIcon({
+className:'',
+html:`<div class="marker-label">${label}</div>`
+})
+})
 
-            L.marker([lat, lng], {icon: icon}).bindPopup(popupContent).addTo(markersLayer);
-        }
+}
 
-        function renderTable(records) {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            
-            records.forEach(rec => {
-                const tr = document.createElement('tr');
-                
-                // Formatting Date for cleaner viewing
-                const dateStr = rec.parsedDate.toLocaleString('en-US', {
-                    month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
-                });
+function showLatestLocations(){
 
-                tr.innerHTML = `
-                    <td>${dateStr}</td>
-                    <td>${rec['Place'] || '-'}</td>
-                    <td>${rec['Activity'] || '-'}</td>
-                    <td>${rec['Signal Strength'] || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    </script>
+markersLayer.clearLayers();
+trackLayer.clearLayers();
+
+const latest={};
+
+allData.forEach(d=>{
+if(!latest[d.id] || latest[d.id].timestamp < d.timestamp){
+latest[d.id]=d;
+}
+});
+
+Object.values(latest).forEach(d=>{
+
+const marker=createMarker(d.lat,d.lon,d.id);
+markersLayer.addLayer(marker);
+
+})
+
+}
+
+function showAnimalTrack(id){
+
+markersLayer.clearLayers();
+trackLayer.clearLayers();
+
+const data=allData
+.filter(d=>d.id==id)
+.sort((a,b)=>b.timestamp-a.timestamp);
+
+if(data.length===0) return;
+
+const points=[];
+
+data.forEach(d=>{
+
+points.push([d.lat,d.lon]);
+
+const marker=createMarker(d.lat,d.lon,id);
+markersLayer.addLayer(marker);
+
+});
+
+const poly=L.polyline(points,{color:"yellow"});
+trackLayer.addLayer(poly);
+
+map.fitBounds(poly.getBounds(),{padding:[50,50]});
+
+populateTable(data);
+calculateStats(data);
+
+}
+
+function populateTable(data){
+
+const body=document.querySelector("#dataTable tbody");
+body.innerHTML="";
+
+data.forEach(d=>{
+
+const row=document.createElement("tr");
+
+row.innerHTML=
+`<td>${d.timestamp.toLocaleString()}</td>
+<td>${d.place}</td>
+<td>${d.activity}</td>
+<td>${d.signal}</td>`;
+
+body.appendChild(row);
+
+});
+
+document.getElementById("table-container").classList.remove("hidden");
+
+}
+
+function calculateStats(data){
+
+const entries=data.length;
+
+const days=[...new Set(data.map(d=>d.timestamp.toDateString()))].length;
+
+let distance=0;
+
+for(let i=1;i<data.length;i++){
+
+const p1=L.latLng(data[i-1].lat,data[i-1].lon);
+const p2=L.latLng(data[i].lat,data[i].lon);
+
+distance+=p1.distanceTo(p2);
+
+}
+
+distance=(distance/1000).toFixed(2);
+
+const stats=document.getElementById("stats");
+
+stats.innerHTML=
+`Entries: <b>${entries}</b><br>
+Tracking Days: <b>${days}</b><br>
+Distance: <b>${distance} km</b>`;
+
+stats.classList.remove("hidden");
+
+}
+
+document.getElementById("animalSelect")
+.addEventListener("change",e=>{
+
+const id=e.target.value;
+
+if(id===""){
+
+document.getElementById("stats").classList.add("hidden");
+document.getElementById("table-container").classList.add("hidden");
+
+showLatestLocations();
+
+}else{
+
+showAnimalTrack(id);
+
+}
+
+});
+
+loadData();
+
+</script>
+
 </body>
 </html>
