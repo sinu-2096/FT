@@ -1,402 +1,397 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8"/>
+    <title>Chambal Gharial Telemetry Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<meta charset="utf-8">
-<title>Gharial Telemetry Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f6fa;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+        #sidebar {
+            width: 380px;
+            background: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+        h2 {
+            margin-top: 0;
+            font-weight: 600;
+            color: #111827;
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
 
-<style>
+        select {
+            padding: 10px 12px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            width: 100%;
+            cursor: pointer;
+            outline: none;
+            background-color: #fdfdfd;
+        }
 
-body{
-margin:0;
-font-family:system-ui;
-}
+        select:focus {
+            border-color: #facc15;
+            box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+        }
 
-#container{
-display:flex;
-height:100vh;
-}
+        #table-container {
+            overflow-y: auto;
+            flex: 1;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #fff;
+        }
 
-#sidebar{
-width:360px;
-background:white;
-border-right:1px solid #ddd;
-padding:20px;
-display:flex;
-flex-direction:column;
-}
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+        }
 
-#map{
-flex:1;
-}
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
 
-h2{
-margin-top:0;
-}
+        th {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            font-weight: 600;
+            color: #475569;
+            z-index: 10;
+            border-bottom: 2px solid #e2e8f0;
+        }
 
-select{
-padding:8px;
-font-size:15px;
-margin-bottom:15px;
-}
+        tbody tr:hover {
+            background-color: #f1f5f9;
+        }
 
-.statbox{
-display:flex;
-gap:10px;
-margin-bottom:15px;
-}
+        #map-container {
+            flex: 1;
+            position: relative;
+        }
 
-.stat{
-flex:1;
-background:#f3f5f7;
-padding:12px;
-border-radius:8px;
-text-align:center;
-font-weight:600;
-}
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
 
-#tableContainer{
-flex:1;
-overflow:auto;
-border-top:1px solid #ddd;
-}
+        /* Marker Styles Matching Your Screenshot */
+        .marker-label {
+            background: #facc15; /* Yellow */
+            color: #000000;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: center;
+            border: 1px solid #000;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            white-space: nowrap;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
 
-table{
-width:100%;
-border-collapse:collapse;
-font-size:13px;
-}
+        .marker-label:hover {
+            transform: scale(1.1);
+            z-index: 1000 !important;
+        }
 
-th,td{
-padding:6px;
-border-bottom:1px solid #eee;
-text-align:left;
-}
+        /* Custom Popup Styling */
+        .custom-popup .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .custom-popup .leaflet-popup-content {
+            margin: 14px 16px;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+        .custom-popup h4 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: #111827;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+        }
 
-th{
-background:#fafafa;
-position:sticky;
-top:0;
-}
+        .hidden { display: none !important; }
 
-.markerLabel{
-background:#e53935;
-color:white;
-font-weight:bold;
-padding:5px 8px;
-border-radius:20px;
-border:2px solid white;
-font-size:12px;
-}
-
-.hidden{
-display:none;
-}
-
-</style>
-
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid #ddd; padding: 15px;}
+            #map-container { height: 55vh; }
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="container">
-
-<div id="sidebar">
-
-<h2>Gharial Telemetry</h2>
-
-<label>View Animal ID:</label>
-
-<select id="animalSelect">
-<option value="">All Hatchlings</option>
-</select>
-
-<div class="statbox hidden" id="stats">
-
-<div class="stat">
-<div id="entryCount">0</div>
-ENTRIES
-</div>
-
-<div class="stat">
-<div id="dayCount">0</div>
-DAYS
-</div>
-
-<div class="stat">
-<div id="distanceCount">0</div>
-KM MOVED
-</div>
-
-</div>
-
-<div id="tableContainer" class="hidden">
-
-<table>
-
-<thead>
-<tr>
-<th>Date & Time</th>
-<th>Place</th>
-<th>Activity</th>
-<th>Signal</th>
-</tr>
-</thead>
-
-<tbody id="tableBody"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<div id="map"></div>
-
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-
-const csvURL =
-"https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
-
-const map = L.map("map").setView([25.86,76.56],13);
-
-L.tileLayer(
-"https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-{maxZoom:20}
-).addTo(map);
-
-let allData=[];
-let markers=L.layerGroup().addTo(map);
-let tracks=L.layerGroup().addTo(map);
-
-function parseDate(str){
-
-if(!str) return null;
-
-if(str.includes("-")){
-
-let parts=str.split(" ");
-let date=parts[0].split("-");
-let time=parts[1];
-
-return new Date(`${date[2]}-${date[1]}-${date[0]} ${time}`);
-
-}
-
-return new Date(str);
-
-}
-
-function parseCSV(text){
-
-let rows=text.trim().split("\n").slice(1);
-
-return rows.map(r=>{
-
-let c=r.split(",");
-
-return{
-
-id:c[0],
-time:parseDate(c[1]),
-lat:parseFloat(c[2]),
-lon:parseFloat(c[3]),
-place:c[4],
-activity:c[5],
-signal:c[6]
-
-};
-
-}).filter(d=>d.time && !isNaN(d.lat));
-
-}
-
-function markerIcon(id){
-
-return L.divIcon({
-html:`<div class="markerLabel">${id}</div>`,
-iconSize:[30,30],
-className:""
-});
-
-}
-
-function loadData(){
-
-fetch(csvURL)
-.then(r=>r.text())
-.then(text=>{
-
-allData=parseCSV(text);
-
-populateDropdown();
-
-showLatest();
-
-});
-
-}
-
-function populateDropdown(){
-
-let ids=[...new Set(allData.map(d=>d.id))].sort((a,b)=>a-b);
-
-let sel=document.getElementById("animalSelect");
-
-ids.forEach(id=>{
-
-let o=document.createElement("option");
-
-o.value=id;
-o.textContent="ID: "+id;
-
-sel.appendChild(o);
-
-});
-
-}
-
-function showLatest(){
-
-markers.clearLayers();
-tracks.clearLayers();
-
-let latest={};
-
-allData.forEach(d=>{
-
-if(!latest[d.id] || latest[d.id].time < d.time){
-
-latest[d.id]=d;
-
-}
-
-});
-
-Object.values(latest).forEach(d=>{
-
-L.marker([d.lat,d.lon],{icon:markerIcon(d.id)})
-.addTo(markers)
-.bindPopup(`ID: ${d.id}<br>${d.time}`);
-
-});
-
-}
-
-function showAnimal(id){
-
-markers.clearLayers();
-tracks.clearLayers();
-
-let data=allData
-.filter(d=>d.id==id)
-.sort((a,b)=>b.time-a.time);
-
-let points=[];
-
-data.forEach(d=>{
-
-points.push([d.lat,d.lon]);
-
-L.marker([d.lat,d.lon],{icon:markerIcon(id)})
-.addTo(markers)
-.bindPopup(`ID: ${id}<br>${d.time}<br>${d.place}`);
-
-});
-
-let poly=L.polyline(points.reverse(),{color:"cyan"}).addTo(tracks);
-
-map.fitBounds(poly.getBounds(),{padding:[50,50]});
-
-populateTable(data);
-
-calculateStats(data);
-
-}
-
-function populateTable(data){
-
-let body=document.getElementById("tableBody");
-
-body.innerHTML="";
-
-data.forEach(d=>{
-
-let row=document.createElement("tr");
-
-row.innerHTML=`
-<td>${d.time.toLocaleString()}</td>
-<td>${d.place}</td>
-<td>${d.activity}</td>
-<td>${d.signal}</td>
-`;
-
-body.appendChild(row);
-
-});
-
-document.getElementById("tableContainer").classList.remove("hidden");
-
-}
-
-function calculateStats(data){
-
-let entries=data.length;
-
-let days=new Set(data.map(d=>d.time.toDateString())).size;
-
-let dist=0;
-
-for(let i=1;i<data.length;i++){
-
-let p1=L.latLng(data[i-1].lat,data[i-1].lon);
-let p2=L.latLng(data[i].lat,data[i].lon);
-
-dist+=p1.distanceTo(p2);
-
-}
-
-dist=(dist/1000).toFixed(2);
-
-document.getElementById("entryCount").textContent=entries;
-document.getElementById("dayCount").textContent=days;
-document.getElementById("distanceCount").textContent=dist;
-
-document.getElementById("stats").classList.remove("hidden");
-
-}
-
-document.getElementById("animalSelect")
-.addEventListener("change",e=>{
-
-let id=e.target.value;
-
-if(!id){
-
-document.getElementById("stats").classList.add("hidden");
-document.getElementById("tableContainer").classList.add("hidden");
-
-showLatest();
-
-}else{
-
-showAnimal(id);
-
-}
-
-});
-
-loadData();
-
-</script>
-
+    <div id="sidebar">
+        <h2>Gharial Telemetry</h2>
+        <select id="animalSelect">
+            <option value="ALL">All Hatchlings (Latest View)</option>
+        </select>
+
+        <div id="table-container" class="hidden">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Place</th>
+                        <th>Activity</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const sheetURL = "https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
+
+        let map, markersLayer, trackLayer;
+        let allData = [];
+        let groupedData = {};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initMap();
+            loadData();
+            
+            document.getElementById("animalSelect").addEventListener("change", (e) => {
+                const id = e.target.value;
+                if (id === "ALL") {
+                    document.getElementById("table-container").classList.add("hidden");
+                    showLatestLocations();
+                } else {
+                    document.getElementById("table-container").classList.remove("hidden");
+                    showAnimalTrack(id);
+                }
+            });
+        });
+
+        function initMap() {
+            map = L.map('map').setView([25.85, 76.57], 12);
+            L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", { maxZoom: 20 }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+            trackLayer = L.layerGroup().addTo(map);
+        }
+
+        // Robust CSV Parser (handles commas inside quotes)
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], val = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                if (inQuotes) {
+                    if (c === '"') {
+                        if (i + 1 < text.length && text[i+1] === '"') { val += '"'; i++; } 
+                        else { inQuotes = false; }
+                    } else { val += c; }
+                } else {
+                    if (c === '"') { inQuotes = true; }
+                    else if (c === ',') { row.push(val.trim()); val = ''; }
+                    else if (c === '\n' || c === '\r') {
+                        row.push(val.trim());
+                        if (row.some(x => x !== '')) rows.push(row);
+                        row = []; val = '';
+                        if (c === '\r' && text[i+1] === '\n') i++; 
+                    } else { val += c; }
+                }
+            }
+            if (row.length > 0 || val !== '') {
+                row.push(val.trim());
+                if (row.some(x => x !== '')) rows.push(row);
+            }
+
+            const headers = rows[0];
+            return rows.slice(1).map(r => {
+                let obj = {};
+                headers.forEach((h, i) => obj[h] = r[i]);
+                obj.parsedDate = new Date(obj['Timestamp']);
+                obj.lat = parseFloat(obj['Latitude']);
+                obj.lon = parseFloat(obj['Longitude']);
+                return obj;
+            }).filter(d => !isNaN(d.lat) && !isNaN(d.lon));
+        }
+
+        function loadData() {
+            fetch(sheetURL)
+                .then(r => r.text())
+                .then(text => {
+                    allData = parseCSV(text);
+                    
+                    // Group and sort data
+                    allData.forEach(d => {
+                        const id = d['Animal ID'];
+                        if (!groupedData[id]) groupedData[id] = [];
+                        groupedData[id].push(d);
+                    });
+
+                    for (let id in groupedData) {
+                        groupedData[id].sort((a, b) => b.parsedDate - a.parsedDate); // Latest first
+                    }
+
+                    populateDropdown();
+                    showLatestLocations();
+                })
+                .catch(err => console.error("Error loading CSV:", err));
+        }
+
+        function populateDropdown() {
+            const select = document.getElementById("animalSelect");
+            const ids = Object.keys(groupedData).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+            
+            ids.forEach(id => {
+                const opt = document.createElement("option");
+                opt.value = id;
+                opt.textContent = "Hatchling ID: " + id;
+                select.appendChild(opt);
+            });
+        }
+
+        function createPopupContent(id, dataPoint) {
+            const dateStr = dataPoint.parsedDate.toLocaleString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
+            });
+            return `
+                <div class="custom-popup">
+                    <h4>Animal ID: ${id}</h4>
+                    <b>Time:</b> ${dateStr}<br>
+                    <b>Place:</b> ${dataPoint['Place'] || 'Unknown'}<br>
+                    <b>Activity:</b> ${dataPoint['Activity'] || 'N/A'}<br>
+                    <b>Signal:</b> ${dataPoint['Signal Strength'] || 'N/A'}<br>
+                    <b>Remarks:</b> ${dataPoint['Remarks'] || 'None'}
+                </div>
+            `;
+        }
+
+        function createMarker(lat, lon, id, dataPoint) {
+            const marker = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: '', // Clear default styling
+                    html: `<div class="marker-label">${id}</div>`,
+                    iconSize: [30, 24],
+                    iconAnchor: [15, 12],
+                    popupAnchor: [0, -12]
+                })
+            });
+
+            marker.bindPopup(createPopupContent(id, dataPoint));
+            return marker;
+        }
+
+        function showLatestLocations() {
+            markersLayer.clearLayers();
+            trackLayer.clearLayers();
+
+            const bounds = [];
+            const coordsTracker = {}; // For handling overlap (Jitter)
+
+            for (let id in groupedData) {
+                if (groupedData[id].length === 0) continue;
+                
+                const latest = groupedData[id][0];
+                let lat = latest.lat;
+                let lon = latest.lon;
+                
+                // Spread markers that share the exact same coordinates so they don't hide each other
+                const coordKey = `${lat.toFixed(4)}_${lon.toFixed(4)}`;
+                if (coordsTracker[coordKey] !== undefined) {
+                    coordsTracker[coordKey]++;
+                    const count = coordsTracker[coordKey];
+                    const angle = count * (Math.PI / 4);
+                    const radius = 0.0004; // Spread radius
+                    lat += Math.sin(angle) * radius;
+                    lon += Math.cos(angle) * radius;
+                } else {
+                    coordsTracker[coordKey] = 0;
+                }
+
+                bounds.push([lat, lon]);
+                const marker = createMarker(lat, lon, id, latest);
+                markersLayer.addLayer(marker);
+            }
+
+            if (bounds.length > 0) map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
+        }
+
+        function showAnimalTrack(id) {
+            markersLayer.clearLayers();
+            trackLayer.clearLayers();
+
+            const data = groupedData[id];
+            if (!data || data.length === 0) return;
+
+            const points = [];
+            
+            // Note: data is sorted latest->oldest. We reverse for drawing the path chronologically
+            const chronoData = [...data].reverse();
+
+            chronoData.forEach((d, index) => {
+                points.push([d.lat, d.lon]);
+                const marker = createMarker(d.lat, d.lon, id, d);
+                
+                // Keep markers below popups/hover
+                marker.setZIndexOffset(index === chronoData.length - 1 ? 1000 : 0);
+                markersLayer.addLayer(marker);
+            });
+
+            // Draw connecting line
+            const poly = L.polyline(points, {color: "#facc15", weight: 3, dashArray: '5, 5', opacity: 0.8});
+            trackLayer.addLayer(poly);
+            map.fitBounds(poly.getBounds(), { padding: [50, 50] });
+
+            populateTable(data);
+        }
+
+        function populateTable(data) {
+            const body = document.getElementById("table-body");
+            body.innerHTML = "";
+
+            data.forEach(d => {
+                const row = document.createElement("tr");
+                const dateStr = d.parsedDate.toLocaleString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
+                });
+
+                row.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${d['Place'] || '-'}</td>
+                    <td>${d['Activity'] || '-'}</td>
+                `;
+                body.appendChild(row);
+            });
+        }
+    </script>
 </body>
 </html>
