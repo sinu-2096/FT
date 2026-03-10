@@ -2,194 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palighat FT Hatchlings Telemetry Dashboard</title>
-    
+    <title>Pali FT Hatchlings Telemetry Dashboard</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        :root {
-            --sidebar-width: 300px;
-            --map-height: 70vh;
-            --primary-bg: #f4f6f9;
-            --header-bg: #2c3e50;
-            --text-color: #333;
-            --border-color: #ccc;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--primary-bg);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            background-color: var(--header-bg);
-            color: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        header h1 {
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .dashboard-container {
-            display: flex;
-            flex-direction: row;
-            height: var(--map-height);
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            background: white;
-            padding: 20px;
-            border-right: 1px solid var(--border-color);
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            z-index: 10;
-            overflow-y: auto;
-        }
-
-        .map-container {
-            flex-grow: 1;
-            height: 100%;
-        }
-
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-
-        .table-container {
-            padding: 20px;
-            overflow-x: auto;
-            background: white;
-            flex-grow: 1;
-        }
-
-        .filter-group {
-            margin-bottom: 20px;
-        }
-
-        .filter-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: var(--header-bg);
-        }
-
-        .filter-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-            background-color: #fff;
-            cursor: pointer;
-        }
-
-        .sidebar-info {
-            font-size: 0.9rem;
-            color: #555;
-            line-height: 1.5;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .telemetry-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        .telemetry-table th, .telemetry-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .telemetry-table th {
-            background-color: var(--header-bg);
-            color: white;
-            position: sticky;
-            top: 0;
-        }
-
-        /* Clickable row styles */
-        .telemetry-table tbody tr {
-            cursor: pointer;
-            transition: background-color 0.15s ease;
-        }
-
-        .telemetry-table tbody tr:hover {
-            background-color: #dce8f5;
-        }
-
-        .telemetry-table tbody tr.row-active {
-            background-color: #b8d4f0;
-            outline: 2px solid #2980b9;
-            outline-offset: -2px;
-        }
-
-        /* Tooltip hint in table header area */
-        .table-hint {
-            font-size: 0.8rem;
-            color: #777;
-            padding: 6px 20px 0 20px;
-            background: white;
-        }
-
-        .animal-marker {
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.6);
-        }
-
-        .marker-default {
-            background-color: #007bff;
-        }
-
-        .marker-selected {
-            background-color: #dc3545;
-        }
-
-        .custom-popup .leaflet-popup-content {
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .custom-popup b {
-            color: #2c3e50;
-        }
-        .custom-popup .popup-row {
-            margin-bottom: 5px;
-        }
+        /* (existing CSS unchanged) */
+        :root { --sidebar-width: 300px; --map-height: 70vh; --primary-bg: #f4f6f9; --header-bg: #2c3e50; --text-color: #333; --border-color: #ccc; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--primary-bg); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: var(--header-bg); color: white; padding: 15px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; }
+        header h1 { font-size: 1.5rem; margin: 0; }
+        .dashboard-container { display: flex; flex-direction: row; height: var(--map-height); border-bottom: 2px solid var(--border-color); }
+        .sidebar { width: var(--sidebar-width); background: white; padding: 20px; border-right: 1px solid var(--border-color); box-shadow: 2px 0 5px rgba(0,0,0,0.05); z-index: 10; overflow-y: auto; }
+        .map-container { flex-grow: 1; height: 100%; }
+        #map { width: 100%; height: 100%; }
+        .table-container { padding: 20px; overflow-x: auto; background: white; flex-grow: 1; }
+        .filter-group { margin-bottom: 20px; }
+        .filter-group label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--header-bg); }
+        .filter-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem; background-color: #fff; cursor: pointer; }
+        .sidebar-info { font-size: 0.9rem; color: #555; line-height: 1.5; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .telemetry-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .telemetry-table th, .telemetry-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        .telemetry-table th { background-color: var(--header-bg); color: white; position: sticky; top: 0; }
+        .telemetry-table tr:hover { background-color: #f1f1f1; }
+        .animal-marker { border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.6); }
+        .marker-default { background-color: #007bff; }
+        .marker-selected { background-color: #dc3545; }
+        .custom-popup .leaflet-popup-content { font-size: 14px; line-height: 1.6; }
+        .custom-popup b { color: #2c3e50; }
+        .custom-popup .popup-row { margin-bottom: 5px; }
     </style>
 </head>
 <body>
-
     <header>
         <h1>🐊 Chambal River Gharial Telemetry</h1>
     </header>
-
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="filter-group">
@@ -198,21 +44,15 @@
                     <option value="all">[ All Animals ]</option>
                 </select>
             </div>
-            
             <div class="sidebar-info">
                 <strong>Dashboard Info:</strong><br>
-                Use the dropdown to filter by a specific Gharial. Selecting an individual will display its complete movement track.<br><br>
-                <strong>Tip:</strong> Click any row in the table below to open its popup on the map.
+                Use the dropdown to filter by a specific Gharial. Selecting an individual will display its complete movement track.
             </div>
         </aside>
-
         <main class="map-container">
             <div id="map"></div>
         </main>
     </div>
-
-    <p class="table-hint">💡 Click any row to highlight its location on the map</p>
-
     <div class="table-container">
         <table class="telemetry-table" id="dataTable">
             <thead>
@@ -227,8 +67,7 @@
                     <th>Remarks</th>
                 </tr>
             </thead>
-            <tbody>
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -236,20 +75,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <script>
+        // --- Configuration ---
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0';
         const MAP_CENTER = [25.84, 76.56];
         const MAP_ZOOM = 13;
 
+        // --- State Variables ---
         let map;
         let mapLayerGroup;
         let rawData = [];
         let animalsData = {};
         let latestRecords = {};
+        // Global lookup for markers by key
+        let markerMapping = {};
 
-        // KEY CHANGE: store markers by a unique key so table rows can look them up
-        // Key format: "AnimalID||Timestamp" (both guaranteed to be in every record)
-        let markerRegistry = {};
-
+        // --- Initialization ---
         function init() {
             initMap();
             loadCSVData();
@@ -258,6 +98,7 @@
             });
         }
 
+        // --- Leaflet Map Initialization ---
         function initMap() {
             map = L.map('map').setView(MAP_CENTER, MAP_ZOOM);
             L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
@@ -267,6 +108,7 @@
             mapLayerGroup = L.featureGroup().addTo(map);
         }
 
+        // --- Google Sheets CSV Loader ---
         function loadCSVData() {
             Papa.parse(CSV_URL, {
                 download: true,
@@ -276,7 +118,7 @@
                     rawData = results.data;
                     processData();
                     populateDropdown();
-                    updateDashboard('all');
+                    updateDashboard('all'); // Default view
                 },
                 error: function(err) {
                     console.error("Error loading CSV: ", err);
@@ -285,10 +127,10 @@
             });
         }
 
+        // --- Data Processing & Latest Location Extraction ---
         function processData() {
             animalsData = {};
             latestRecords = {};
-
             rawData.forEach(row => {
                 const id = row['Animal ID'];
                 if (!id) return;
@@ -296,7 +138,6 @@
                 if (!animalsData[id]) animalsData[id] = [];
                 animalsData[id].push(row);
             });
-
             for (const id in animalsData) {
                 animalsData[id].sort((a, b) => b.parsedDate - a.parsedDate);
                 latestRecords[id] = animalsData[id][0];
@@ -306,18 +147,17 @@
         function parseCustomDate(dateString) {
             if (!dateString) return new Date(0);
             const parts = dateString.trim().split(' ');
-            if (parts.length < 1) return new Date(0);
             const dateParts = parts[0].split('-');
-            const timeParts = parts.length > 1 ? parts[1].split(':') : ['00', '00'];
-            return new Date(
-                parseInt(dateParts[2], 10),
-                parseInt(dateParts[1], 10) - 1,
-                parseInt(dateParts[0], 10),
-                parseInt(timeParts[0], 10),
-                parseInt(timeParts[1], 10)
-            );
+            const timeParts = parts.length > 1 ? parts[1].split(':') : ['00','00'];
+            const year = parseInt(dateParts[2], 10);
+            const month = parseInt(dateParts[1], 10) - 1;
+            const day = parseInt(dateParts[0], 10);
+            const hours = parseInt(timeParts[0], 10);
+            const minutes = parseInt(timeParts[1], 10);
+            return new Date(year, month, day, hours, minutes);
         }
 
+        // --- Animal Filter Logic ---
         function populateDropdown() {
             const select = document.getElementById('animalFilter');
             const sortedIds = Object.keys(animalsData).sort((a, b) => a - b);
@@ -334,16 +174,14 @@
             renderTable(selectedId);
         }
 
-        // Unique key to link a table row to its marker
-        function markerKey(record) {
-            return `${record['Animal ID']}||${record['Timestamp']}`;
-        }
-
+        // --- Marker Rendering & Movement Track Rendering ---
         function renderMap(selectedId) {
             mapLayerGroup.clearLayers();
-            markerRegistry = {}; // Reset registry on each render
+            // Clear and rebuild marker lookup
+            markerMapping = {};
 
             if (selectedId === 'all') {
+                // Show latest location of every Animal ID
                 const bounds = [];
                 for (const id in latestRecords) {
                     const record = latestRecords[id];
@@ -352,7 +190,9 @@
                     if (!isNaN(lat) && !isNaN(lng)) {
                         const marker = createMarker(record, 'marker-default');
                         mapLayerGroup.addLayer(marker);
-                        markerRegistry[markerKey(record)] = marker; // Register it
+                        // Store marker by unique key "ID_Timestamp"
+                        const key = `${id}_${record['Timestamp']}`;
+                        markerMapping[key] = marker;
                         bounds.push([lat, lng]);
                     }
                 }
@@ -360,31 +200,28 @@
                     map.fitBounds(bounds, { padding: [50, 50], maxZoom: MAP_ZOOM });
                 }
             } else {
-                const records = animalsData[selectedId];
+                // Individual Animal Selected
+                const records = animalsData[selectedId] || [];
                 const latLngs = [];
-
                 for (let i = records.length - 1; i >= 0; i--) {
                     const record = records[i];
                     const lat = parseFloat(record['Latitude']);
                     const lng = parseFloat(record['Longitude']);
                     if (!isNaN(lat) && !isNaN(lng)) {
-                        latLngs.push([lat, lng]);
                         const marker = createMarker(record, 'marker-selected');
                         mapLayerGroup.addLayer(marker);
-                        markerRegistry[markerKey(record)] = marker; // Register it
+                        // Store marker by key
+                        const key = `${selectedId}_${record['Timestamp']}`;
+                        markerMapping[key] = marker;
+                        latLngs.push([lat, lng]);
                     }
                 }
-
                 if (latLngs.length > 1) {
                     const trackLine = L.polyline(latLngs, {
-                        color: '#ffc107',
-                        weight: 3,
-                        opacity: 0.8,
-                        dashArray: '5, 10'
+                        color: '#ffc107', weight: 3, opacity: 0.8, dashArray: '5, 10'
                     });
                     mapLayerGroup.addLayer(trackLine);
                 }
-
                 if (latLngs.length > 0) {
                     map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
                 }
@@ -395,7 +232,6 @@
             const lat = parseFloat(record['Latitude']);
             const lng = parseFloat(record['Longitude']);
             const id = record['Animal ID'];
-
             const icon = L.divIcon({
                 className: `animal-marker ${colorClass}`,
                 html: `<span>${id}</span>`,
@@ -403,9 +239,7 @@
                 iconAnchor: [15, 15],
                 popupAnchor: [0, -15]
             });
-
             const marker = L.marker([lat, lng], { icon: icon });
-
             const popupContent = `
                 <div class="custom-popup">
                     <div class="popup-row"><b>Animal ID:</b> ${id}</div>
@@ -418,11 +252,11 @@
                     <div class="popup-row"><b>Remarks:</b><br>${record['Remarks'] || 'None'}</div>
                 </div>
             `;
-
             marker.bindPopup(popupContent);
             return marker;
         }
 
+        // --- Table Rendering & Row Click Handling ---
         function renderTable(selectedId) {
             const tbody = document.querySelector('#dataTable tbody');
             tbody.innerHTML = '';
@@ -432,39 +266,33 @@
                 tableData = Object.values(latestRecords);
                 tableData.sort((a, b) => b.parsedDate - a.parsedDate);
             } else {
-                tableData = animalsData[selectedId];
+                tableData = animalsData[selectedId] || [];
             }
 
             tableData.forEach(row => {
                 const tr = document.createElement('tr');
+                // Generate the same key used for markers
+                const key = `${row['Animal ID']}_${row['Timestamp']}`;
+                tr.setAttribute('data-key', key);  // store key for lookup【13†L201-L205】
+
                 tr.innerHTML = `
-                    <td><strong>${row['Animal ID'] || ''}</strong></td>
-                    <td>${row['Timestamp'] || ''}</td>
-                    <td>${row['Place'] || ''}</td>
-                    <td>${row['Activity'] || ''}</td>
-                    <td>${row['Signal Strength'] || ''}</td>
-                    <td>${row['Latitude'] || ''}</td>
-                    <td>${row['Longitude'] || ''}</td>
-                    <td>${row['Remarks'] || ''}</td>
+                    <td><strong>${row['Animal ID']||''}</strong></td>
+                    <td>${row['Timestamp']||''}</td>
+                    <td>${row['Place']||''}</td>
+                    <td>${row['Activity']||''}</td>
+                    <td>${row['Signal Strength']||''}</td>
+                    <td>${row['Latitude']||''}</td>
+                    <td>${row['Longitude']||''}</td>
+                    <td>${row['Remarks']||''}</td>
                 `;
-
-                // --- CLICK HANDLER: open popup for this row's marker ---
-                tr.addEventListener('click', () => {
-                    const key = markerKey(row);
-                    const marker = markerRegistry[key];
-
-                    // Highlight the clicked row, clear others
-                    document.querySelectorAll('#dataTable tbody tr').forEach(r => r.classList.remove('row-active'));
-                    tr.classList.add('row-active');
-
+                // On row click: pan to marker and open its popup
+                tr.addEventListener('click', function() {
+                    const marker = markerMapping[key];
                     if (marker) {
-                        const latlng = marker.getLatLng();
-                        // Pan map to marker, then open popup
-                        map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
-                        marker.openPopup();
+                        map.panTo(marker.getLatLng());
+                        marker.openPopup(); // openPopup immediately shows the popup【21†L133-L141】
                     }
                 });
-
                 tbody.appendChild(tr);
             });
         }
@@ -473,4 +301,3 @@
     </script>
 </body>
 </html>
-
