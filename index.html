@@ -342,6 +342,9 @@ function renderMap(selectedId){
   mapLayerGroup.clearLayers();
   markerMapping={};
 
+  // Define the IDs you want to highlight in red
+  const redIds = ['30', '33', '34', '38', '96', '64', '98'];
+
   if(selectedId==='all'){
     const bounds=[];
     for(const id in latestRecords){
@@ -349,7 +352,11 @@ function renderMap(selectedId){
       const lat=parseFloat(record['Latitude']);
       const lng=parseFloat(record['Longitude']);
       if(!isNaN(lat)&&!isNaN(lng)){
-        const marker=createMarker(record,'marker-default');
+        
+        // Check if the current ID is in our list to determine the color
+        const colorClass = redIds.includes(id.toString()) ? 'marker-selected' : 'marker-default';
+        const marker=createMarker(record, colorClass);
+        
         mapLayerGroup.addLayer(marker);
         markerMapping[markerKey(record)]=marker;
         bounds.push([lat,lng]);
@@ -360,17 +367,23 @@ function renderMap(selectedId){
   } else {
     const records=animalsData[selectedId]||[];
     const latLngs=[];
+    
+    // Ensure the color stays consistent when filtering a specific animal
+    const colorClass = redIds.includes(selectedId.toString()) ? 'marker-selected' : 'marker-default';
+
     for(let i=records.length-1;i>=0;i--){
       const record=records[i];
       const lat=parseFloat(record['Latitude']);
       const lng=parseFloat(record['Longitude']);
       if(!isNaN(lat)&&!isNaN(lng)){
-        const marker=createMarker(record,'marker-selected');
+        const marker=createMarker(record, colorClass);
         mapLayerGroup.addLayer(marker);
         markerMapping[markerKey(record)]=marker;
         latLngs.push([lat,lng]);
       }
     }
+    
+    // Draws the track line
     if(latLngs.length>1){
       mapLayerGroup.addLayer(L.polyline(latLngs,{
         color:'#ffc107',weight:3,opacity:0.8,dashArray:'5,10'
@@ -433,7 +446,7 @@ function renderTable(selectedId){
     if(index>=DEFAULT_ROWS) tr.classList.add('row-hidden');
 
     const key=markerKey(row);
-    const signalVal=row['Signal Strength']||row['signal strength']||row['SignalStrength']||'';
+    let signalVal=row['Signal Strength']||row['signal strength']||row['SignalStrength']||'';
 
     tr.innerHTML=`
       <td><strong>${row['Animal ID']||''}</strong></td>
