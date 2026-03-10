@@ -58,13 +58,21 @@ gap:10px;
 
 .filter-group label{
 font-weight:bold;
+font-size:1rem;
 color:var(--header-bg);
 }
 
 .filter-group select{
-padding:8px 12px;
+padding:9px 14px;
 border:1px solid var(--border-color);
 border-radius:4px;
+font-size:1rem;
+min-width:160px;
+}
+
+.top-panel .hint-text{
+font-size:0.95rem;
+color:#555;
 }
 
 .map-container{
@@ -79,7 +87,7 @@ height:100%;
 /* TABLE */
 
 .table-hint{
-font-size:0.8rem;
+font-size:0.85rem;
 color:#777;
 padding:8px 20px 0 20px;
 background:white;
@@ -94,7 +102,7 @@ background:white;
 .telemetry-table{
 width:100%;
 border-collapse:collapse;
-font-size:0.9rem;
+font-size:0.95rem;
 }
 
 .telemetry-table th,
@@ -110,6 +118,7 @@ color:white;
 position:sticky;
 top:0;
 z-index:1;
+font-size:0.95rem;
 }
 
 .telemetry-table tbody tr{
@@ -127,7 +136,6 @@ outline:2px solid #2980b9;
 outline-offset:-2px;
 }
 
-/* Hidden rows */
 .telemetry-table tbody tr.row-hidden{
 display:none;
 }
@@ -148,10 +156,10 @@ background:#e8f0fe !important;
 display:inline-block;
 color:#2980b9;
 font-weight:bold;
-font-size:0.9rem;
+font-size:0.95rem;
 border:1px solid #2980b9;
 border-radius:20px;
-padding:5px 18px;
+padding:6px 20px;
 transition:background 0.15s,color 0.15s;
 }
 
@@ -177,9 +185,11 @@ box-shadow:0 0 5px rgba(0,0,0,0.6);
 .marker-default{background:#007bff;}
 .marker-selected{background:#dc3545;}
 
+/* POPUP */
 .custom-popup .leaflet-popup-content{
 font-size:14px;
-line-height:1.6;
+line-height:1.7;
+min-width:220px;
 }
 
 .custom-popup b{color:#2c3e50;}
@@ -198,10 +208,10 @@ line-height:1.6;
 <div class="filter-group">
 <label for="animalFilter">Select Animal ID</label>
 <select id="animalFilter">
-<option value="all">[ All Animals ]</option>
+<option value="all">All Animals</option>
 </select>
 </div>
-<div>Use dropdown to filter individual gharials and view their movement track.</div>
+<div class="hint-text">Use dropdown to filter individual gharials and view their movement track.</div>
 </div>
 
 <div class="map-container">
@@ -236,7 +246,7 @@ line-height:1.6;
 const CSV_URL='https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0';
 const MAP_CENTER=[25.84,76.56];
 const MAP_ZOOM=13;
-const DEFAULT_ROWS=5; // Number of rows visible before "See More"
+const DEFAULT_ROWS=5;
 
 let map;
 let mapLayerGroup;
@@ -314,7 +324,7 @@ function populateDropdown(){
   Object.keys(animalsData).sort((a,b)=>a-b).forEach(id=>{
     const option=document.createElement('option');
     option.value=id;
-    option.textContent=`[ ${id} ]`;
+    option.textContent=id;   // No brackets
     select.appendChild(option);
   });
 }
@@ -322,6 +332,10 @@ function populateDropdown(){
 function updateDashboard(selectedId){
   renderMap(selectedId);
   renderTable(selectedId);
+}
+
+function markerKey(record){
+  return `${record['Animal ID']}_${record['Timestamp']}`;
 }
 
 function renderMap(selectedId){
@@ -367,14 +381,14 @@ function renderMap(selectedId){
   }
 }
 
-function markerKey(record){
-  return `${record['Animal ID']}_${record['Timestamp']}`;
-}
-
 function createMarker(record,colorClass){
   const lat=parseFloat(record['Latitude']);
   const lng=parseFloat(record['Longitude']);
   const id=record['Animal ID'];
+
+  // Read signal strength — try both possible column name variants
+  const signalVal=record['Signal Strength']||record['signal strength']||record['SignalStrength']||'N/A';
+
   const icon=L.divIcon({
     className:`animal-marker ${colorClass}`,
     html:`<span>${id}</span>`,
@@ -382,19 +396,22 @@ function createMarker(record,colorClass){
     iconAnchor:[15,15],
     popupAnchor:[0,-15]
   });
+
   const marker=L.marker([lat,lng],{icon});
+
   marker.bindPopup(`
     <div class="custom-popup">
       <div class="popup-row"><b>Animal ID:</b> ${id}</div>
       <div class="popup-row"><b>Last Seen:</b> ${record['Timestamp']||'N/A'}</div>
       <div class="popup-row"><b>Location:</b><br>${record['Place']||'N/A'}</div>
       <div class="popup-row"><b>Activity:</b><br>${record['Activity']||'N/A'}</div>
-      <div class="popup-row"><b>Signal Strength:</b><br>${record['Signal Strength']||'N/A'}</div>
+      <div class="popup-row"><b>Signal Strength:</b><br>${signalVal}</div>
       <div class="popup-row"><b>Latitude:</b> ${record['Latitude']}</div>
       <div class="popup-row"><b>Longitude:</b> ${record['Longitude']}</div>
       <div class="popup-row"><b>Remarks:</b><br>${record['Remarks']||'None'}</div>
     </div>
   `);
+
   return marker;
 }
 
@@ -413,33 +430,30 @@ function renderTable(selectedId){
 
   tableData.forEach((row,index)=>{
     const tr=document.createElement('tr');
-
-    // Hide rows beyond the default count
     if(index>=DEFAULT_ROWS) tr.classList.add('row-hidden');
 
     const key=markerKey(row);
+    const signalVal=row['Signal Strength']||row['signal strength']||row['SignalStrength']||'';
+
     tr.innerHTML=`
       <td><strong>${row['Animal ID']||''}</strong></td>
       <td>${row['Timestamp']||''}</td>
       <td>${row['Place']||''}</td>
       <td>${row['Activity']||''}</td>
-      <td>${row['Signal Strength']||''}</td>
+      <td>${signalVal}</td>
       <td>${row['Latitude']||''}</td>
       <td>${row['Longitude']||''}</td>
       <td>${row['Remarks']||''}</td>
     `;
 
     tr.addEventListener('click',function(){
-      // Highlight row
       document.querySelectorAll('#dataTable tbody tr').forEach(r=>r.classList.remove('row-active'));
       tr.classList.add('row-active');
 
-      // Scroll map into view first, then pan + open popup
       document.querySelector('.map-container').scrollIntoView({behavior:'smooth',block:'start'});
 
       const marker=markerMapping[key];
       if(marker){
-        // Wait for scroll to finish before panning (approx 500ms)
         setTimeout(()=>{
           map.setView(marker.getLatLng(),Math.max(map.getZoom(),15),{animate:true});
           marker.openPopup();
@@ -450,7 +464,6 @@ function renderTable(selectedId){
     tbody.appendChild(tr);
   });
 
-  // Add "See More" row only if there are hidden rows
   if(total>DEFAULT_ROWS){
     const seeMoreTr=document.createElement('tr');
     seeMoreTr.classList.add('see-more-row');
@@ -463,18 +476,14 @@ function renderTable(selectedId){
     let expanded=false;
     seeMoreTr.addEventListener('click',function(){
       expanded=!expanded;
-      const hiddenRows=tbody.querySelectorAll('tr.row-hidden');
       if(expanded){
-        hiddenRows.forEach(r=>r.classList.remove('row-hidden'));
+        tbody.querySelectorAll('tr.row-hidden').forEach(r=>r.classList.remove('row-hidden'));
         seeMoreTr.querySelector('.see-more-btn').innerHTML='Show less &laquo;';
       } else {
-        // Re-hide rows beyond DEFAULT_ROWS
-        const allDataRows=Array.from(tbody.querySelectorAll('tr:not(.see-more-row)'));
-        allDataRows.forEach((r,i)=>{
+        Array.from(tbody.querySelectorAll('tr:not(.see-more-row)')).forEach((r,i)=>{
           if(i>=DEFAULT_ROWS) r.classList.add('row-hidden');
         });
         seeMoreTr.querySelector('.see-more-btn').innerHTML=`See more &raquo; (${total-DEFAULT_ROWS} more entries)`;
-        // Scroll back to table top when collapsing
         tbody.closest('.table-container').scrollIntoView({behavior:'smooth',block:'start'});
       }
     });
