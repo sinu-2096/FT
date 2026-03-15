@@ -417,7 +417,7 @@ header img{height:42px;object-fit:contain;}
         </div>
         <div class="charts-row single">
           <div class="chart-card">
-            <h4>Maximum Displacement from Release — Active Animals (meters)</h4>
+            <h4>Maximum Displacement from Release — All Animals (meters) · 🔵 Active &nbsp;🟠 Temp Missing &nbsp;⚫ Gone &nbsp;🔴 Dead</h4>
             <div class="chart-wrap" style="height:240px;"><canvas id="chartDisplacement"></canvas></div>
           </div>
         </div>
@@ -986,10 +986,9 @@ function renderMovementTab(){
   const allFixes=rawArr.filter(r=>r['Animal ID']);
   const avgFixes=(allFixes.length/Math.max(Object.keys(animalsData).length,1)).toFixed(1);
 
-  // Max displacement per animal
+  // Max displacement per animal — ALL animals with valid GPS data
   const dispMap={};
   for(const id in animalsData){
-    if(DEAD_IDS.has(id))continue;
     const ordered=[...animalsData[id]].sort((a,b)=>a._parsed-b._parsed);
     const rel=[parseFloat(ordered[0]['Latitude']),parseFloat(ordered[0]['Longitude'])];
     if(isNaN(rel[0]))continue;
@@ -1027,19 +1026,24 @@ function renderMovementTab(){
     ['#8e44ad','#16a085','#e67e22','#aaa']
   );
 
-  // Displacement chart — top active animals
-  const sortedDisp=Object.entries(dispMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  // Displacement chart — all animals, sorted desc, color by status
+  const sortedDisp=Object.entries(dispMap).sort((a,b)=>b[1]-a[1]).slice(0,20);
   const colors=sortedDisp.map(([id])=>{
     const s=statusMap[id];
-    return s==='active'?'#1a7fe8':s==='tmiss'?'#e67e22':'#7f8c8d';
+    return s==='dead'?'#e74c3c':s==='tmiss'?'#e67e22':s==='gone'?'#7f8c8d':'#1a7fe8';
   });
   mkBar('chartDisplacement',sortedDisp.map(x=>x[0]),sortedDisp.map(x=>x[1]),colors,'Distance (m)',true);
 }
 
 function renderActivityTab(){
-  // Activity distribution
+  // Activity distribution — skip blank / unknown entries
+  const SKIP_ACTS=new Set(['unknown','Unknown','','—','-','unknown activity']);
   const acts={};
-  rawArr.forEach(r=>{const a=(r['Activity']||'Unknown').trim();acts[a]=(acts[a]||0)+1;});
+  rawArr.forEach(r=>{
+    const a=(r['Activity']||'').trim();
+    if(!a||SKIP_ACTS.has(a)||a.toLowerCase()==='unknown')return;
+    acts[a]=(acts[a]||0)+1;
+  });
   const actSorted=Object.entries(acts).sort((a,b)=>b[1]-a[1]);
   const ACTCOLORS=['#1a7fe8','#27ae60','#e67e22','#e74c3c','#8e44ad','#16a085','#f39c12','#2c3e50','#95a5a6'];
   mkBar('chartActivity',actSorted.map(x=>x[0]),actSorted.map(x=>x[1]),
