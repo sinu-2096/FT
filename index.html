@@ -7,13 +7,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 :root{
-  --hdr:#1a2a3a;
-  --blue:#1a7fe8;
-  --red:#e74c3c;
-  --orange:#e67e22;
-  --grey:#7f8c8d;
-  --gold:#f0c040;
-  --border:#ddd;
+  --hdr:#1a2a3a; --blue:#1a7fe8; --red:#e74c3c;
+  --orange:#e67e22; --grey:#7f8c8d; --gold:#f0c040;
+  --purple:#8e44ad; --teal:#16a085; --border:#ddd;
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
 html,body{height:100%;overflow:hidden;}
@@ -21,97 +17,86 @@ body{display:flex;flex-direction:column;background:#f0f2f5;color:#333;}
 
 /* ── HEADER ── */
 header{
-  background:var(--hdr);color:white;
-  padding:9px 16px;
-  position:relative;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;z-index:500;min-height:62px;
+  background:var(--hdr);color:white;padding:9px 16px;
+  position:relative;display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0;min-height:62px;z-index:500;
 }
 .hdr-logos{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 header img{height:42px;object-fit:contain;}
-
-/* PERFECTLY CENTERED TITLE — absolute so logos/legend don't push it */
 .hdr-title{
-  position:absolute;
-  left:50%;transform:translateX(-50%);
-  text-align:center;
-  font-size:1.25rem;font-weight:700;line-height:1.3;
-  white-space:nowrap;pointer-events:none;
+  position:absolute;left:50%;transform:translateX(-50%);
+  text-align:center;font-size:1.22rem;font-weight:700;
+  line-height:1.3;white-space:nowrap;pointer-events:none;
 }
-
-.hdr-right{
-  display:flex;align-items:center;gap:8px;
-  flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;
-}
-
-/* ── LEGEND PILLS (counts only, clickable) ── */
+.hdr-right{display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
 .legend-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .legend-pill{
-  display:flex;align-items:center;gap:4px;
-  padding:3px 9px;border-radius:20px;
-  border:2px solid transparent;
-  cursor:pointer;font-size:0.78rem;
-  transition:background .18s,border-color .18s,transform .1s;
+  display:flex;align-items:center;gap:4px;padding:3px 9px;
+  border-radius:20px;border:2px solid transparent;cursor:pointer;
+  font-size:0.77rem;transition:background .18s,border-color .18s,transform .1s;
   user-select:none;background:rgba(255,255,255,0.08);
 }
 .legend-pill:hover{background:rgba(255,255,255,0.18);transform:scale(1.04);}
 .legend-pill.active-filter{border-color:white;background:rgba(255,255,255,0.22);}
 .ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0;
   border:2px solid rgba(255,255,255,0.5);box-shadow:0 0 3px rgba(0,0,0,0.35);}
-.ldot-blue  {background:var(--blue);}
-.ldot-red   {background:var(--red);}
-.ldot-orange{background:var(--orange);}
-.ldot-grey  {background:var(--grey);}
+.ldot-blue{background:var(--blue);} .ldot-red{background:var(--red);}
+.ldot-orange{background:var(--orange);} .ldot-grey{background:var(--grey);}
 .lcount{background:rgba(255,255,255,0.22);border-radius:10px;padding:0 6px;
   font-weight:700;font-size:0.74rem;min-width:16px;text-align:center;}
-
 .field-btn{
-  padding:6px 12px;background:#2c3e50;color:white;
-  border:none;border-radius:5px;cursor:pointer;
-  font-size:0.84rem;font-weight:600;white-space:nowrap;
-  transition:background .2s;flex-shrink:0;
+  padding:6px 12px;background:#2c3e50;color:white;border:none;border-radius:5px;
+  cursor:pointer;font-size:0.83rem;font-weight:600;white-space:nowrap;transition:background .2s;
 }
 .field-btn:hover{background:#3d5166;}
 
 /* ── TOP PANEL ── */
 .top-panel{
-  background:white;padding:7px 16px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:white;padding:7px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
   flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.06);
 }
 .filter-group{display:flex;align-items:center;gap:6px;}
-.filter-group label{font-weight:600;font-size:0.85rem;color:#555;white-space:nowrap;}
+.filter-group label{font-weight:600;font-size:0.84rem;color:#555;white-space:nowrap;}
 .filter-group select{
-  padding:5px 9px;border:1px solid var(--border);
-  border-radius:5px;font-size:0.85rem;background:#fafafa;cursor:pointer;
+  padding:5px 8px;border:1px solid var(--border);border-radius:5px;
+  font-size:0.84rem;background:#fafafa;cursor:pointer;
 }
-.filter-divider{width:1px;height:24px;background:#ddd;margin:0 4px;}
-
-/* active filter badge */
+.filter-divider{width:1px;height:24px;background:#ddd;margin:0 2px;}
+.tool-btn{
+  padding:5px 11px;border:1px solid var(--border);border-radius:5px;
+  background:white;cursor:pointer;font-size:0.82rem;font-weight:600;
+  color:#444;transition:all .2s;white-space:nowrap;
+}
+.tool-btn:hover{background:#f0f0f0;}
+.tool-btn.active{background:var(--hdr);color:white;border-color:var(--hdr);}
 .active-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto;}
 .filter-chip{
-  display:flex;align-items:center;gap:5px;
-  background:#e8f4fd;color:#1a2a3a;
-  border:1px solid #b8d9f0;border-radius:12px;
-  padding:2px 9px;font-size:0.78rem;font-weight:600;
+  display:flex;align-items:center;gap:5px;background:#e8f4fd;
+  color:#1a2a3a;border:1px solid #b8d9f0;border-radius:12px;
+  padding:2px 9px;font-size:0.77rem;font-weight:600;
 }
-.filter-chip button{background:none;border:none;cursor:pointer;font-size:0.9rem;
-  color:#555;line-height:1;padding:0 1px;}
+.filter-chip button{background:none;border:none;cursor:pointer;font-size:0.88rem;color:#555;line-height:1;}
 
-/* ── ANALYTICS ── */
+/* ── ANALYTICS PANEL ── */
 .analytics-panel{
-  display:none;
-  background:linear-gradient(135deg,#fff8dc,#fffbe6);
-  padding:9px 16px;border-bottom:2px solid var(--gold);
-  font-size:0.87rem;line-height:1.9;flex-shrink:0;
+  display:none;background:linear-gradient(135deg,#fff8dc,#fffbe6);
+  padding:8px 16px;border-bottom:2px solid var(--gold);
+  font-size:0.86rem;line-height:1.9;flex-shrink:0;
+  display:none;align-items:center;justify-content:space-between;gap:10px;
 }
 .analytics-panel b{color:#7d5800;}
+.analytics-text{flex:1;line-height:1.9;}
+.analytics-panel .view-graphs-btn{
+  padding:5px 14px;background:var(--hdr);color:white;border:none;
+  border-radius:5px;cursor:pointer;font-size:0.82rem;font-weight:600;
+  white-space:nowrap;transition:background .2s;flex-shrink:0;
+}
+.analytics-panel .view-graphs-btn:hover{background:#2c3e50;}
 
 /* ── STATUS BAR ── */
 .status-bar{
-  background:#ecf0f1;padding:5px 16px;
-  font-size:0.82rem;color:#555;
+  background:#ecf0f1;padding:5px 16px;font-size:0.82rem;color:#555;
   border-bottom:1px solid var(--border);flex-shrink:0;
 }
 
@@ -121,85 +106,69 @@ header img{height:42px;object-fit:contain;}
 
 /* ── TABLE SECTION ── */
 .table-section{
-  display:flex;flex-direction:column;
-  background:white;border-top:1px solid var(--border);
-  flex-shrink:0;height:220px;min-height:55px;max-height:70vh;
+  display:flex;flex-direction:column;background:white;
+  border-top:1px solid var(--border);flex-shrink:0;
+  height:220px;min-height:55px;max-height:70vh;
 }
 .resize-handle{
-  height:8px;
-  background:linear-gradient(to bottom,#e8e8e8,#d0d0d0);
+  height:8px;background:linear-gradient(to bottom,#e8e8e8,#d0d0d0);
   cursor:ns-resize;border-bottom:1px solid #c0c0c0;
   flex-shrink:0;display:flex;align-items:center;justify-content:center;
 }
 .resize-handle::after{content:'';width:38px;height:3px;background:#aaa;border-radius:2px;}
 .table-header-row{
   display:flex;align-items:center;justify-content:space-between;
-  padding:4px 14px;background:#f8f9fa;
-  border-bottom:1px solid var(--border);flex-shrink:0;
+  padding:4px 14px;background:#f8f9fa;border-bottom:1px solid var(--border);flex-shrink:0;
 }
 .table-hint{font-size:0.78rem;color:#888;}
 .see-more-btn{
-  padding:3px 13px;background:var(--hdr);color:white;
-  border:none;border-radius:4px;font-size:0.78rem;
-  cursor:pointer;display:none;transition:background .2s;
+  padding:3px 13px;background:var(--hdr);color:white;border:none;
+  border-radius:4px;font-size:0.78rem;cursor:pointer;display:none;transition:background .2s;
 }
 .see-more-btn:hover{background:#2c3e50;}
 .table-scroll{flex:1;overflow-y:auto;overflow-x:auto;}
-.telemetry-table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+.telemetry-table{width:100%;border-collapse:collapse;font-size:0.83rem;}
 .telemetry-table th,
 .telemetry-table td{padding:7px 11px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap;}
 .telemetry-table th{background:var(--hdr);color:white;position:sticky;top:0;z-index:1;}
 .telemetry-table tbody tr:hover{background:#dce8f5;cursor:pointer;}
-.sig-strong{color:#27ae60;font-weight:600;}
-.sig-medium{color:#e67e22;font-weight:600;}
-.sig-weak  {color:#e74c3c;font-weight:600;}
-.badge{display:inline-block;padding:1px 7px;border-radius:10px;
-  font-size:0.72rem;font-weight:700;color:white;vertical-align:middle;}
-.badge-tmiss{background:var(--orange);}
-.badge-gone {background:var(--grey);}
-.badge-dead {background:var(--red);}
-.badge-active{background:var(--blue);}
-.badge-settler{background:#8e44ad;}
-.badge-explorer{background:#16a085;}
+.sig-strong{color:#27ae60;font-weight:600;} .sig-medium{color:#e67e22;font-weight:600;} .sig-weak{color:#e74c3c;font-weight:600;}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:0.71rem;font-weight:700;color:white;vertical-align:middle;}
+.badge-tmiss{background:var(--orange);} .badge-gone{background:var(--grey);}
+.badge-dead{background:var(--red);} .badge-active{background:var(--blue);}
+.badge-settler{background:var(--purple);} .badge-explorer{background:var(--teal);}
 
 /* ── MARKERS ── */
 .animal-marker{
   border-radius:50%;display:flex;align-items:center;justify-content:center;
-  color:white;font-weight:700;font-size:11px;
-  border:2.5px solid rgba(255,255,255,0.9);
+  color:white;font-weight:700;font-size:11px;border:2.5px solid rgba(255,255,255,0.9);
   box-shadow:0 2px 7px rgba(0,0,0,0.55);cursor:pointer;
 }
-.mk-blue  {background:var(--blue);}
-.mk-red   {background:var(--red);}
-.mk-orange{background:var(--orange);}
-.mk-grey  {background:var(--grey);}
+.mk-blue{background:var(--blue);} .mk-red{background:var(--red);}
+.mk-orange{background:var(--orange);} .mk-grey{background:var(--grey);}
 .star-lbl{font-size:20px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.5));}
 
 /* ── POPUP ── */
 .popup-id{font-size:1rem;font-weight:700;color:var(--hdr);margin-bottom:6px;}
-.popup-tbl{border-collapse:collapse;font-size:0.86rem;min-width:210px;}
+.popup-tbl{border-collapse:collapse;font-size:0.85rem;min-width:210px;}
 .popup-tbl td{padding:3px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
 .popup-tbl td:first-child{font-weight:600;color:#444;white-space:nowrap;padding-right:10px;}
 
 /* ── FIELD PANEL ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:1099;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1099;}
 .overlay.open{display:block;}
 .field-panel{
   position:fixed;top:0;right:-385px;width:360px;height:100%;
   background:white;box-shadow:-4px 0 18px rgba(0,0,0,0.2);
-  transition:right .3s ease;overflow:hidden;z-index:1100;
-  display:flex;flex-direction:column;
+  transition:right .3s ease;overflow:hidden;z-index:1100;display:flex;flex-direction:column;
 }
 .field-panel.open{right:0;}
-.fp-hdr{background:var(--hdr);color:white;padding:12px 16px;
-  display:flex;align-items:center;justify-content:space-between;}
+.fp-hdr{background:var(--hdr);color:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
 .fp-hdr h3{font-size:0.96rem;font-weight:700;}
-.close-btn{background:none;border:none;color:white;font-size:1.25rem;cursor:pointer;
-  padding:2px 6px;border-radius:3px;transition:background .2s;line-height:1;}
+.close-btn{background:none;border:none;color:white;font-size:1.25rem;cursor:pointer;padding:2px 6px;border-radius:3px;transition:background .2s;line-height:1;}
 .close-btn:hover{background:rgba(255,255,255,0.2);}
 .fp-latest{padding:12px 16px;background:#fffbe6;border-bottom:2px solid var(--gold);flex-shrink:0;}
-.fp-latest .fu-label{font-size:0.73rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.5px;color:#999;margin-bottom:4px;}
+.fp-latest .fu-label{font-size:0.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:4px;}
 .fp-latest .fu-date{font-weight:700;color:#7d5800;font-size:0.88rem;}
 .fp-latest .fu-text{margin-top:4px;font-size:0.9rem;line-height:1.5;}
 .fp-scroll{flex:1;overflow-y:auto;padding:10px 16px;}
@@ -207,57 +176,120 @@ header img{height:42px;object-fit:contain;}
 .fu-item{padding:9px 0;border-bottom:1px solid #f0f0f0;}
 .fu-item .fu-date{font-weight:600;color:#555;font-size:0.83rem;}
 .fu-item .fu-text{margin-top:3px;font-size:0.88rem;line-height:1.4;color:#333;}
+
+/* ── MODAL BASE ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  z-index:2000;overflow-y:auto;padding:20px;
+}
+.modal-overlay.open{display:flex;align-items:flex-start;justify-content:center;}
+.modal-box{
+  background:white;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.25);
+  width:100%;max-width:980px;margin:auto;overflow:hidden;
+}
+.modal-header{
+  background:var(--hdr);color:white;padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-header h2{font-size:1.05rem;font-weight:700;}
+.modal-close{background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;line-height:1;padding:0 4px;}
+.modal-body{padding:20px;overflow-y:auto;max-height:80vh;}
+
+/* ── STATS MODAL TABS ── */
+.tab-bar{display:flex;gap:4px;margin-bottom:18px;border-bottom:2px solid #eee;padding-bottom:0;}
+.tab-btn{
+  padding:8px 18px;border:none;background:none;cursor:pointer;
+  font-size:0.88rem;font-weight:600;color:#888;border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:color .2s,border-color .2s;
+}
+.tab-btn.active{color:var(--hdr);border-bottom-color:var(--hdr);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* ── STAT CARDS ── */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.stat-card{
+  background:#f8f9fa;border-radius:8px;padding:14px 16px;
+  border-left:4px solid var(--blue);text-align:center;
+}
+.stat-card.s-red{border-left-color:var(--red);}
+.stat-card.s-orange{border-left-color:var(--orange);}
+.stat-card.s-grey{border-left-color:var(--grey);}
+.stat-card.s-green{border-left-color:#27ae60;}
+.stat-card.s-purple{border-left-color:var(--purple);}
+.stat-card.s-teal{border-left-color:var(--teal);}
+.stat-card .val{font-size:1.8rem;font-weight:800;color:var(--hdr);line-height:1;}
+.stat-card .lbl{font-size:0.76rem;color:#888;margin-top:4px;}
+.stat-card .sub{font-size:0.7rem;color:#aaa;margin-top:2px;}
+
+/* ── CHARTS GRID ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.charts-row.single{grid-template-columns:1fr;}
+.chart-card{background:#f8f9fa;border-radius:8px;padding:16px;}
+.chart-card h4{font-size:0.85rem;font-weight:700;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px;}
+.chart-wrap{position:relative;height:220px;}
+.chart-wrap canvas{max-height:220px;}
+
+/* ── MORTALITY TABLE ── */
+.mort-table{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:8px;}
+.mort-table th{background:#f0f0f0;padding:7px 12px;text-align:left;font-weight:600;color:#555;}
+.mort-table td{padding:7px 12px;border-bottom:1px solid #eee;}
+.mort-table tr:last-child td{border-bottom:none;}
+
+/* ── MOVEMENT MODAL ── */
+.mov-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px;}
+.mov-stat{background:#f8f9fa;border-radius:7px;padding:10px 14px;border-left:3px solid var(--gold);}
+.mov-stat .v{font-size:1.4rem;font-weight:800;color:var(--hdr);}
+.mov-stat .l{font-size:0.74rem;color:#888;margin-top:2px;}
+.fix-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-top:8px;}
+.fix-table th{background:var(--hdr);color:white;padding:7px 10px;text-align:left;position:sticky;top:0;z-index:1;}
+.fix-table td{padding:6px 10px;border-bottom:1px solid #eee;}
+.fix-table tr:hover td{background:#f0f6ff;}
+.fix-scroll{max-height:200px;overflow-y:auto;border:1px solid #eee;border-radius:6px;}
+
+@media(max-width:640px){
+  .charts-row{grid-template-columns:1fr;}
+  .hdr-title{font-size:0.95rem;}
+}
 </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
   <div class="hdr-logos">
     <img src="image.png" alt="Logo 1">
     <img src="unnamed.png" alt="Logo 2">
   </div>
-
-  <!-- Absolutely centered title -->
   <div class="hdr-title">🐊 Pali FT Hatchlings Telemetry Dashboard</div>
-
   <div class="hdr-right">
     <div class="legend-bar">
-      <div class="legend-pill" id="pill-active"  onclick="setPillFilter('active')"  title="Show Active">
-        <div class="ldot ldot-blue"></div><span>Active</span>
-        <span class="lcount" id="countActive">—</span>
+      <div class="legend-pill" id="pill-active"  onclick="setPillFilter('active')">
+        <div class="ldot ldot-blue"></div><span>Active</span><span class="lcount" id="countActive">—</span>
       </div>
-      <div class="legend-pill" id="pill-dead"   onclick="setPillFilter('dead')"   title="Show Dead/Missing">
-        <div class="ldot ldot-red"></div><span>Dead/Missing</span>
-        <span class="lcount" id="countDead">—</span>
+      <div class="legend-pill" id="pill-dead"   onclick="setPillFilter('dead')">
+        <div class="ldot ldot-red"></div><span>Dead/Missing</span><span class="lcount" id="countDead">—</span>
       </div>
-      <div class="legend-pill" id="pill-tmiss"  onclick="setPillFilter('tmiss')"  title="Show Temp Missing">
-        <div class="ldot ldot-orange"></div><span>Temp Missing</span>
-        <span class="lcount" id="countTmiss">—</span>
+      <div class="legend-pill" id="pill-tmiss"  onclick="setPillFilter('tmiss')">
+        <div class="ldot ldot-orange"></div><span>Temp Missing</span><span class="lcount" id="countTmiss">—</span>
       </div>
-      <div class="legend-pill" id="pill-gone"   onclick="setPillFilter('gone')"   title="Show Gone >30d">
-        <div class="ldot ldot-grey"></div><span>Gone &gt;30d</span>
-        <span class="lcount" id="countGone">—</span>
+      <div class="legend-pill" id="pill-gone"   onclick="setPillFilter('gone')">
+        <div class="ldot ldot-grey"></div><span>Gone &gt;30d</span><span class="lcount" id="countGone">—</span>
       </div>
     </div>
     <button class="field-btn" onclick="toggleFP()">📋 Field Updates</button>
   </div>
 </header>
 
-<!-- FILTER BAR -->
-<div class="top-panel" id="topPanel">
-  <!-- Animal ID -->
+<!-- ── TOP PANEL ── -->
+<div class="top-panel">
   <div class="filter-group">
-    <label for="animalFilter">Animal ID</label>
-    <select id="animalFilter">
-      <option value="all">All Animals</option>
-    </select>
+    <label>Animal ID</label>
+    <select id="animalFilter"><option value="all">All Animals</option></select>
   </div>
-
   <div class="filter-divider"></div>
-
-  <!-- Status -->
   <div class="filter-group">
-    <label for="statusFilter">Status</label>
+    <label>Status</label>
     <select id="statusFilter">
       <option value="all">All</option>
       <option value="active">Active</option>
@@ -266,42 +298,44 @@ header img{height:42px;object-fit:contain;}
       <option value="gone">Gone &gt;30d</option>
     </select>
   </div>
-
   <div class="filter-divider"></div>
-
-  <!-- Category -->
   <div class="filter-group">
-    <label for="categoryFilter">Category</label>
+    <label>Category</label>
     <select id="categoryFilter">
       <option value="all">All</option>
       <option value="settler">Settler</option>
       <option value="explorer">Explorer</option>
     </select>
   </div>
-
-  <!-- Active filter chips -->
+  <div class="filter-divider"></div>
+  <button class="tool-btn" id="heatmapBtn" onclick="toggleHeatmap()">🌡️ Heatmap</button>
+  <button class="tool-btn" id="statsBtn"   onclick="openStats()">📊 Statistics</button>
   <div class="active-filters" id="activeFilters"></div>
 </div>
 
-<div class="analytics-panel" id="analyticsPanel"></div>
-<div class="status-bar" id="statusBar">📡 Latest Telemetry: loading…</div>
-
-<div class="map-container">
-  <div id="map"></div>
+<!-- ── ANALYTICS PANEL ── -->
+<div class="analytics-panel" id="analyticsPanel" style="display:none;">
+  <div class="analytics-text" id="analyticsText"></div>
+  <button class="view-graphs-btn" onclick="openMovementModal()">📈 View Graphs</button>
 </div>
 
+<div class="status-bar" id="statusBar">📡 Latest Telemetry: loading…</div>
+
+<div class="map-container"><div id="map"></div></div>
+
+<!-- ── TABLE ── -->
 <div class="table-section" id="tableSection">
   <div class="resize-handle" id="resizeHandle"></div>
   <div class="table-header-row">
-    <span class="table-hint">💡 Drag handle to resize · Click row to zoom to marker</span>
+    <span class="table-hint">💡 Drag handle to resize · Click row to zoom</span>
     <button class="see-more-btn" id="seeMoreBtn" onclick="toggleTableExpand()"></button>
   </div>
   <div class="table-scroll">
     <table class="telemetry-table" id="dataTable">
       <thead>
         <tr>
-          <th>Animal ID</th><th>Timestamp</th><th>Place</th>
-          <th>Activity</th><th>Signal</th><th>Status</th><th>Category</th>
+          <th>Animal ID</th><th>Timestamp</th><th>Place</th><th>Activity</th>
+          <th>Signal</th><th>Status</th><th>Category</th>
           <th>Latitude</th><th>Longitude</th><th>Remarks</th>
         </tr>
       </thead>
@@ -310,12 +344,10 @@ header img{height:42px;object-fit:contain;}
   </div>
 </div>
 
+<!-- ── FIELD PANEL ── -->
 <div class="overlay" id="overlay" onclick="closeFP()"></div>
 <div class="field-panel" id="fieldPanel">
-  <div class="fp-hdr">
-    <h3>📋 Field Updates</h3>
-    <button class="close-btn" onclick="closeFP()">✕</button>
-  </div>
+  <div class="fp-hdr"><h3>📋 Field Updates</h3><button class="close-btn" onclick="closeFP()">✕</button></div>
   <div class="fp-latest">
     <div class="fu-label">Latest Update</div>
     <div class="fu-date" id="latestFuDate">Loading…</div>
@@ -327,9 +359,140 @@ header img{height:42px;object-fit:contain;}
   </div>
 </div>
 
+<!-- ── STATISTICS MODAL ── -->
+<div class="modal-overlay" id="statsModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>📊 Population Statistics — Pali FT Hatchlings</h2>
+      <button class="modal-close" onclick="closeStats()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- TABS -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('tab-survival')">🛡 Survival</button>
+        <button class="tab-btn" onclick="switchTab('tab-movement')">📍 Movement</button>
+        <button class="tab-btn" onclick="switchTab('tab-activity')">🌊 Activity & Signal</button>
+      </div>
+
+      <!-- TAB 1: SURVIVAL -->
+      <div class="tab-content active" id="tab-survival">
+        <div class="stat-cards" id="survivalCards"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h4>Population Status Distribution</h4>
+            <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Mortality Causes (Known)</h4>
+            <table class="mort-table" id="mortTable">
+              <thead><tr><th>Animal ID</th><th>Cause</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h4>Days Since Last Fix — All Animals</h4>
+            <div class="chart-wrap"><canvas id="chartRecency"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Category Breakdown</h4>
+            <div class="chart-wrap"><canvas id="chartCategory"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MOVEMENT -->
+      <div class="tab-content" id="tab-movement">
+        <div class="stat-cards" id="movementCards"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <h4>Top 12 Animals — Number of Fixes</h4>
+            <div class="chart-wrap"><canvas id="chartFixes"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Movement Type Distribution</h4>
+            <div class="chart-wrap"><canvas id="chartMovType"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row single">
+          <div class="chart-card">
+            <h4>Maximum Displacement from Release — Active Animals (meters)</h4>
+            <div class="chart-wrap" style="height:240px;"><canvas id="chartDisplacement"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ACTIVITY & SIGNAL -->
+      <div class="tab-content" id="tab-activity">
+        <div class="charts-row">
+          <div class="chart-card">
+            <h4>Activity Type Distribution (All Observations)</h4>
+            <div class="chart-wrap"><canvas id="chartActivity"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>Signal Strength Distribution</h4>
+            <div class="chart-wrap"><canvas id="chartSignal"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row single">
+          <div class="chart-card">
+            <h4>Observations Over Time (Weekly)</h4>
+            <div class="chart-wrap" style="height:220px;"><canvas id="chartTimeline"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOVEMENT DETAIL MODAL (per animal) ── -->
+<div class="modal-overlay" id="movModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="movModalTitle">📈 Movement Details</h2>
+      <button class="modal-close" onclick="closeMovModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mov-stats-row" id="movStatCards"></div>
+      <div class="charts-row">
+        <div class="chart-card" style="grid-column:1/-1;">
+          <h4>Displacement from Release Point Over Time (meters)</h4>
+          <div class="chart-wrap" style="height:230px;"><canvas id="chartMovLine"></canvas></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <h4>Activity Breakdown (This Animal)</h4>
+          <div class="chart-wrap"><canvas id="chartMovActivity"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h4>Signal Strength History</h4>
+          <div class="chart-wrap"><canvas id="chartMovSignal"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card" style="margin-top:0;">
+        <h4>All Fix Points</h4>
+        <div class="fix-scroll">
+          <table class="fix-table" id="fixTable">
+            <thead>
+              <tr><th>#</th><th>Timestamp</th><th>Place</th><th>Activity</th>
+                  <th>Signal</th><th>Dist from Release (m)</th><th>Lat</th><th>Lng</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
@@ -340,115 +503,111 @@ const MAP_ZOOM   = 13;
 const TODAY      = new Date();
 const DEFAULT_ROWS = 5;
 
-// Confirmed dead / missing
-const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
-
-// Researcher-defined Settlers
+const DEAD_IDS    = new Set(['30','33','34','38','96','64','98']);
 const SETTLER_IDS = new Set(['32','35','84','92','90','88','72','74','66',
                               '76','37','36','31','68','86','78','94','39','62','70']);
-
-// Explorers = active animals not in SETTLER_IDS (computed after data loads)
-// We'll identify them dynamically
-
 const TEMP_MISSING_DAYS = 10;
 const GONE_DAYS         = 30;
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let map, oms;
-let rawData        = [];
-let animalsData    = {};
-let latestRecords  = {};
-let statusMap      = {};     // id → 'active'|'dead'|'tmiss'|'gone'
-let categoryMapFn  = {};     // id → 'settler'|'explorer'|'dead'
-let markers        = [];
-let markerMapping  = {};
-let trackLayers    = [];
-let allTableRows   = [];
-let tableExpanded  = false;
-let justSpiderfied = false;
+// Mortality causes (researcher-defined)
+const MORTALITY = {
+  '64': {cause:'Fish net mortality',type:'Confirmed Dead'},
+  '30': {cause:'Unknown — Missing',type:'Missing'},
+  '33': {cause:'Unknown — Missing',type:'Missing'},
+  '96': {cause:'Unknown — Missing',type:'Missing'},
+  '34': {cause:'Suspected Mugger Predation',type:'Presumed Dead'},
+  '38': {cause:'Suspected Mugger Predation',type:'Presumed Dead'},
+  '98': {cause:'Confirmed Mugger Predation',type:'Confirmed Dead'},
+};
 
-// Current filter state
-let f_animal   = 'all';
-let f_status   = 'all';
-let f_category = 'all';
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let map, oms, heatmapLayer;
+let rawData={}, rawArr=[];
+let animalsData={}, latestRecords={}, statusMap={}, categoryMap={};
+let markers=[], markerMapping={}, trackLayers=[];
+let allTableRows=[], tableExpanded=false, justSpiderfied=false;
+let f_animal='all', f_status='all', f_category='all';
+let currentAnalyticsId=null;
+const chartInst={};
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 function init(){
-  initMap();
-  initResize();
-  loadTelemetry();
-  loadFieldUpdates();
+  initMap(); initResize();
+  loadTelemetry(); loadFieldUpdates();
 
-  document.getElementById('animalFilter').addEventListener('change', e => {
-    f_animal = e.target.value;
-    syncPillsToStatus('all');
-    document.getElementById('statusFilter').value   = 'all';
-    document.getElementById('categoryFilter').value = 'all';
-    f_status   = 'all';
-    f_category = 'all';
-    applyFilters();
+  document.getElementById('animalFilter').addEventListener('change', e=>{
+    f_animal=e.target.value; f_status='all'; f_category='all';
+    document.getElementById('statusFilter').value='all';
+    document.getElementById('categoryFilter').value='all';
+    syncPillsToStatus('all'); applyFilters();
   });
-  document.getElementById('statusFilter').addEventListener('change', e => {
-    f_status = e.target.value;
-    f_animal = 'all';
-    document.getElementById('animalFilter').value = 'all';
-    syncPillsToStatus(f_status);
-    applyFilters();
+  document.getElementById('statusFilter').addEventListener('change', e=>{
+    f_status=e.target.value; f_animal='all';
+    document.getElementById('animalFilter').value='all';
+    syncPillsToStatus(f_status); applyFilters();
   });
-  document.getElementById('categoryFilter').addEventListener('change', e => {
-    f_category = e.target.value;
-    f_animal   = 'all';
-    document.getElementById('animalFilter').value = 'all';
-    syncPillsToStatus('all');
-    applyFilters();
+  document.getElementById('categoryFilter').addEventListener('change', e=>{
+    f_category=e.target.value; f_animal='all';
+    document.getElementById('animalFilter').value='all';
+    syncPillsToStatus('all'); applyFilters();
   });
 }
 
 // ── MAP ───────────────────────────────────────────────────────────────────────
 function initMap(){
-  map = L.map('map').setView(MAP_CENTER, MAP_ZOOM);
-  L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{
-    maxZoom:20, attribution:'© Google'
-  }).addTo(map);
-
-  // ── OMS: large nearbyDistance catches ALL visually overlapping markers ───────
-  oms = new OverlappingMarkerSpiderfier(map, {
-    keepSpiderfied         : true,
-    nearbyDistance         : 40,      // px — wide enough to catch tight clusters
-    circleSpiralSwitchover : 12,      // circle layout up to 12, spiral beyond
-    circleFootSeparation   : 58,      // wide circle spread
-    spiralFootSeparation   : 38,
-    spiralLengthStart      : 26,
-    spiralLengthFactor     : 7,
-    legWeight              : 2.5,
-    legColors              : { usual:'#FFD700', highlighted:'#FF8800' }
+  map=L.map('map').setView(MAP_CENTER,MAP_ZOOM);
+  L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:20,attribution:'© Google'}).addTo(map);
+  oms=new OverlappingMarkerSpiderfier(map,{
+    keepSpiderfied:true,nearbyDistance:40,
+    circleSpiralSwitchover:12,circleFootSeparation:58,
+    spiralFootSeparation:38,spiralLengthStart:26,spiralLengthFactor:7,
+    legWeight:2.5,legColors:{usual:'#FFD700',highlighted:'#FF8800'}
   });
-
-  // Spiderfy → block popup on first click, only spread markers
-  oms.addListener('spiderfy', function(spiderfied){
-    justSpiderfied = true;
-    spiderfied.forEach(m => { try{ m.closePopup(); }catch(e){} });
-    setTimeout(() => { justSpiderfied = false; }, 450);
+  oms.addListener('spiderfy',function(spiderfied){
+    justSpiderfied=true;
+    spiderfied.forEach(m=>{try{m.closePopup();}catch(e){}});
+    setTimeout(()=>{justSpiderfied=false;},450);
   });
+}
+
+// ── HEATMAP ───────────────────────────────────────────────────────────────────
+function buildHeatmapLayer(){
+  const pts=rawArr
+    .map(r=>[parseFloat(r['Latitude']),parseFloat(r['Longitude']),0.6])
+    .filter(p=>!isNaN(p[0])&&!isNaN(p[1]));
+  heatmapLayer=L.heatLayer(pts,{
+    radius:22,blur:16,maxZoom:17,
+    gradient:{0.2:'#313695',0.4:'#4575b4',0.55:'#74add1',
+              0.65:'#fee090',0.8:'#f46d43',1.0:'#a50026'}
+  });
+}
+
+function toggleHeatmap(){
+  const btn=document.getElementById('heatmapBtn');
+  if(!heatmapLayer) buildHeatmapLayer();
+  if(map.hasLayer(heatmapLayer)){
+    map.removeLayer(heatmapLayer);
+    btn.classList.remove('active');
+  } else {
+    map.addLayer(heatmapLayer);
+    btn.classList.add('active');
+  }
 }
 
 // ── RESIZE ────────────────────────────────────────────────────────────────────
 function initResize(){
-  const handle  = document.getElementById('resizeHandle');
-  const section = document.getElementById('tableSection');
+  const handle=document.getElementById('resizeHandle');
+  const section=document.getElementById('tableSection');
   let drag=false,startY=0,startH=0;
   const onStart=y=>{drag=true;startY=y;startH=section.offsetHeight;document.body.style.cursor='ns-resize';};
-  const onMove =y=>{
-    if(!drag) return;
-    section.style.height=Math.min(Math.max(55,startH+(startY-y)),window.innerHeight*.70)+'px';
-  };
+  const onMove=y=>{if(!drag)return;section.style.height=Math.min(Math.max(55,startH+(startY-y)),window.innerHeight*.70)+'px';};
   const onEnd=()=>{drag=false;document.body.style.cursor='';};
-  handle.addEventListener('mousedown', e=>{onStart(e.clientY);e.preventDefault();});
+  handle.addEventListener('mousedown',e=>{onStart(e.clientY);e.preventDefault();});
   document.addEventListener('mousemove',e=>onMove(e.clientY));
-  document.addEventListener('mouseup',  onEnd);
-  handle.addEventListener('touchstart', e=>onStart(e.touches[0].clientY),{passive:true});
-  document.addEventListener('touchmove', e=>{if(drag)onMove(e.touches[0].clientY);},{passive:true});
-  document.addEventListener('touchend',  onEnd);
+  document.addEventListener('mouseup',onEnd);
+  handle.addEventListener('touchstart',e=>onStart(e.touches[0].clientY),{passive:true});
+  document.addEventListener('touchmove',e=>{if(drag)onMove(e.touches[0].clientY);},{passive:true});
+  document.addEventListener('touchend',onEnd);
 }
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
@@ -456,7 +615,7 @@ function loadTelemetry(){
   Papa.parse(CSV_URL,{
     download:true,header:true,skipEmptyLines:true,
     complete(results){
-      rawData=results.data;
+      rawArr=results.data;
       processData();
       populateDropdown();
       applyFilters();
@@ -471,16 +630,14 @@ function loadFieldUpdates(){
     complete(results){
       let rows=results.data.filter(r=>(r['Date']||'').trim());
       rows.sort((a,b)=>parseDT(b['Date'])-parseDT(a['Date']));
-      if(!rows.length) return;
-      const lat=rows[0];
-      document.getElementById('latestFuDate').textContent=fmtDateOnly(parseDT(lat['Date']));
-      document.getElementById('latestFuText').textContent=lat['Update']||'';
+      if(!rows.length)return;
+      document.getElementById('latestFuDate').textContent=fmtDateOnly(parseDT(rows[0]['Date']));
+      document.getElementById('latestFuText').textContent=rows[0]['Update']||'';
       const list=document.getElementById('fuList');
       if(rows.length<=1){list.innerHTML='<p style="color:#bbb;font-size:.84rem;">No previous updates.</p>';return;}
       rows.slice(1).forEach(r=>{
         const d=document.createElement('div');d.className='fu-item';
-        d.innerHTML=`<div class="fu-date">${fmtDateOnly(parseDT(r['Date']))}</div>
-                     <div class="fu-text">${r['Update']||''}</div>`;
+        d.innerHTML=`<div class="fu-date">${fmtDateOnly(parseDT(r['Date']))}</div><div class="fu-text">${r['Update']||''}</div>`;
         list.appendChild(d);
       });
     }
@@ -488,195 +645,134 @@ function loadFieldUpdates(){
 }
 
 function processData(){
-  animalsData={};latestRecords={};statusMap={};categoryMapFn={};
-  rawData.forEach(row=>{
+  animalsData={};latestRecords={};statusMap={};categoryMap={};
+  rawArr.forEach(row=>{
     const id=(row['Animal ID']||'').trim();
-    if(!id) return;
+    if(!id)return;
     row._id=id;row._parsed=parseDT(row['Timestamp']);
-    if(!animalsData[id]) animalsData[id]=[];
+    if(!animalsData[id])animalsData[id]=[];
     animalsData[id].push(row);
   });
   for(const id in animalsData){
     animalsData[id].sort((a,b)=>b._parsed-a._parsed);
     latestRecords[id]=animalsData[id][0];
-  }
-  // Status & category
-  for(const id in latestRecords){
     statusMap[id]=computeStatus(id,latestRecords[id]);
-    categoryMapFn[id]=computeCategory(id);
+    categoryMap[id]=DEAD_IDS.has(id)?'dead':SETTLER_IDS.has(id)?'settler':'explorer';
   }
   updateCounts();
 }
 
-// ── COMPUTE STATUS & CATEGORY ─────────────────────────────────────────────────
+// ── STATUS ────────────────────────────────────────────────────────────────────
 function computeStatus(id,rec){
-  if(DEAD_IDS.has(id)) return 'dead';
+  if(DEAD_IDS.has(id))return 'dead';
   const days=(TODAY-rec._parsed)/86400000;
-  if(days>GONE_DAYS)         return 'gone';
-  if(days>TEMP_MISSING_DAYS) return 'tmiss';
+  if(days>GONE_DAYS)return 'gone';
+  if(days>TEMP_MISSING_DAYS)return 'tmiss';
   return 'active';
 }
-
-function computeCategory(id){
-  if(DEAD_IDS.has(id)) return 'dead';
-  if(SETTLER_IDS.has(id)) return 'settler';
-  return 'explorer'; // everything else that's not dead is explorer
-}
-
 function updateCounts(){
   let nA=0,nD=0,nT=0,nG=0;
-  for(const id in statusMap){
-    const s=statusMap[id];
-    if(s==='active') nA++;
-    else if(s==='dead') nD++;
-    else if(s==='tmiss') nT++;
-    else if(s==='gone') nG++;
-  }
+  for(const id in statusMap){const s=statusMap[id];if(s==='active')nA++;else if(s==='dead')nD++;else if(s==='tmiss')nT++;else nG++;}
   document.getElementById('countActive').textContent=nA;
   document.getElementById('countDead').textContent=nD;
   document.getElementById('countTmiss').textContent=nT;
   document.getElementById('countGone').textContent=nG;
 }
-
-// ── STATUS BADGES ─────────────────────────────────────────────────────────────
 function statusLabel(s){
-  if(s==='dead')   return '<span class="badge badge-dead">Dead/Missing</span>';
-  if(s==='tmiss')  return '<span class="badge badge-tmiss">Temp Missing</span>';
-  if(s==='gone')   return '<span class="badge badge-gone">Gone &gt;30d</span>';
-  return '<span class="badge badge-active">Active</span>';
+  const m={dead:'<span class="badge badge-dead">Dead/Missing</span>',
+           tmiss:'<span class="badge badge-tmiss">Temp Missing</span>',
+           gone:'<span class="badge badge-gone">Gone &gt;30d</span>',
+           active:'<span class="badge badge-active">Active</span>'};
+  return m[s]||'';
 }
 function categoryLabel(cat){
-  if(cat==='settler')  return '<span class="badge badge-settler">Settler</span>';
-  if(cat==='explorer') return '<span class="badge badge-explorer">Explorer</span>';
+  if(cat==='settler') return '<span class="badge badge-settler">Settler</span>';
+  if(cat==='explorer')return '<span class="badge badge-explorer">Explorer</span>';
   return '';
 }
 
-// ── PILL SYNC ─────────────────────────────────────────────────────────────────
+// ── PILL & FILTER ─────────────────────────────────────────────────────────────
 function syncPillsToStatus(s){
   document.querySelectorAll('.legend-pill').forEach(p=>p.classList.remove('active-filter'));
-  if(s!=='all') document.getElementById('pill-'+s)?.classList.add('active-filter');
+  if(s!=='all')document.getElementById('pill-'+s)?.classList.add('active-filter');
 }
-
 function setPillFilter(cat){
-  // Clicking a pill sets the status dropdown
   const sel=document.getElementById('statusFilter');
-  if(f_status===cat){ sel.value='all'; f_status='all'; syncPillsToStatus('all'); }
-  else { sel.value=cat; f_status=cat; syncPillsToStatus(cat); }
-  f_animal='all';
-  document.getElementById('animalFilter').value='all';
-  document.getElementById('categoryFilter').value='all';
-  f_category='all';
+  if(f_status===cat){sel.value='all';f_status='all';syncPillsToStatus('all');}
+  else{sel.value=cat;f_status=cat;syncPillsToStatus(cat);}
+  f_animal='all';document.getElementById('animalFilter').value='all';
+  document.getElementById('categoryFilter').value='all';f_category='all';
   applyFilters();
 }
-
-// ── APPLY FILTERS (central routing) ──────────────────────────────────────────
 function applyFilters(){
   clearMap();
   document.getElementById('analyticsPanel').style.display='none';
+  currentAnalyticsId=null;
   updateFilterChips();
-
-  // Single animal selected → show full track, ignore status/category
   if(f_animal!=='all'){
     renderSingleAnimal(f_animal);
     renderTableRows(animalsData[f_animal]||[]);
     return;
   }
-
-  // Multi-animal: apply status + category filters on latest records
   const pool=getFilteredPool();
   renderPoolOnMap(pool);
   renderTableRows(pool);
 }
-
 function getFilteredPool(){
   return Object.values(latestRecords).filter(r=>{
     const id=r._id;
-    if(f_status!=='all'   && statusMap[id]!==f_status)       return false;
-    if(f_category!=='all' && categoryMapFn[id]!==f_category) return false;
+    if(f_status!=='all'&&statusMap[id]!==f_status)return false;
+    if(f_category!=='all'&&categoryMap[id]!==f_category)return false;
     return true;
   });
 }
-
 function updateFilterChips(){
-  const el=document.getElementById('activeFilters');
-  el.innerHTML='';
-  if(f_status!=='all'){
-    const labels={active:'Active',dead:'Dead/Missing',tmiss:'Temp Missing',gone:'Gone >30d'};
-    const chip=makeChip('Status: '+labels[f_status],()=>{
-      document.getElementById('statusFilter').value='all';
-      f_status='all'; syncPillsToStatus('all'); applyFilters();
-    });
-    el.appendChild(chip);
-  }
-  if(f_category!=='all'){
-    const labels={settler:'Category: Settler',explorer:'Category: Explorer'};
-    const chip=makeChip(labels[f_category],()=>{
-      document.getElementById('categoryFilter').value='all';
-      f_category='all'; applyFilters();
-    });
-    el.appendChild(chip);
-  }
-  if(f_animal!=='all'){
-    const chip=makeChip('Animal: ID '+f_animal,()=>{
-      document.getElementById('animalFilter').value='all';
-      f_animal='all'; applyFilters();
-    });
-    el.appendChild(chip);
-  }
+  const el=document.getElementById('activeFilters');el.innerHTML='';
+  const SLBL={active:'Active',dead:'Dead/Missing',tmiss:'Temp Missing',gone:'Gone >30d'};
+  const CLBL={settler:'Settler',explorer:'Explorer'};
+  if(f_status!=='all')   el.appendChild(makeChip('Status: '+SLBL[f_status],   ()=>{document.getElementById('statusFilter').value='all';f_status='all';syncPillsToStatus('all');applyFilters();}));
+  if(f_category!=='all') el.appendChild(makeChip('Category: '+CLBL[f_category],()=>{document.getElementById('categoryFilter').value='all';f_category='all';applyFilters();}));
+  if(f_animal!=='all')   el.appendChild(makeChip('Animal: ID '+f_animal,        ()=>{document.getElementById('animalFilter').value='all';f_animal='all';applyFilters();}));
 }
-
 function makeChip(label,onClose){
-  const div=document.createElement('div');
-  div.className='filter-chip';
+  const div=document.createElement('div');div.className='filter-chip';
   div.innerHTML=`<span>${label}</span><button title="Clear">✕</button>`;
-  div.querySelector('button').onclick=onClose;
-  return div;
+  div.querySelector('button').onclick=onClose;return div;
 }
 
 // ── MAP RENDERING ─────────────────────────────────────────────────────────────
 function clearMap(){
-  markers.forEach(m=>map.removeLayer(m));
-  markers=[]; markerMapping={};
-  trackLayers.forEach(l=>map.removeLayer(l));
-  trackLayers=[];
+  markers.forEach(m=>map.removeLayer(m));markers=[];markerMapping={};
+  trackLayers.forEach(l=>map.removeLayer(l));trackLayers=[];
 }
-
 function renderPoolOnMap(pool){
   pool.forEach(r=>addMarker(r));
   if(pool.length>0){
     const lls=pool.map(r=>[parseFloat(r['Latitude']),parseFloat(r['Longitude'])]).filter(ll=>!isNaN(ll[0])&&!isNaN(ll[1]));
-    if(lls.length>0) map.fitBounds(L.latLngBounds(lls),{padding:[60,60]});
+    if(lls.length>0)map.fitBounds(L.latLngBounds(lls),{padding:[60,60]});
   }
 }
-
 function renderSingleAnimal(sid){
-  const records=animalsData[sid]||[];
-  if(!records.length) return;
+  const records=animalsData[sid]||[];if(!records.length)return;
   const ordered=[...records].sort((a,b)=>a._parsed-b._parsed);
-  const lls=ordered
-    .map(r=>[parseFloat(r['Latitude']),parseFloat(r['Longitude'])])
-    .filter(ll=>!isNaN(ll[0])&&!isNaN(ll[1]));
+  const lls=ordered.map(r=>[parseFloat(r['Latitude']),parseFloat(r['Longitude'])]).filter(ll=>!isNaN(ll[0])&&!isNaN(ll[1]));
   if(lls.length>1){
     const line=L.polyline(lls,{color:'#FFD700',weight:3,dashArray:'7,11',opacity:.9}).addTo(map);
     trackLayers.push(line);
   }
   records.forEach(r=>addMarker(r));
   addStarMarker(ordered[0]);
-  if(lls.length) map.fitBounds(L.latLngBounds(lls),{padding:[50,50]});
+  if(lls.length)map.fitBounds(L.latLngBounds(lls),{padding:[50,50]});
   computeAnalytics(sid,records,ordered);
 }
-
 function mkIcon(id){
   const s=statusMap[id]||'active';
   const cls=s==='dead'?'mk-red':s==='tmiss'?'mk-orange':s==='gone'?'mk-grey':'mk-blue';
   return L.divIcon({className:'animal-marker '+cls,html:id,iconSize:[28,28],iconAnchor:[14,14]});
 }
-
 function popupHTML(r){
-  const sig=getSignal(r);
-  const id=r['Animal ID'];
-  const s=statusMap[id]||'active';
-  const cat=categoryMapFn[id]||'';
+  const sig=getSignal(r);const id=r['Animal ID'];
+  const s=statusMap[id]||'active';const cat=categoryMap[id]||'';
   return `<div class="popup-id">🐊 Animal ID: ${id}</div>
     <table class="popup-tbl">
       <tr><td>Timestamp</td><td>${r['Timestamp']||'—'}</td></tr>
@@ -690,38 +786,28 @@ function popupHTML(r){
       <tr><td>Remarks</td><td>${r['Remarks']||'—'}</td></tr>
     </table>`;
 }
-
 function addMarker(record){
-  const lat=parseFloat(record['Latitude']);
-  const lng=parseFloat(record['Longitude']);
-  if(isNaN(lat)||isNaN(lng)) return null;
+  const lat=parseFloat(record['Latitude']);const lng=parseFloat(record['Longitude']);
+  if(isNaN(lat)||isNaN(lng))return null;
   const id=record['Animal ID'];
   const m=L.marker([lat,lng],{icon:mkIcon(id)}).addTo(map);
-  m.bindPopup(popupHTML(record),{maxWidth:290});
-
-  // Spiderfy on first click, popup on second
-  m.on('click',function(){
-    if(justSpiderfied) this.closePopup();
-  });
-
-  markers.push(m);
-  oms.addMarker(m);
+  m.bindPopup(popupHTML(record),{maxWidth:295});
+  m.on('click',function(){if(justSpiderfied)this.closePopup();});
+  markers.push(m);oms.addMarker(m);
   markerMapping[id+'|'+record['Timestamp']]=m;
   return m;
 }
-
 function addStarMarker(record){
-  if(!record) return;
-  const lat=parseFloat(record['Latitude']);
-  const lng=parseFloat(record['Longitude']);
-  if(isNaN(lat)||isNaN(lng)) return;
+  if(!record)return;
+  const lat=parseFloat(record['Latitude']);const lng=parseFloat(record['Longitude']);
+  if(isNaN(lat)||isNaN(lng))return;
   const icon=L.divIcon({className:'star-lbl',html:'⭐',iconSize:[24,24],iconAnchor:[12,12]});
   const m=L.marker([lat,lng],{icon,zIndexOffset:1000}).addTo(map);
   m.bindPopup('<b>⭐ Release Point</b><br>Animal ID: '+record['Animal ID']);
   trackLayers.push(m);
 }
 
-// ── ANALYTICS ─────────────────────────────────────────────────────────────────
+// ── ANALYTICS (text panel) ────────────────────────────────────────────────────
 function haversine(a,b){
   const R=6371000,toR=Math.PI/180;
   const lat1=a[0]*toR,lat2=b[0]*toR;
@@ -729,107 +815,77 @@ function haversine(a,b){
   const x=Math.sin(dlat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlon/2)**2;
   return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
-
 function classifyMovement(id,records){
-  if(SETTLER_IDS.has(id)) return 'Settler';
-  if(DEAD_IDS.has(id))    return '—';
-  const last10=records.slice(0,10)
-    .map(r=>[parseFloat(r['Latitude']),parseFloat(r['Longitude'])])
-    .filter(ll=>!isNaN(ll[0]));
-  if(last10.length<2) return 'Settler';
+  if(SETTLER_IDS.has(id))return 'Settler';
+  if(DEAD_IDS.has(id))return '—';
+  const last10=records.slice(0,10).map(r=>[parseFloat(r['Latitude']),parseFloat(r['Longitude'])]).filter(ll=>!isNaN(ll[0]));
+  if(last10.length<2)return 'Settler';
   let maxSpread=0;
   for(let i=0;i<last10.length;i++)
-    for(let j=i+1;j<last10.length;j++){
-      const d=haversine(last10[i],last10[j]);
-      if(d>maxSpread) maxSpread=d;
-    }
+    for(let j=i+1;j<last10.length;j++){const d=haversine(last10[i],last10[j]);if(d>maxSpread)maxSpread=d;}
   const ord=[...records].sort((a,b)=>a._parsed-b._parsed);
   const rel=[parseFloat(ord[0]['Latitude']),parseFloat(ord[0]['Longitude'])];
   let maxDisp=0;
-  records.forEach(r=>{
-    const pt=[parseFloat(r['Latitude']),parseFloat(r['Longitude'])];
-    if(!isNaN(pt[0])){ const d=haversine(rel,pt); if(d>maxDisp) maxDisp=d; }
-  });
-  if(maxDisp>1500) return 'Disperser';
-  if(maxSpread>300) return 'Explorer';
+  records.forEach(r=>{const pt=[parseFloat(r['Latitude']),parseFloat(r['Longitude'])];if(!isNaN(pt[0])){const d=haversine(rel,pt);if(d>maxDisp)maxDisp=d;}});
+  if(maxDisp>1500)return 'Disperser';
+  if(maxSpread>300)return 'Explorer';
   return 'Settler';
 }
-
 function computeAnalytics(id,records,ordered){
-  if(!records.length) return;
+  if(!records.length)return;
   const release=[parseFloat(ordered[0]['Latitude']),parseFloat(ordered[0]['Longitude'])];
-  const latest =[parseFloat(records[0]['Latitude']), parseFloat(records[0]['Longitude'])];
-  if(isNaN(release[0])||isNaN(latest[0])) return;
+  const latest=[parseFloat(records[0]['Latitude']),parseFloat(records[0]['Longitude'])];
+  if(isNaN(release[0])||isNaN(latest[0]))return;
   let maxDisp=0;
-  records.forEach(r=>{
-    const pt=[parseFloat(r['Latitude']),parseFloat(r['Longitude'])];
-    if(!isNaN(pt[0])){ const d=haversine(release,pt); if(d>maxDisp) maxDisp=d; }
-  });
+  records.forEach(r=>{const pt=[parseFloat(r['Latitude']),parseFloat(r['Longitude'])];if(!isNaN(pt[0])){const d=haversine(release,pt);if(d>maxDisp)maxDisp=d;}});
   const currentDist=haversine(release,latest);
   let prevDist=0;
-  if(records.length>=2){
-    const prev=[parseFloat(records[1]['Latitude']),parseFloat(records[1]['Longitude'])];
-    if(!isNaN(prev[0])) prevDist=haversine(prev,latest);
-  }
+  if(records.length>=2){const prev=[parseFloat(records[1]['Latitude']),parseFloat(records[1]['Longitude'])];if(!isNaN(prev[0]))prevDist=haversine(prev,latest);}
   const movType=classifyMovement(id,records);
   const daysSince=Math.round((TODAY-records[0]._parsed)/86400000);
+  currentAnalyticsId=id;
   const panel=document.getElementById('analyticsPanel');
-  panel.style.display='block';
-  panel.innerHTML=
+  panel.style.display='flex';
+  document.getElementById('analyticsText').innerHTML=
     `<b>Movement Analytics — ID ${id}</b><br>
-     Max displacement from release: <b>${Math.round(maxDisp)} m</b>&emsp;
-     Current distance from release: <b>${Math.round(currentDist)} m</b>&emsp;
-     Distance from previous fix: <b>${Math.round(prevDist)} m</b>&emsp;
+     Max displacement: <b>${Math.round(maxDisp)} m</b>&emsp;
+     Current dist from release: <b>${Math.round(currentDist)} m</b>&emsp;
+     Dist from prev fix: <b>${Math.round(prevDist)} m</b>&emsp;
      Movement type: <b>${movType}</b>&emsp;
-     Last fix: <b>${daysSince} day${daysSince!==1?'s':''} ago</b>`;
+     Last fix: <b>${daysSince} day${daysSince!==1?'s':''} ago</b>&emsp;
+     Total fixes: <b>${records.length}</b>`;
 }
 
 // ── STATUS BAR ────────────────────────────────────────────────────────────────
 function updateStatus(){
   let latest=null;
-  rawData.forEach(r=>{const d=parseDT(r['Timestamp']);if(!latest||d>latest)latest=d;});
-  if(latest) document.getElementById('statusBar').textContent='📡 Latest Telemetry: '+fmtDT(latest);
+  rawArr.forEach(r=>{const d=parseDT(r['Timestamp']);if(!latest||d>latest)latest=d;});
+  if(latest)document.getElementById('statusBar').textContent='📡 Latest Telemetry: '+fmtDT(latest);
 }
 
 // ── TABLE ─────────────────────────────────────────────────────────────────────
 function renderTableRows(rows){
   allTableRows=[...rows].sort((a,b)=>b._parsed-a._parsed);
-  tableExpanded=false;
-  paintTable();
+  tableExpanded=false;paintTable();
 }
-
-function toggleTableExpand(){
-  tableExpanded=!tableExpanded;
-  paintTable();
-}
-
+function toggleTableExpand(){tableExpanded=!tableExpanded;paintTable();}
 function paintTable(){
-  const tbody=document.querySelector('#dataTable tbody');
-  tbody.innerHTML='';
+  const tbody=document.querySelector('#dataTable tbody');tbody.innerHTML='';
   const visible=tableExpanded?allTableRows:allTableRows.slice(0,DEFAULT_ROWS);
   visible.forEach(r=>{
-    const sig=getSignal(r);
-    const id=r['Animal ID'];
-    const s=statusMap[id]||'active';
-    const cat=categoryMapFn[id]||'';
+    const sig=getSignal(r);const id=r['Animal ID'];
+    const s=statusMap[id]||'active';const cat=categoryMap[id]||'';
     const tr=document.createElement('tr');
-    if(s==='tmiss') tr.style.background='#fff6ee';
-    if(s==='gone')  tr.style.background='#f5f5f5';
-    if(s==='dead')  tr.style.background='#fff0f0';
-    tr.innerHTML=`
-      <td>${id}</td>
-      <td>${r['Timestamp']||''}</td>
-      <td>${r['Place']||''}</td>
+    if(s==='tmiss')tr.style.background='#fff6ee';
+    if(s==='gone') tr.style.background='#f5f5f5';
+    if(s==='dead') tr.style.background='#fff0f0';
+    tr.innerHTML=`<td>${id}</td><td>${r['Timestamp']||''}</td><td>${r['Place']||''}</td>
       <td>${r['Activity']||''}</td>
       <td><span class="${sigClass(sig)}">${sig||''}</span></td>
-      <td>${statusLabel(s)}</td>
-      <td>${categoryLabel(cat)}</td>
-      <td>${r['Latitude']||''}</td>
-      <td>${r['Longitude']||''}</td>
-      <td>${r['Remarks']||''}</td>`;
+      <td>${statusLabel(s)}</td><td>${categoryLabel(cat)}</td>
+      <td>${r['Latitude']||''}</td><td>${r['Longitude']||''}</td><td>${r['Remarks']||''}</td>`;
     tr.onclick=()=>{
-      const key=id+'|'+r['Timestamp'];
-      const m=markerMapping[key];
+      const key=id+'|'+r['Timestamp'];const m=markerMapping[key];
       if(m){map.setView(m.getLatLng(),17);m.openPopup();oms.unspiderfy();}
     };
     tbody.appendChild(tr);
@@ -838,47 +894,313 @@ function paintTable(){
   if(allTableRows.length>DEFAULT_ROWS){
     btn.style.display='block';
     btn.textContent=tableExpanded?'▲ See less':`▼ See more (${allTableRows.length-DEFAULT_ROWS} more)`;
-  } else { btn.style.display='none'; }
+  } else btn.style.display='none';
 }
 
 // ── DROPDOWN ──────────────────────────────────────────────────────────────────
 function populateDropdown(){
   const sel=document.getElementById('animalFilter');
   Object.keys(animalsData).sort((a,b)=>+a-+b).forEach(id=>{
-    const o=document.createElement('option');
-    o.value=id;
+    const o=document.createElement('option');o.value=id;
     const s=statusMap[id];
     const tag=s==='dead'?'⚰ ':s==='tmiss'?'⚠ ':s==='gone'?'☁ ':'';
-    o.textContent=tag+'ID '+id;
-    sel.appendChild(o);
+    o.textContent=tag+'ID '+id;sel.appendChild(o);
+  });
+}
+
+// ── STATS MODAL ───────────────────────────────────────────────────────────────
+function openStats(){
+  document.getElementById('statsModal').classList.add('open');
+  switchTab('tab-survival');
+}
+function closeStats(){document.getElementById('statsModal').classList.remove('open');}
+
+function switchTab(tabId){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  const idx=['tab-survival','tab-movement','tab-activity'].indexOf(tabId);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if(tabId==='tab-survival')   renderSurvivalTab();
+  if(tabId==='tab-movement')   renderMovementTab();
+  if(tabId==='tab-activity')   renderActivityTab();
+}
+
+function renderSurvivalTab(){
+  const total=Object.keys(latestRecords).length;
+  const nA=Object.values(statusMap).filter(s=>s==='active').length;
+  const nD=Object.values(statusMap).filter(s=>s==='dead').length;
+  const nT=Object.values(statusMap).filter(s=>s==='tmiss').length;
+  const nG=Object.values(statusMap).filter(s=>s==='gone').length;
+  const survRate=total>0?((nA/(nA+nD))*100).toFixed(1):'—';
+  const nSettle=Object.values(categoryMap).filter(c=>c==='settler').length;
+  const nExplore=Object.values(categoryMap).filter(c=>c==='explorer').length;
+
+  document.getElementById('survivalCards').innerHTML=`
+    <div class="stat-card"><div class="val">${total}</div><div class="lbl">Total Tagged</div></div>
+    <div class="stat-card"><div class="val">${nA}</div><div class="lbl">Active</div><div class="sub">Last seen ≤10 days</div></div>
+    <div class="stat-card s-red"><div class="val">${nD}</div><div class="lbl">Dead / Missing</div><div class="sub">Confirmed</div></div>
+    <div class="stat-card s-orange"><div class="val">${nT}</div><div class="lbl">Temp Missing</div><div class="sub">10–30 days</div></div>
+    <div class="stat-card s-grey"><div class="val">${nG}</div><div class="lbl">Gone &gt;30d</div></div>
+    <div class="stat-card s-green"><div class="val">${survRate}%</div><div class="lbl">Survival Rate</div><div class="sub">Active ÷ (Active+Dead)</div></div>
+    <div class="stat-card s-purple"><div class="val">${nSettle}</div><div class="lbl">Settlers</div></div>
+    <div class="stat-card s-teal"><div class="val">${nExplore}</div><div class="lbl">Explorers</div></div>`;
+
+  // Mortality table
+  const tbody=document.querySelector('#mortTable tbody');tbody.innerHTML='';
+  Object.entries(MORTALITY).forEach(([id,info])=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><b>${id}</b></td><td>${info.cause}</td><td><span class="badge badge-dead">${info.type}</span></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Charts
+  mkDonut('chartStatus',
+    ['Active','Dead/Missing','Temp Missing','Gone >30d'],
+    [nA,nD,nT,nG],
+    ['#1a7fe8','#e74c3c','#e67e22','#7f8c8d']
+  );
+
+  // Days since fix histogram
+  const daysBuckets={'0–3d':0,'4–7d':0,'8–14d':0,'15–30d':0,'31–60d':0,'>60d':0};
+  Object.values(latestRecords).forEach(r=>{
+    const d=(TODAY-r._parsed)/86400000;
+    if(d<=3)daysBuckets['0–3d']++;
+    else if(d<=7)daysBuckets['4–7d']++;
+    else if(d<=14)daysBuckets['8–14d']++;
+    else if(d<=30)daysBuckets['15–30d']++;
+    else if(d<=60)daysBuckets['31–60d']++;
+    else daysBuckets['>60d']++;
+  });
+  mkBar('chartRecency',Object.keys(daysBuckets),Object.values(daysBuckets),'#1a7fe8','Animals');
+
+  mkDonut('chartCategory',
+    ['Settler','Explorer','Dead'],
+    [nSettle,nExplore,nD],
+    ['#8e44ad','#16a085','#e74c3c']
+  );
+}
+
+function renderMovementTab(){
+  const activeIds=Object.keys(statusMap).filter(id=>statusMap[id]==='active');
+  const allFixes=rawArr.filter(r=>r['Animal ID']);
+  const avgFixes=(allFixes.length/Math.max(Object.keys(animalsData).length,1)).toFixed(1);
+
+  // Max displacement per animal
+  const dispMap={};
+  for(const id in animalsData){
+    if(DEAD_IDS.has(id))continue;
+    const ordered=[...animalsData[id]].sort((a,b)=>a._parsed-b._parsed);
+    const rel=[parseFloat(ordered[0]['Latitude']),parseFloat(ordered[0]['Longitude'])];
+    if(isNaN(rel[0]))continue;
+    let maxD=0;
+    animalsData[id].forEach(r=>{
+      const pt=[parseFloat(r['Latitude']),parseFloat(r['Longitude'])];
+      if(!isNaN(pt[0])){const d=haversine(rel,pt);if(d>maxD)maxD=d;}
+    });
+    dispMap[id]=Math.round(maxD);
+  }
+  const dispVals=Object.values(dispMap);
+  const maxOverall=Math.max(...dispVals);
+  const maxId=Object.keys(dispMap).find(id=>dispMap[id]===maxOverall)||'—';
+  const avgDisp=dispVals.length?Math.round(dispVals.reduce((a,b)=>a+b,0)/dispVals.length):0;
+
+  document.getElementById('movementCards').innerHTML=`
+    <div class="stat-card"><div class="val">${rawArr.length}</div><div class="lbl">Total Observations</div></div>
+    <div class="stat-card"><div class="val">${avgFixes}</div><div class="lbl">Avg Fixes / Animal</div></div>
+    <div class="stat-card s-teal"><div class="val">${maxOverall} m</div><div class="lbl">Max Dispersal</div><div class="sub">Animal ID ${maxId}</div></div>
+    <div class="stat-card s-purple"><div class="val">${avgDisp} m</div><div class="lbl">Avg Max Displacement</div></div>`;
+
+  // Top 12 by fix count
+  const fixCounts=Object.entries(animalsData).map(([id,recs])=>({id,n:recs.length})).sort((a,b)=>b.n-a.n).slice(0,12);
+  mkBar('chartFixes',fixCounts.map(x=>x.id),fixCounts.map(x=>x.n),'#1a7fe8','Fixes');
+
+  // Movement type distribution
+  const movTypes={Settler:0,Explorer:0,Disperser:0,'—':0};
+  for(const id in animalsData){
+    const mt=classifyMovement(id,animalsData[id]);
+    movTypes[mt]=(movTypes[mt]||0)+1;
+  }
+  mkDonut('chartMovType',
+    Object.keys(movTypes).filter(k=>movTypes[k]>0),
+    Object.keys(movTypes).filter(k=>movTypes[k]>0).map(k=>movTypes[k]),
+    ['#8e44ad','#16a085','#e67e22','#aaa']
+  );
+
+  // Displacement chart — top active animals
+  const sortedDisp=Object.entries(dispMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const colors=sortedDisp.map(([id])=>{
+    const s=statusMap[id];
+    return s==='active'?'#1a7fe8':s==='tmiss'?'#e67e22':'#7f8c8d';
+  });
+  mkBar('chartDisplacement',sortedDisp.map(x=>x[0]),sortedDisp.map(x=>x[1]),colors,'Distance (m)',true);
+}
+
+function renderActivityTab(){
+  // Activity distribution
+  const acts={};
+  rawArr.forEach(r=>{const a=(r['Activity']||'Unknown').trim();acts[a]=(acts[a]||0)+1;});
+  const actSorted=Object.entries(acts).sort((a,b)=>b[1]-a[1]);
+  const ACTCOLORS=['#1a7fe8','#27ae60','#e67e22','#e74c3c','#8e44ad','#16a085','#f39c12','#2c3e50','#95a5a6'];
+  mkBar('chartActivity',actSorted.map(x=>x[0]),actSorted.map(x=>x[1]),
+    actSorted.map((_,i)=>ACTCOLORS[i%ACTCOLORS.length]),'Observations');
+
+  // Signal distribution
+  const sigs={Strong:0,Medium:0,Weak:0,'Medium-Weak':0,'Not Recorded':0};
+  rawArr.forEach(r=>{
+    const s=(r['Signal']||'').trim();
+    if(!s)sigs['Not Recorded']++;
+    else if(sigs[s]!==undefined)sigs[s]++;
+    else sigs[s]=(sigs[s]||0)+1;
+  });
+  const sigFiltered=Object.entries(sigs).filter(([,v])=>v>0);
+  mkDonut('chartSignal',sigFiltered.map(x=>x[0]),sigFiltered.map(x=>x[1]),
+    ['#27ae60','#e67e22','#e74c3c','#f39c12','#bdc3c7']);
+
+  // Weekly timeline
+  const weekly={};
+  rawArr.forEach(r=>{
+    if(!r._parsed||r._parsed<=new Date(2000,0,1))return;
+    const d=r._parsed;
+    const mon=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    weekly[mon]=(weekly[mon]||0)+1;
+  });
+  const weekSorted=Object.entries(weekly).sort((a,b)=>a[0].localeCompare(b[0]));
+  mkLine('chartTimeline',weekSorted.map(x=>x[0]),weekSorted.map(x=>x[1]),'Observations');
+}
+
+// ── MOVEMENT MODAL (per animal) ───────────────────────────────────────────────
+function openMovementModal(){
+  if(!currentAnalyticsId)return;
+  const id=currentAnalyticsId;
+  const records=animalsData[id];
+  if(!records||!records.length)return;
+
+  document.getElementById('movModalTitle').textContent=`📈 Movement Details — Animal ID ${id}`;
+  document.getElementById('movModal').classList.add('open');
+
+  const ordered=[...records].sort((a,b)=>a._parsed-b._parsed);
+  const release=[parseFloat(ordered[0]['Latitude']),parseFloat(ordered[0]['Longitude'])];
+
+  // Compute per-fix displacement
+  const fixData=ordered.map((r,i)=>{
+    const pt=[parseFloat(r['Latitude']),parseFloat(r['Longitude'])];
+    const dist=(!isNaN(pt[0])&&!isNaN(release[0]))?Math.round(haversine(release,pt)):0;
+    return {r,dist,i:i+1};
+  });
+
+  const maxDisp=Math.max(...fixData.map(f=>f.dist));
+  const finalDist=fixData.length?fixData[fixData.length-1].dist:0;
+  let totalPath=0;
+  for(let i=1;i<fixData.length;i++){
+    const a=[parseFloat(fixData[i-1].r['Latitude']),parseFloat(fixData[i-1].r['Longitude'])];
+    const b=[parseFloat(fixData[i].r['Latitude']),parseFloat(fixData[i].r['Longitude'])];
+    if(!isNaN(a[0])&&!isNaN(b[0]))totalPath+=haversine(a,b);
+  }
+  const movType=classifyMovement(id,records);
+  const daysSince=Math.round((TODAY-records[0]._parsed)/86400000);
+
+  document.getElementById('movStatCards').innerHTML=`
+    <div class="mov-stat"><div class="v">${records.length}</div><div class="l">Total Fixes</div></div>
+    <div class="mov-stat"><div class="v">${maxDisp} m</div><div class="l">Max Displacement</div></div>
+    <div class="mov-stat"><div class="v">${finalDist} m</div><div class="l">Current Dist from Release</div></div>
+    <div class="mov-stat"><div class="v">${Math.round(totalPath)} m</div><div class="l">Total Path Length</div></div>
+    <div class="mov-stat"><div class="v">${movType}</div><div class="l">Movement Type</div></div>
+    <div class="mov-stat"><div class="v">${daysSince}d</div><div class="l">Days Since Last Fix</div></div>`;
+
+  // Displacement line chart
+  const labels=fixData.map(f=>f.r['Timestamp']||'Fix '+f.i);
+  mkLine('chartMovLine',labels,fixData.map(f=>f.dist),'Distance (m)',true);
+
+  // Activity donut
+  const acts={};records.forEach(r=>{const a=(r['Activity']||'Unknown').trim();acts[a]=(acts[a]||0)+1;});
+  const actE=Object.entries(acts).sort((a,b)=>b[1]-a[1]);
+  mkDonut('chartMovActivity',actE.map(x=>x[0]),actE.map(x=>x[1]),
+    ['#1a7fe8','#27ae60','#e67e22','#e74c3c','#8e44ad','#16a085']);
+
+  // Signal donut
+  const sigs={};records.forEach(r=>{const s=(r['Signal']||'Not Recorded').trim()||'Not Recorded';sigs[s]=(sigs[s]||0)+1;});
+  const sigE=Object.entries(sigs);
+  mkDonut('chartMovSignal',sigE.map(x=>x[0]),sigE.map(x=>x[1]),['#27ae60','#e67e22','#e74c3c','#f39c12','#bdc3c7']);
+
+  // Fix table
+  const ftBody=document.querySelector('#fixTable tbody');ftBody.innerHTML='';
+  fixData.forEach((f,i)=>{
+    const tr=document.createElement('tr');
+    const sig=getSignal(f.r);
+    tr.innerHTML=`<td>${i+1}</td><td>${f.r['Timestamp']||'—'}</td><td>${f.r['Place']||'—'}</td>
+      <td>${f.r['Activity']||'—'}</td><td><span class="${sigClass(sig)}">${sig||'—'}</span></td>
+      <td><b>${f.dist}</b></td><td>${f.r['Latitude']||'—'}</td><td>${f.r['Longitude']||'—'}</td>`;
+    ftBody.appendChild(tr);
+  });
+}
+function closeMovModal(){document.getElementById('movModal').classList.remove('open');}
+
+// ── CHART HELPERS ─────────────────────────────────────────────────────────────
+function destroyChart(id){if(chartInst[id]){chartInst[id].destroy();delete chartInst[id];}}
+
+function mkDonut(id,labels,data,colors){
+  destroyChart(id);
+  const ctx=document.getElementById(id).getContext('2d');
+  chartInst[id]=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{
+      legend:{position:'right',labels:{font:{size:11},boxWidth:14}},
+      tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}`}}
+    }}
+  });
+}
+
+function mkBar(id,labels,data,color,ylabel,multicolor){
+  destroyChart(id);
+  const ctx=document.getElementById(id).getContext('2d');
+  const bgColors=multicolor&&Array.isArray(color)?color:labels.map(()=>color||'#1a7fe8');
+  chartInst[id]=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{label:ylabel||'Count',data,backgroundColor:bgColors,borderRadius:4,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:10},maxRotation:45}}}}
+  });
+}
+
+function mkLine(id,labels,data,ylabel,small){
+  destroyChart(id);
+  const ctx=document.getElementById(id).getContext('2d');
+  chartInst[id]=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{label:ylabel||'Value',data,
+      borderColor:'#1a7fe8',backgroundColor:'rgba(26,127,232,0.1)',
+      borderWidth:2,pointRadius:small?2:4,pointHoverRadius:6,fill:true,tension:0.3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},
+              x:{ticks:{font:{size:small?9:10},maxRotation:small?90:45,maxTicksLimit:small?10:20}}}}
   });
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function parseDT(s){
-  if(!s||!s.trim()) return new Date(0);
-  const p=s.trim().split(' ');
-  const dp=p[0].split('-');
-  if(dp.length<3) return new Date(0);
+  if(!s||!s.trim())return new Date(0);
+  const p=s.trim().split(' ');const dp=p[0].split('-');
+  if(dp.length<3)return new Date(0);
   const tp=p[1]?p[1].split(':'):['0','0'];
   return new Date(+dp[2],+dp[1]-1,+dp[0],+tp[0],+tp[1]);
 }
 function fmtDT(d){
-  if(!d||d.getFullYear()<2000) return '';
+  if(!d||d.getFullYear()<2000)return '';
   return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
        +' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 function fmtDateOnly(d){
-  if(!d||d.getFullYear()<2000) return '';
+  if(!d||d.getFullYear()<2000)return '';
   return d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
 }
-function getSignal(r){ return (r['Signal']||'').trim(); }
+function getSignal(r){return (r['Signal']||'').trim();}
 function sigClass(s){
-  if(!s) return '';
-  const v=s.toLowerCase();
-  if(v.includes('strong')) return 'sig-strong';
-  if(v.includes('medium')) return 'sig-medium';
-  if(v.includes('weak'))   return 'sig-weak';
+  if(!s)return '';const v=s.toLowerCase();
+  if(v.includes('strong'))return 'sig-strong';
+  if(v.includes('medium'))return 'sig-medium';
+  if(v.includes('weak'))return 'sig-weak';
   return '';
 }
 
@@ -891,6 +1213,10 @@ function closeFP(){
   document.getElementById('fieldPanel').classList.remove('open');
   document.getElementById('overlay').classList.remove('open');
 }
+
+// Close modals on backdrop click
+document.getElementById('statsModal').addEventListener('click',function(e){if(e.target===this)closeStats();});
+document.getElementById('movModal').addEventListener('click',function(e){if(e.target===this)closeMovModal();});
 
 document.addEventListener('DOMContentLoaded',init);
 </script>
