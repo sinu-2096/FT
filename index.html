@@ -1,1 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Gharial Ecology Project – Pali FTH 2025 Hatchling Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
+<style>
+:root{
+  --forest:#173f31;
+  --forest-2:#215742;
+  --forest-3:#2f7a5a;
+  --lime:#7ecf9b;
+  --sand:#f4f7f2;
+  --panel:#ffffff;
+  --panel-2:#f7faf7;
+  --line:#dde7df;
+  --line-2:#c4d4c8;
+  --text:#122118;
+  --muted:#587064;
+  --muted-2:#7d9489;
+  --shadow:0 10px 28px rgba(18,33,24,.12);
+  --shadow-lg:0 18px 44px rgba(18,33,24,.18);
+  --hdr:126px;
+  --fbar:54px;
+  --btm:250px;
+  --radius:12px;
+  --mono:'IBM Plex Mono',monospace;
+  --font:'Space Grotesk',sans-serif;
+
+  /* ── Status bucket accent colours ── */
+  --col-active:#16a34a;
+  --col-missing:#d97706;
+  --col-missing-start:#7c3aed;
+  --col-water:#2563eb;
+  --col-recovered:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--sand);color:var(--text);font-family:var(--font)}
+button,select,input{font:inherit}
+button{cursor:pointer}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#bfd0c2;border-radius:999px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ─── Loading Screen ─── */
+#loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
+#loading.hide{opacity:0;visibility:hidden;pointer-events:none}
+.loading-bg{position:absolute;inset:0;background:url('background (1).gif') center/cover no-repeat}
+.loading-veil{position:absolute;inset:0;background:rgba(9,22,15,.72);backdrop-filter:blur(4px)}
+.loading-card{position:relative;z-index:2;width:min(720px,92vw);padding:36px 28px;border:1px solid rgba(255,255,255,.16);border-radius:20px;background:rgba(12,24,18,.45);box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;color:#fff}
+.loading-logos{display:flex;align-items:center;gap:24px}
+.loading-logos img{height:96px;max-width:220px;object-fit:contain;filter:drop-shadow(0 4px 18px rgba(0,0,0,.45))}
+.loading-divider{width:2px;height:72px;background:rgba(255,255,255,.2);border-radius:999px}
+.loading-ring{width:46px;height:46px;border:4px solid rgba(255,255,255,.16);border-top-color:var(--lime);border-radius:50%;animation:spin .85s linear infinite}
+.loading-title{font:700 1rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.loading-copy{font:600 .72rem var(--mono);letter-spacing:.05em;color:rgba(255,255,255,.74)}
+.loading-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:6px}
+.loading-item{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.58);font:.66rem var(--mono);text-align:left}
+.loading-item.ok{color:#b7f0c6;background:rgba(31,94,54,.34)}
+.loading-item.err{color:#fecaca;background:rgba(127,29,29,.26)}
+
+/* ─── Toast ─── */
+#toast{position:fixed;left:50%;bottom:calc(var(--btm) + 14px);transform:translateX(-50%) translateY(10px);z-index:9500;padding:8px 16px;border-radius:999px;border:1px solid rgba(153,27,27,.25);background:rgba(255,244,244,.96);color:#991b1b;font:.68rem var(--mono);letter-spacing:.05em;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
+
+/* ─── Header ─── */
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
+.hdr-logos{display:flex;align-items:center;gap:10px}
+.hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
+.hdr-logos a:hover{opacity:1}
+.hdr-logos img{height:46px;max-width:110px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.34))}
+.hdr-divider{width:1px;height:36px;background:rgba(255,255,255,.18)}
+.hdr-brand{min-width:0}
+.hdr-logos,.hdr-divider,.hdr-brand,.syncbox,.hdr-actions{grid-row:1}
+.hdr-title{font:700 .94rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
+
+/* ─── Status Blocks ── */
+#statusBlocks{grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;min-width:0;width:100%}
+.sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease;border-left:3px solid transparent}
+.sblock.clickable{cursor:pointer}
+.sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
+.sblock.muted{color:rgba(255,255,255,.42)}
+.sblock-label{font:700 .58rem var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.sblock-count{font:700 .98rem var(--mono)}
+.sblock-sub{font:500 .5rem var(--mono);color:rgba(255,255,255,.52);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.sblock[data-bucket="active"]        {border-left-color:var(--col-active)}
+.sblock[data-bucket="missing"]       {border-left-color:var(--col-missing)}
+.sblock[data-bucket="missing_start"] {border-left-color:var(--col-missing-start)}
+.sblock[data-bucket="water"]         {border-left-color:var(--col-water)}
+.sblock[data-bucket="recovered"]     {border-left-color:var(--col-recovered)}
+
+/* Header actions */
+.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
+.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
+.syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
+.syncbox span{font:600 .64rem var(--mono);color:#fff}
+.hbtn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
+.hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
+.hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
+#mobileMenuBtn{display:none}
+
+/* ─── Filter Bar (desktop) ─── */
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
+#fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
+#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
+.fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
+.fsel{min-width:148px;height:34px;padding:0 28px 0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center/8px;color:var(--text);font:600 .68rem var(--mono);appearance:none}
+.fbtn{height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);font:700 .64rem var(--mono);letter-spacing:.02em;display:inline-flex;align-items:center;gap:6px;transition:all .14s ease;white-space:nowrap}
+.fbtn:hover,.fbtn.on{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
+.fbtn.apply{background:var(--forest-2);border-color:var(--forest-2);color:#fff}
+.fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
+.fbtn.clear{color:#6b7280}
+
+/* ─── Multi-select dropdowns ─── */
+.ms-wrap{position:relative;flex-shrink:0}
+.ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
+.ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
+.ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
+.ms-caret{font-size:.56rem;color:currentColor}
+.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop.open{display:flex;flex-direction:column}
+.ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
+.ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
+.ms-count{margin-left:auto;font:600 .58rem var(--mono);color:var(--muted-2)}
+.ms-items{overflow:auto;padding:6px 0}
+.ms-empty{padding:12px 14px;color:var(--muted-2);font:.66rem var(--mono)}
+.ms-item{display:flex;align-items:center;gap:8px;padding:6px 12px;font:600 .64rem var(--mono);color:var(--text);cursor:pointer}
+.ms-item:hover{background:#f0f7f1}
+.ms-item input{accent-color:var(--forest-3)}
+
+/* ─── Map ─── */
+#map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1}
+#map{width:100%;height:100%}
+.leaflet-control-attribution{display:none}
+.leaflet-popup-content-wrapper{border-radius:16px;border:1px solid var(--line-2);box-shadow:var(--shadow-lg)}
+.leaflet-popup-content{margin:0}
+.leaflet-popup-tip{background:#fff}
+.leaflet-popup-close-button{top:10px!important;right:10px!important}
+.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
+path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
+.leaflet-interactive:active{outline:none!important}
+.leaflet-container a.leaflet-popup-close-button:focus{outline:none}
+.map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
+.fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
+
+/* ─── Legend – top-right, collapsible ─── */
+#legend{
+  position:absolute;
+  right:12px;
+  top:12px;
+  z-index:500;
+  min-width:0;
+  border-radius:14px;
+  background:rgba(255,255,255,.97);
+  border:1px solid var(--line-2);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  transition:min-width .18s ease;
+}
+#legend-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel-2);
+  cursor:pointer;
+  user-select:none;
+}
+#legend-header:hover{background:#eef8f1}
+.legend-title{font:700 .58rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+#legend-toggle-btn{
+  width:20px;height:20px;border-radius:50%;border:1px solid var(--line-2);
+  background:#fff;color:var(--muted);font:700 .7rem var(--mono);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s ease;
+}
+#legend-toggle-btn:hover{background:#eef8f1;color:var(--forest-2)}
+#legend-body{padding:10px 12px;transition:all .18s ease}
+#legend.collapsed #legend-body{display:none}
+#legend.collapsed #legend-header{border-bottom:none}
+.legend-row{display:flex;align-items:center;gap:8px;font:600 .62rem var(--mono);color:var(--text);margin-bottom:6px}
+.legend-row:last-child{margin-bottom:0}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+#mapFoot{position:absolute;left:0;right:0;bottom:0;z-index:450;display:flex;align-items:center;gap:10px;padding:6px 14px;background:rgba(255,255,255,.94);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+.map-foot-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);flex-shrink:0}
+#mapFootText{font:600 .65rem var(--mono);color:var(--muted)}
+#mapFootCount{margin-left:auto;font:600 .62rem var(--mono);color:var(--muted-2)}
+.zone-label{border:1px solid var(--line-2)!important;border-radius:999px!important;background:rgba(255,255,255,.94)!important;color:var(--forest)!important;font:700 .58rem var(--mono)!important;padding:3px 8px!important}
+
+/* ─── Popups ─── */
+.pop-top{padding:14px 14px 12px 14px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);border-bottom:2px solid rgba(126,207,155,.45);display:flex;align-items:center;gap:12px}
+.pop-id-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.72);color:#fff;font:700 .8rem var(--mono);flex-shrink:0}
+.pop-id{font:700 .9rem var(--mono);color:#fff}
+.pop-sub{margin-top:3px;font:600 .58rem var(--mono);color:rgba(255,255,255,.74);letter-spacing:.05em}
+.pop-body{padding:12px 14px}
+.pop-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.pop-label{font:700 .54rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.pop-value{font:600 .66rem var(--mono);color:var(--text);text-align:right}
+.pop-retag{margin:6px 0;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde68a;font:600 .62rem var(--mono);color:#78350f}
+.pop-actions{display:flex;gap:6px;padding:10px 14px 14px 14px}
+.pab{flex:1;height:34px;border-radius:10px;border:1px solid var(--line-2);background:#eef8f1;color:var(--forest-2);font:700 .62rem var(--mono)}
+.pab:hover{background:#dff1e5;border-color:#8ab99a}
+.sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
+
+/* ── popup divider for telemetry block ── */
+.pop-telemetry-sep{height:1px;background:var(--line);margin:8px 0 8px 0}
+
+/* ─── Field Updates Panel ─── */
+#fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
+#fpBg.open{display:block}
+#fp{
+  position:fixed;
+  top:calc(var(--hdr) + var(--fbar));
+  right:-400px;
+  width:400px;
+  height:calc(100vh - var(--hdr) - var(--fbar));
+  z-index:1190;
+  background:#fff;
+  border-left:1px solid var(--line-2);
+  box-shadow:-18px 0 44px rgba(12,24,18,.18);
+  transition:right .24s ease;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#fp.open{right:0}
+.fp-hdr{padding:16px 20px;background:#2d5a45;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fp-hdr h3{font:700 .92rem var(--mono);display:flex;align-items:center;gap:10px}
+.fp-hdr h3::before{content:'📋';font-size:1.1rem}
+.fp-cl{border:none;background:none;color:rgba(255,255,255,.7);font-size:1.2rem}
+.fp-cl:hover{color:#fff}
+.fp-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;background:#fff}
+.fp-latest{padding:20px;background:#f8fcf9;border-bottom:1px solid var(--line);flex-shrink:0}
+.fp-kicker{font:700 .62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#2d5a45;margin-bottom:6px}
+.fp-date{font:700 .9rem var(--mono);color:var(--forest);margin-bottom:12px}
+.update-content{font:500 .82rem/1.6 var(--font);color:var(--text);white-space:pre-wrap}
+.update-content strong{font-weight:700;color:var(--forest);display:block;margin-top:14px;margin-bottom:4px}
+.update-content strong:first-child{margin-top:0}
+.fp-scroll{padding:20px;flex:1}
+.fp-scroll h4{font:700 .64rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.fu{padding:20px 0;border-bottom:1px solid var(--line)}
+.fu:last-child{border-bottom:none;padding-bottom:120px}
+.fu-date{font:700 .75rem var(--mono);color:var(--forest);margin-bottom:8px}
+
+/* ─── Bottom Panel ─── */
+#btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
+#resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
+#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.btm-title{font:700 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.tbl-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.14);font:700 .58rem var(--mono);letter-spacing:.04em}
+.btm-actions{display:flex;align-items:center;gap:6px}
+.bc{height:28px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.12);color:#fff;font:700 .58rem var(--mono)}
+.bc:hover{background:rgba(255,255,255,.2)}
+#btmScroll{flex:1;overflow:auto;min-height:0}
+.dtbl{width:100%;border-collapse:collapse;font:600 .66rem var(--mono);white-space:nowrap}
+.dtbl th,.dtbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.dtbl tbody tr{transition:background .12s ease;cursor:pointer}
+.dtbl tbody tr:hover{background:#eff7f1}
+.dtbl tbody tr.sel{background:#dff1e5}
+.no-data td{padding:20px 12px;text-align:center;color:var(--muted-2);font:600 .7rem var(--mono)}
+
+/* ─── Mobile Drawer ─── */
+#drawerBg{display:none;position:fixed;inset:0;z-index:10030;background:rgba(12,24,18,.52);backdrop-filter:blur(2px);animation:fadeIn .2s ease}
+#drawerBg.open{display:block}
+#mobileDrawer{position:fixed;left:0;right:0;bottom:0;z-index:10040;background:#fff;border-radius:20px 20px 0 0;border-top:2px solid var(--lime);box-shadow:0 -18px 48px rgba(12,24,18,.22);max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.46,1)}
+#mobileDrawer.open{transform:translateY(0)}
+.drawer-handle{width:44px;height:5px;border-radius:999px;background:#c4d4c8;margin:12px auto 4px;flex-shrink:0}
+.drawer-hdr{padding:4px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex-shrink:0}
+.drawer-title{font:700 .78rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--forest)}
+.drawer-close{width:32px;height:32px;border-radius:50%;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.drawer-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:calc(env(safe-area-inset-bottom) + 16px)}
+.drawer-row{display:flex;flex-direction:column;gap:6px}
+.drawer-label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.drawer-footer{display:flex;gap:10px;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);border-top:1px solid var(--line);background:#fff;flex-shrink:0}
+.drawer-footer .fbtn{flex:1;height:48px;border-radius:12px;justify-content:center;font-size:.72rem}
+#mobileDrawer .ms-btn{width:100%;min-width:0;height:44px;border-radius:12px;font-size:.72rem}
+#mobileDrawer .fsel{width:100%;min-width:0;height:44px;border-radius:12px;font-size:.72rem}
+#mobileDrawer .ms-drop{position:static;max-height:220px;border-radius:12px;margin-top:4px;box-shadow:var(--shadow);display:none}
+#mobileDrawer .ms-drop.open{display:flex}
+#mobileDrawer .ms-item{padding:10px 12px;min-height:44px}
+#mobileDrawer .ms-hbtn{height:36px;padding:0 12px}
+.drawer-toggles{display:flex;gap:8px}
+.drawer-toggles .fbtn{flex:1;height:44px;justify-content:center;border-radius:12px}
+
+/* ─── Tablet ─── */
+@media(max-width:1200px){
+  #statusBlocks{grid-template-columns:repeat(3,1fr) repeat(2,1fr)}
+  .hdr-sub{display:none}
+}
+@media(max-width:1024px){
+  :root{--hdr:108px}
+  #statusBlocks{grid-template-columns:repeat(3,1fr)}
+  .sblock:nth-child(4),.sblock:nth-child(5){grid-column:span 1}
+  .hdr-sub{display:none}
+  .hdr-title{font-size:.8rem}
+  .syncbox{display:none}
+}
+
+/* ─── Mobile ─── */
+@media(max-width:767px){
+  :root{--hdr:60px;--fbar:0px;--btm:52px}
+  #hdr{height:var(--hdr);grid-template-columns:auto auto 1fr auto;grid-template-rows:1fr;row-gap:0;column-gap:8px;padding:8px 12px;align-items:center}
+  .hdr-logos{gap:6px}
+  .hdr-logos img{height:32px;max-width:72px}
+  .hdr-divider{height:24px}
+  .hdr-title{font-size:.72rem;white-space:normal;line-height:1.2}
+  .hdr-sub{display:none}
+  .hdr-brand{grid-row:1;grid-column:3}
+  #statusBlocks{display:none}
+  .syncbox{display:none}
+  .hdr-actions{grid-row:1;grid-column:4;gap:6px}
+  #filterToggleBtn{display:none}
+  #fieldUpdatesBtn{display:none}
+  #mobileMenuBtn{display:inline-flex !important}
+  #refreshBtn{min-width:0;padding:0 10px}
+  .hbtn{height:44px;min-width:44px}
+  #fbar{display:none !important}
+  #map-wrap{top:var(--hdr);bottom:var(--btm);left:0;right:0}
+  #mapFoot{padding:4px 10px}
+  #mapFootText{font-size:.58rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fab{width:40px;height:40px}
+  #legend{right:8px;top:8px}
+  .legend-title{font-size:.52rem}
+  .legend-row{font-size:.58rem}
+  .leaflet-popup-content-wrapper{max-width:calc(100vw - 32px)}
+  .pop-body{padding:10px 12px}
+  .pop-row{flex-direction:column;gap:2px}
+  .pop-value{text-align:left}
+  #btm{height:var(--btm);transition:height .25s ease}
+  #resizeBar{display:none}
+  #btmHdr{height:52px;padding:0 12px}
+  .btm-title{font-size:.66rem}
+  #btmScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .dtbl{min-width:860px}
+  .dtbl th,.dtbl td{padding:7px 8px;font-size:.6rem}
+  .dtbl tbody tr{min-height:44px}
+  #btm.mobile-expanded{height:55vh}
+  .btm-actions{gap:4px}
+  .bc{height:36px;padding:0 10px;font-size:.6rem}
+  #toast{bottom:calc(var(--btm) + 8px)}
+  #fp{width:100%;right:-100%;top:var(--hdr);height:calc(100vh - var(--hdr))}
+  #fp.open{right:0}
+  .loading-logos img{height:56px}
+  .loading-logos .loading-divider{height:44px}
+  .loading-list{grid-template-columns:1fr}
+  .loading-card{padding:24px 18px;gap:12px}
+}
+@media(max-width:380px){
+  .hdr-logos img{height:26px;max-width:56px}
+  .hdr-title{font-size:.64rem}
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-bg"></div>
+  <div class="loading-veil"></div>
+  <div class="loading-card">
+    <div class="loading-logos">
+      <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
+      <div class="loading-divider"></div>
+      <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
+    </div>
+    <div class="loading-ring"></div>
+    <div class="loading-title">Pali FTH 2025 Hatchlings</div>
+    <div class="loading-copy" id="loadingCopy">Loading hatchling telemetry data...</div>
+    <div class="loading-list">
+      <div class="loading-item" id="ld-master">Radio Master Dictionary</div>
+      <div class="loading-item" id="ld-log">Radio Log (Telemetry)</div>
+      <div class="loading-item" id="ld-updates">Field Updates</div>
+      <div class="loading-item" id="ld-zones">River Zones GeoJSON</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<header id="hdr">
+  <div class="hdr-logos">
+    <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
+      <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
+    </a>
+    <a href="https://www.instagram.com/gharialecologyproject/" target="_blank" rel="noopener" title="Gharial Ecology Project on Instagram">
+      <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
+    </a>
+  </div>
+  <div class="hdr-divider"></div>
+  <div class="hdr-brand">
+    <div class="hdr-title">Gharial Ecology Project – Pali FTH 2025 Hatchling Dashboard</div>
+    <div class="hdr-sub">VHF Telemetry Monitor | 30 Individuals</div>
+  </div>
+
+  <div id="statusBlocks">
+    <button class="sblock clickable" id="sb-active" data-bucket="active" type="button" onclick="toggleBucket('active')">
+      <span class="sblock-label">Active</span>
+      <span class="sblock-count" id="sbc-active">-</span>
+      <span class="sblock-sub">VHF within 14d</span>
+    </button>
+    <button class="sblock clickable" id="sb-missing" data-bucket="missing" type="button" onclick="toggleBucket('missing')">
+      <span class="sblock-label">Missing</span>
+      <span class="sblock-count" id="sbc-missing">-</span>
+      <span class="sblock-sub">No signal &gt; 14d</span>
+    </button>
+    <button class="sblock clickable" id="sb-missing_start" data-bucket="missing_start" type="button" onclick="toggleBucket('missing_start')">
+      <span class="sblock-label">Missing Soon After Release</span>
+      <span class="sblock-count" id="sbc-missing_start">4</span>
+      <span class="sblock-sub">Presumed dead / dispersed</span>
+    </button>
+    <button class="sblock clickable" id="sb-water" data-bucket="water" type="button" onclick="toggleBucket('water')">
+      <span class="sblock-label">Radios in Water</span>
+      <span class="sblock-count" id="sbc-water">3</span>
+      <span class="sblock-sub">Static in water</span>
+    </button>
+    <button class="sblock clickable" id="sb-recovered" data-bucket="recovered" type="button" onclick="toggleBucket('recovered')">
+      <span class="sblock-label">Recovered</span>
+      <span class="sblock-count" id="sbc-recovered">7</span>
+      <span class="sblock-sub">Radios retrieved</span>
+    </button>
+  </div>
+
+  <div class="syncbox">
+    <strong>Last Sync</strong>
+    <span id="syncTime">-</span>
+  </div>
+  <div class="hdr-actions">
+    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">↺</span> Refresh</button>
+    <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
+    <button class="hbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()">Field Updates</button>
+    <button class="hbtn" id="mobileMenuBtn" type="button" onclick="openMobileDrawer()" aria-label="Open filters">☰ Filters</button>
+  </div>
+</header>
+
+<div id="fbar">
+  <div id="fbar-inner">
+    <div class="fg">
+      <label>Radio ID</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-rid">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">None</button>
+            <span class="ms-count" id="msc-rid"></span>
+          </div>
+          <div class="ms-items" id="msi-rid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Zone</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-zone">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">None</button>
+            <span class="ms-count" id="msc-zone"></span>
+          </div>
+          <div class="ms-items" id="msi-zone"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Status</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-status">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">None</button>
+            <span class="ms-count" id="msc-status"></span>
+          </div>
+          <div class="ms-items" id="msi-status"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
+    <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
+    <div class="fsep"></div>
+    <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
+    <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
+    <div class="fsep"></div>
+    <button class="fbtn" type="button" onclick="exportCSV()">Export CSV</button>
+  </div>
+</div>
+
+<div id="drawerBg" onclick="closeMobileDrawer()"></div>
+<div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
+  <div class="drawer-handle"></div>
+  <div class="drawer-hdr">
+    <span class="drawer-title">🔍 Filters &amp; Tools</span>
+    <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-row">
+      <span class="drawer-label">Radio ID</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-rid" type="button" onclick="toggleMobMS('rid',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-rid">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('rid')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('rid')">None</button>
+            <span class="ms-count" id="mob-msc-rid"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-rid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-row">
+      <span class="drawer-label">Zone</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-zone" type="button" onclick="toggleMobMS('zone',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-zone">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('zone')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('zone')">None</button>
+            <span class="ms-count" id="mob-msc-zone"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-zone"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-row">
+      <span class="drawer-label">Status</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-status" type="button" onclick="toggleMobMS('status',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-status">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('status')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('status')">None</button>
+            <span class="ms-count" id="mob-msc-status"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-status"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-row">
+      <span class="drawer-label">Map Overlays</span>
+      <div class="drawer-toggles">
+        <button class="fbtn" id="mob-heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
+        <button class="fbtn" id="mob-kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
+      </div>
+    </div>
+    <div class="drawer-row">
+      <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px" type="button" onclick="exportCSV();closeMobileDrawer()">↓ Export CSV</button>
+    </div>
+    <div class="drawer-row">
+      <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px;background:#eef8f1;color:var(--forest-2);border-color:#8ab99a" type="button" onclick="toggleFieldPanel();closeMobileDrawer()">📋 Field Updates</button>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="fbtn clear" type="button" onclick="mobileClearFilters()">Clear All</button>
+    <button class="fbtn apply" type="button" onclick="mobileApplyFilters()">Apply Filters</button>
+  </div>
+</div>
+
+<div id="map-wrap">
+  <div id="map"></div>
+  <div class="map-fab">
+    <button class="fab" type="button" title="Reset View" onclick="resetView()">H</button>
+  </div>
+  <div id="legend">
+    <div id="legend-header" onclick="toggleLegend()" title="Toggle legend">
+      <span class="legend-title">Legend</span>
+      <button id="legend-toggle-btn" type="button" aria-label="Toggle legend">−</button>
+    </div>
+    <div id="legend-body"></div>
+  </div>
+  <div id="mapFoot">
+    <div class="map-foot-dot"></div>
+    <span id="mapFootText">Loading Pali FTH 2025 telemetry...</span>
+    <span id="mapFootCount"></span>
+  </div>
+</div>
+
+<div id="fpBg" onclick="closeFieldPanel()"></div>
+<aside id="fp">
+  <div class="fp-hdr">
+    <h3>Field Updates</h3>
+    <button class="fp-cl" type="button" onclick="closeFieldPanel()">✕</button>
+  </div>
+  <div class="fp-body">
+    <div class="fp-latest">
+      <div class="fp-kicker">Latest update</div>
+      <div class="fp-date" id="fuDate">Loading...</div>
+      <div class="update-content" id="fuText"></div>
+    </div>
+    <div class="fp-scroll">
+      <h4>Previous Updates</h4>
+      <div id="fuList"></div>
+    </div>
+  </div>
+</aside>
+
+<div id="btm">
+  <div id="resizeBar"></div>
+  <div id="btmHdr">
+    <div class="btm-title">Pali FTH 2025 Records <span class="tbl-badge" id="tableBadge">0 records</span></div>
+    <div class="btm-actions">
+      <button class="bc" id="btmToggleBtn" type="button" onclick="toggleBottom()">Hide</button>
+    </div>
+  </div>
+  <div id="btmScroll">
+    <table class="dtbl">
+      <thead>
+        <tr>
+          <th>Radio ID</th>
+          <th>Category</th>
+          <th>Sex</th>
+          <th>T.L (cm)</th>
+          <th>Tag Place</th>
+          <th>Latest VHF Signal</th>
+          <th>Days Since Release</th>
+          <th>Days Since Last Fix</th>
+          <th>Current Status</th>
+          <th>Zone</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="no-data"><td colspan="13">Loading telemetry data...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONSTANTS & HARDCODED GEOJSON
+   ═══════════════════════════════════════════════ */
+const SPREADSHEET_ID = '10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ';
+const URLS = {
+  master:  `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=226140717`,
+  radioLog:`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=0`,
+  updates: `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=238985281`
+};
+
+/* HARDCODED ZONES TO PREVENT NETWORK ISSUES */
+const ZONE_GEOJSON_DATA = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pali Nesting Stretch"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.55788226585895, 25.83887002828274],
+            [76.55879779457314, 25.838458028978522],
+            [76.56478394385692, 25.847109713069045],
+            [76.56369235192892, 25.847204783005424],
+            [76.55788226585895, 25.83887002828274]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 0
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rapta"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.51235052425409, 25.84163943520221],
+            [76.51389988053916, 25.835110814908163],
+            [76.52967514453564, 25.841037295984606],
+            [76.53069631117802, 25.845695872166175],
+            [76.52949908132064, 25.845315587110903],
+            [76.51235052425409, 25.84163943520221]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 2
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pali Chambal RJ Side"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.56277661371598, 25.852045304847536],
+            [76.55383230047892, 25.847871625939007],
+            [76.55091716399698, 25.84262436532343],
+            [76.56370583072379, 25.84679884043156],
+            [76.56277661371598, 25.852045304847536]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 3
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pali RJ Side"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.56345330462017, 25.848894990978366],
+            [76.5637182984002, 25.847106047251415],
+            [76.57246468793716, 25.857958524700905],
+            [76.5706086097614, 25.859090722198744],
+            [76.56292275452063, 25.85157801402802],
+            [76.56345330462017, 25.848894990978366]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 4
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name ": "Pali RJ Island"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.56565613250297, 25.852987185412516],
+            [76.56758987042792, 25.852328728967265],
+            [76.56970652950736, 25.854633310483607],
+            [76.56847834460893, 25.855385817168525],
+            [76.56798184433057, 25.854962532747663],
+            [76.56565613250297, 25.852987185412516]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 5
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pali MP Side"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.57240157391539, 25.857938255709456],
+            [76.56042879106423, 25.840746569139853],
+            [76.55871294638723, 25.838481609778526],
+            [76.55985684283769, 25.837074567734973],
+            [76.56317414254687, 25.840986789563416],
+            [76.57125767746487, 25.847781393673543],
+            [76.57499440587048, 25.856703008281187],
+            [76.57240157391539, 25.857938255709456]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 5
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Parvati Confluence"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.5717914958073, 25.857080446361152],
+            [76.56374609077096, 25.847232349247435],
+            [76.56481372745822, 25.847163718515546],
+            [76.5717914958073, 25.857080446361152]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 6
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pada"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.54716053478143, 25.830261138270373],
+            [76.54847720080761, 25.828160231620657],
+            [76.55497075824974, 25.83141931445394],
+            [76.55781355989683, 25.834920708405363],
+            [76.55987833161771, 25.837048427970984],
+            [76.5587112867322, 25.838395066153865],
+            [76.55790333258022, 25.83874518957097],
+            [76.55757416607469, 25.838664391951482],
+            [76.54716053478143, 25.830261138270373]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 7
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Adusa"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.5471306215955, 25.83028807682099],
+            [76.53896130739179, 25.82479332037299],
+            [76.53590903615225, 25.821560991561697],
+            [76.53686661144314, 25.818544071726734],
+            [76.54434766840598, 25.824146861670044],
+            [76.5485669845329, 25.827863951004645],
+            [76.5471306215955, 25.83028807682099]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 8
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chappol"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.51567422639147, 25.770292260629105],
+            [76.51996421849105, 25.770108397968116],
+            [76.51832995869376, 25.778509114173275],
+            [76.51935144156079, 25.7834759519217],
+            [76.52241599971927, 25.792673675351637],
+            [76.5261616799852, 25.80009297812748],
+            [76.52330143315987, 25.80021567350228],
+            [76.51771707941691, 25.787522991951235],
+            [76.5143803004542, 25.778447761364447],
+            [76.51567422639147, 25.770292260629105]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 10
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Icchana Khedi"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.52336909548688, 25.800401008616276],
+            [76.52616147770328, 25.80009443648848],
+            [76.5322223709781, 25.81205028009424],
+            [76.53685280710306, 25.818364223553132],
+            [76.53583119182036, 25.82142904927781],
+            [76.53065592654093, 25.815789730810536],
+            [76.52336909548688, 25.800401008616276]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 10
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pali Guest House"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.57046058479176, 25.859163898275966],
+            [76.57243492391979, 25.85793737934202],
+            [76.57638698796967, 25.863577884884904],
+            [76.57413897567443, 25.864313265050683],
+            [76.57046058479176, 25.859163898275966]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 11
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pali Guest House MP Side"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.57243492391979, 25.85812132248668],
+            [76.57509295210167, 25.856589311735448],
+            [76.57788591147676, 25.86210616493598],
+            [76.57631899324542, 25.863087228530446],
+            [76.57243492391979, 25.85812132248668]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 12
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kudi Ghat"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.5743430063352, 25.86486316781628],
+            [76.5781580806784, 25.862656568159295],
+            [76.58442529217388, 25.86927661930504],
+            [76.59144291494323, 25.873200047977804],
+            [76.58912687094539, 25.877000862025795],
+            [76.58285799513379, 25.874117803360164],
+            [76.5743430063352, 25.86486316781628]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 13
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Meena Khedi"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.58905819471113, 25.877368046877223],
+            [76.5915111466283, 25.87326140348661],
+            [76.59614065818079, 25.87240210043487],
+            [76.59798254305974, 25.876632387120097],
+            [76.5947774233764, 25.878775156042906],
+            [76.58905819471113, 25.877368046877223]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 14
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Binjari Sandbank"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.62149922791934, 25.872899313579893],
+            [76.6247001961645, 25.87063196373107],
+            [76.62694782021958, 25.870754483143884],
+            [76.62946871629856, 25.87847597706258],
+            [76.62347456566931, 25.87988516798076],
+            [76.62149922791934, 25.872899313579893]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 16
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bohna Upside"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.62667535486639, 25.870448090940926],
+            [76.62435963460513, 25.870325576922042],
+            [76.62143112496659, 25.873021871376693],
+            [76.61714043117456, 25.870632096838605],
+            [76.60079646595858, 25.87541160490693],
+            [76.59786828699038, 25.87663703114208],
+            [76.59596246522864, 25.87198040388705],
+            [76.60447425616405, 25.86867162352081],
+            [76.6147569207568, 25.865485090329486],
+            [76.62422318761531, 25.86646509080508],
+            [76.62538113401706, 25.868425926701022],
+            [76.62667535486639, 25.870448090940926]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 16
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bohna Down"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.6235164360653, 25.880004502250046],
+            [76.62953984005065, 25.878295641798914],
+            [76.63078126357743, 25.889212003053032],
+            [76.63292694503872, 25.898044554998876],
+            [76.62773159725742, 25.899899027503153],
+            [76.62575154180712, 25.89411085763851],
+            [76.6235164360653, 25.880004502250046]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 17
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Aniyala"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.67731119026462, 25.912579715247517],
+            [76.67744376718724, 25.906313872986374],
+            [76.68601678351774, 25.9053497533027],
+            [76.69405438841716, 25.90161342688512],
+            [76.7057102525165, 25.897876523866174],
+            [76.71535771542284, 25.89799601954826],
+            [76.71361483328411, 25.9024560460539],
+            [76.69619738097151, 25.90655489690792],
+            [76.68588334189036, 25.911856816210587],
+            [76.67731119026462, 25.912579715247517]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 18
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [76.62764002948273, 25.900413310866924],
+            [76.63298571107435, 25.897638293902304],
+            [76.6379381106189, 25.90305953995579],
+            [76.64543827067689, 25.905710115098927],
+            [76.65575478733712, 25.907517968946408],
+            [76.65508667301492, 25.91197676471579],
+            [76.65106771077257, 25.911494772326535],
+            [76.64168968992072, 25.910048737582187],
+            [76.63259090680702, 25.906074355312953],
+            [76.62764002948273, 25.900413310866924]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 19
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sewapur"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.65468498830916, 25.912458747509262],
+            [76.6562904820741, 25.907035887785227],
+            [76.67772550446387, 25.905951170077756],
+            [76.67718977924454, 25.91257924170914],
+            [76.65468498830916, 25.912458747509262]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 20
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rameshwar"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.73134463175404, 25.9094468003876],
+            [76.72290538409925, 25.905590790873404],
+            [76.71393104920145, 25.902578921671022],
+            [76.71567158964632, 25.897878635533274],
+            [76.72169933997753, 25.899083087538813],
+            [76.73308604203743, 25.90366297156197],
+            [76.73134463175404, 25.9094468003876]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 21
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Banas Confluence"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.73120811341624, 25.909509080623565],
+            [76.73328482138203, 25.9031214770134],
+            [76.7438686059727, 25.905171024093647],
+            [76.7568602089766, 25.911497467269513],
+            [76.7403852875592, 25.915232938389067],
+            [76.73120811341624, 25.909509080623565]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 22
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lohlai Dam"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.68196384814559, 25.96668492854411],
+            [76.6807572086974, 25.96337316583174],
+            [76.68704462404071, 25.960232637467286],
+            [76.69384034553389, 25.95400821789643],
+            [76.69784158237047, 25.956977685783414],
+            [76.6919349656311, 25.96365872151081],
+            [76.68628250097754, 25.96565719116535],
+            [76.68196384814559, 25.96668492854411]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 23
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Banas River"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.69772869302841, 25.956976111417973],
+            [76.69364959671879, 25.953657638699497],
+            [76.69772629923358, 25.94186915860459],
+            [76.7049122958768, 25.930950571336354],
+            [76.71831802726905, 25.917406028927672],
+            [76.7305615292741, 25.909800950378],
+            [76.7319217307712, 25.909801293662852],
+            [76.7397898330297, 25.91487256432609],
+            [76.72997807393091, 25.916881046624127],
+            [76.7121977386131, 25.92937798130086],
+            [76.70306783084612, 25.94003537026903],
+            [76.70064029843667, 25.944489509272046],
+            [76.69772869302841, 25.956976111417973]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 24
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Banas Confluence Down"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.74056631349066, 25.91543508244331],
+            [76.75681128713342, 25.911662221432906],
+            [76.76384924166268, 25.920125188939608],
+            [76.7581642622518, 25.929194547580153],
+            [76.74733549737346, 25.92742901093824],
+            [76.74056631349066, 25.91543508244331]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 25
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Bagdiya Upside": ""
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.74692946943003, 25.94015021840022],
+            [76.74395133008574, 25.936741999982658],
+            [76.74483114134455, 25.92986384328816],
+            [76.74632020842694, 25.92682023804906],
+            [76.75586329028954, 25.92895102422483],
+            [76.74963671605974, 25.938506843049595],
+            [76.74692946943003, 25.94015021840022]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 26
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bagdiya Nesting Site"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.7469266874242, 25.940221348428366],
+            [76.75054832128609, 25.937899841928555],
+            [76.75405852026137, 25.93931947364011],
+            [76.75494999936643, 25.941640952160526],
+            [76.75329704852658, 25.94187476760409],
+            [76.74874679059576, 25.942058479413788],
+            [76.7469266874242, 25.940221348428366]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 27
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bagdiya Down"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.75494401641015, 25.94168736325412],
+            [76.75330621365009, 25.935572322997686],
+            [76.78289501834433, 25.932867791482792],
+            [76.77323712302729, 25.940899186418378],
+            [76.76353518258168, 25.94126699873715],
+            [76.75494401641015, 25.94168736325412]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 28
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rijheta"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.89809587694555, 26.094308392447616],
+            [76.90845620479422, 26.086889488815345],
+            [76.92044220036951, 26.093855064596838],
+            [76.93937138605605, 26.0960250774138],
+            [76.93403541698115, 26.10325915890411],
+            [76.91319073185525, 26.100907880189197],
+            [76.89809587694555, 26.094308392447616]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 29
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Baroli Island"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.93403543452558, 26.103440037900825],
+            [76.9392706663865, 26.095934671335314],
+            [76.9546815586798, 26.098737265932556],
+            [76.9485416786531, 26.107601653839026],
+            [76.93403543452558, 26.103440037900825]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 31
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Baroli Down"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.9486440018639, 26.10796422550669],
+            [76.95478948102709, 26.0983789305744],
+            [76.95680346365907, 26.102989786917334],
+            [76.96869402645422, 26.115020124287383],
+            [76.96546629910222, 26.12017488946485],
+            [76.95730679200551, 26.116829257737052],
+            [76.9486440018639, 26.10796422550669]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 32
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Jamurdi": ""
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.96566014474303, 26.12053298083471],
+            [76.96907799804433, 26.11473973763715],
+            [76.97784708678466, 26.11998934082446],
+            [76.97422671418309, 26.125959197634884],
+            [76.96566014474303, 26.12053298083471]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 33
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dubawali"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.97459550006585, 26.126040703642445],
+            [76.97830556547558, 26.119986669725833],
+            [76.98544937434622, 26.12323930022366],
+            [76.99772323133374, 26.12441051385923],
+            [77.0060747476407, 26.12784437805155],
+            [76.9963141480489, 26.13191005723054],
+            [76.98323914980836, 26.13064433335883],
+            [76.97982438456307, 26.12992197189402],
+            [76.97459550006585, 26.126040703642445]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 34
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nadigaon Main Channel"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.9997015043611, 26.13472792149085],
+            [77.00418900546293, 26.13346089233586],
+            [77.00520233243412, 26.14395448084383],
+            [77.01059426089574, 26.15334249877793],
+            [77.00285027571897, 26.15418715496962],
+            [76.99944852585708, 26.14210320776793],
+            [76.9997015043611, 26.13472792149085]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 35
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nadigaon Channel"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [77.00420459826813, 26.133534446708552],
+            [77.00865620597557, 26.132884674715726],
+            [77.01603917658076, 26.148901644886934],
+            [77.01632867859519, 26.154326234162724],
+            [77.0106106719931, 26.15338427089499],
+            [77.00518195915748, 26.14396323445594],
+            [77.00420459826813, 26.133534446708552]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 36
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kuno Confluence"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [77.08051420107773, 26.185795625612727],
+            [77.08037067271096, 26.167469107193483],
+            [77.10384331134605, 26.16871979732943],
+            [77.09994814875267, 26.188552326184762],
+            [77.08051420107773, 26.185795625612727]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 37
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kuno Nesting Site"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [77.08651669525898, 26.111247830464322],
+            [77.0851126459807, 26.097320342914244],
+            [77.09502702738303, 26.104104985311494],
+            [77.0943390546932, 26.10961972608152],
+            [77.08651669525898, 26.111247830464322]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 37
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Liloli"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [77.08026536834649, 26.182823943350172],
+            [77.0509156360128, 26.182824011529917],
+            [77.03596172993792, 26.177053870063958],
+            [77.03945601449516, 26.170531419968796],
+            [77.08026263546202, 26.172789120037066],
+            [77.08026536834649, 26.182823943350172]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 39
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Khirkhiri"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.80711521645196, 26.00047370493982],
+            [76.80088361359566, 25.984215128729886],
+            [76.79413775897103, 25.963791984744404],
+            [76.7904192033152, 25.947199470483838],
+            [76.77428856998762, 25.94082509072129],
+            [76.7831616482145, 25.932691532275925],
+            [76.79347579882068, 25.9351268701907],
+            [76.81189965855896, 25.9545557690722],
+            [76.82112412396725, 25.994736234855225],
+            [76.80711521645196, 26.00047370493982]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 39
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bagora"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.80845528003852, 26.00093198940968],
+            [76.8205232115663, 25.99534866831256],
+            [76.83792218695072, 26.00985793488482],
+            [76.83046845311003, 26.019427996183808],
+            [76.80845528003852, 26.00093198940968]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 40
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Saand"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [76.82978316293156, 26.020232470565645],
+            [76.8384778331287, 26.00987063052719],
+            [76.86828043772095, 26.03027946106826],
+            [76.85727861481598, 26.042862895407055],
+            [76.83581157492557, 26.031074768039332],
+            [76.82978316293156, 26.020232470565645]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 41
+    }
+  ]
+};
+
+/* ── Retagging: April 4 2026 ── */
+const RETAG_DATE_STR = 'April 4th';
+const RETAG_DATE = new Date(2026, 3, 4);
+const RETAG_OLD_TO_NEW = { '68':'65', '84':'67', '86':'69', '88':'71' };
+const RETAG_NEW_TO_OLD = { '65':'68', '67':'84', '69':'86', '71':'88' };
+
+/* ── Hardcoded status buckets ── */
+const RECOVERED_IDS      = new Set(['35','36','64','66','70','76','98']);
+const MISSING_START_IDS  = new Set(['30','33','34','96']);
+const WATER_IDS          = new Set(['31','38','72']);
+const HARD_MISSING_IDS   = new Set(['39','40','62','82']);
+const HARD_ACTIVE_IDS    = new Set(['32','37','65','67','69','71','74','78','80','90','92','94']);
+
+/* ── Status display metadata ── */
+const STATUS_COLORS = {
+  active:        { color:'#fff', bg:'#16a34a',  border:'#16a34a',  label:'Active'                    },
+  missing:       { color:'#fff', bg:'#d97706',  border:'#d97706',  label:'Missing'                   },
+  missing_start: { color:'#fff', bg:'#7c3aed',  border:'#7c3aed',  label:'Missing Soon After Release' },
+  water:         { color:'#fff', bg:'#2563eb',  border:'#2563eb',  label:'Radio in Water'            },
+  recovered:     { color:'#fff', bg:'#dc2626',  border:'#dc2626',  label:'Recovered'                 }
+};
+
+const MARKER_COLORS = {
+  active:        '#16a34a',
+  missing:       '#d97706',
+  missing_start: '#7c3aed',
+  water:         '#2563eb',
+  recovered:     '#dc2626'
+};
+
+const MAP_CENTER = [25.84, 76.56];
+const MAP_ZOOM   = 12;
+const TODAY      = new Date();
+const SPLASH_MIN_MS = 5000;
+const SPLASH_START  = performance.now();
+const ZONE_SNAP_MAX_KM = 0.5;
+
+/* ── State ── */
+let map, oms, markerLayer;
+let zoneGeoLayer = null;
+let heatLayer = null, kdeLayer = null;
+let heatmapOn = false, kdeOn = false;
+let bottomCollapsed = false, bottomHeight = 250;
+let filterBarHidden = false;
+let legendCollapsed = false;
+let activeBucket = null;
+
+let masterMap   = {};
+let entities    = [];
+let displayed   = [];
+let displayRows = [];
+let updatesRows = [];
+let geojsonData = null;
+let zonePolygons = [];
+let entityMarkerMap = {};
+
+/* ═══════════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════════ */
+function normId(raw){ return String(raw||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,''); }
+
+function gc(row,...keys){
+  const rk = Object.keys(row||{});
+  for(const key of keys){
+    const kn = String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
+    for(const rKey of rk){
+      const probe = String(rKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
+      if(probe === kn){
+        const v = String(row[rKey]||'').trim();
+        if(v && !['na','n/a','-','—','null',''].includes(v.toLowerCase())) return v;
+      }
+    }
+  }
+  return '';
+}
+
+function parsePaliDate(val){
+  if(!val) return null;
+  const m = String(val).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(!m) return null;
+  const d = new Date(+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  return isNaN(d) ? null : d;
+}
+
+function parseTagDate(val){
+  if(!val) return null;
+  const s = String(val).trim();
+  if(!s || ['na','n/a','-','—','null'].includes(s.toLowerCase())) return null;
+
+  const MON = {
+    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
+    january:0,february:1,march:2,april:3,june:5,july:6,august:7,
+    september:8,october:9,november:10,december:11
+  };
+
+  const iso = new Date(s);
+  if(!isNaN(iso) && iso.getFullYear() > 2000) return iso;
+
+  const m1 = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/,]*(\d{2,4})$/i);
+  if(m1){
+    const monKey = m1[2].toLowerCase();
+    const mIdx = MON[monKey] ?? MON[monKey.slice(0,3)];
+    let y = +m1[3]; if(y<100) y += y<50?2000:1900;
+    if(mIdx !== undefined){ const dt = new Date(y,mIdx,+m1[1]); if(!isNaN(dt)) return dt; }
+  }
+
+  const m2 = s.match(/^([A-Za-z]{3,})\s+(\d{1,2})[,\s]+(\d{4})$/i);
+  if(m2){
+    const monKey = m2[1].toLowerCase();
+    const mIdx = MON[monKey] ?? MON[monKey.slice(0,3)];
+    if(mIdx !== undefined){ const dt = new Date(+m2[3],mIdx,+m2[2]); if(!isNaN(dt)) return dt; }
+  }
+
+  const m3 = s.match(/^(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{4})/);
+  if(m3){ const dt = new Date(+m3[3],+m3[2]-1,+m3[1]); if(!isNaN(dt)) return dt; }
+
+  const m4 = s.match(/^(\d{4})[\-\/](\d{1,2})[\-\/](\d{1,2})/);
+  if(m4){ const dt = new Date(+m4[1],+m4[2]-1,+m4[3]); if(!isNaN(dt)) return dt; }
+
+  return null;
+}
+
+function daysSince(ts){
+  if(!ts||isNaN(ts.getTime())) return null;
+  return Math.max(0,Math.floor((TODAY-ts)/86400000));
+}
+function fmtDateTime(ts){
+  if(!ts||isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtDateOnly(ts){
+  if(!ts||isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+}
+function escapeHtml(v){
+  return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function toast(msg,ok=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=ok?'on ok':'on';
+  clearTimeout(el._t); el._t=setTimeout(()=>{el.className='';},3600);
+}
+
+/* ═══════════════════════════════════════════════
+   STATUS LOGIC
+   ═══════════════════════════════════════════════ */
+function getPaliStatus(id, daysSinceLastFix){
+  const sid = String(id);
+  if(RECOVERED_IDS.has(sid))     return 'recovered';
+  if(MISSING_START_IDS.has(sid)) return 'missing_start';
+  if(WATER_IDS.has(sid))         return 'water';
+  if(HARD_MISSING_IDS.has(sid))  return 'missing';
+  if(daysSinceLastFix === null || daysSinceLastFix > 14) return 'missing';
+  return 'active';
+}
+
+function statusLabel(bucket){
+  return (STATUS_COLORS[bucket]||{label:'-'}).label;
+}
+
+function badgeHtml(bucket){
+  const m = STATUS_COLORS[bucket] || STATUS_COLORS.missing;
+  return `<span class="sbadge" style="background:${m.bg};color:${m.color};border-color:${m.border}">${escapeHtml(m.label)}</span>`;
+}
+
+/* ═══════════════════════════════════════════════
+   MAP INIT
+   ═══════════════════════════════════════════════ */
+function initMap(){
+  map = L.map('map',{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,bounceAtZoomLimits:false}).setView(MAP_CENTER,MAP_ZOOM);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+  oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
+  oms.addListener('click', m => m.openPopup());
+  map.on('click',()=>{ document.querySelectorAll('.leaflet-interactive').forEach(el=>el.blur()); });
+}
+
+/* ═══════════════════════════════════════════════
+   DATA FETCH
+   ═══════════════════════════════════════════════ */
+function fetchCSV(url){
+  return new Promise((res,rej)=>{
+    Papa.parse(url+'&_t='+Date.now(),{
+      download:true,header:true,skipEmptyLines:true,
+      complete:r=>res(r.data||[]),error:rej
+    });
+  });
+}
+function setLD(id,ok){ const el=document.getElementById(id);if(el){el.classList.remove('ok','err');el.classList.add(ok?'ok':'err');} }
+
+/* ═══════════════════════════════════════════════
+   DATA INGESTION
+   ═══════════════════════════════════════════════ */
+function buildMasterMap(rows){
+  masterMap = {};
+  rows.forEach(row=>{
+    const id = normId(gc(row,'Radio_ID','RadioID','Radio ID','ID'));
+    if(!id) return;
+    masterMap[id] = row;
+  });
+}
+
+function buildEntitiesFromLog(rows){
+  const buckets = {};
+  rows.forEach(row=>{
+    let rawId = normId(gc(row,'Radio_ID','RadioID','Radio ID','Animal ID','AnimalID','ID'));
+    if(!rawId) return;
+    const remappedId = RETAG_OLD_TO_NEW[rawId] || rawId;
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
+    const ts = parsePaliDate(gc(row,'Timestamp','Date','DateTime','date','timestamp'));
+    if(!buckets[remappedId]) buckets[remappedId] = { fixes:[], originalOldId: RETAG_OLD_TO_NEW[rawId]?rawId:null };
+    buckets[remappedId].fixes.push({
+      lat, lon, ts,
+      place:    gc(row,'Place','place','Current Place','CurrentPlace','Locality','Site','Location'),
+      activity: gc(row,'Activity','activity','Behaviour','Behavior','Activity_Type','Activity Type'),
+      signal:   gc(row,'Signal','signal','Signal Strength','SignalStrength','Signal_Strength'),
+      remarks:  gc(row,'Remarks','Notes','remarks'),
+      zone: '-',
+      fromOldId: (RETAG_OLD_TO_NEW[rawId] ? rawId : null)
+    });
+  });
+  return buckets;
+}
+
+function mergeEntities(logBuckets){
+  const allIds = new Set([...Object.keys(masterMap),...Object.keys(logBuckets)]);
+  Object.keys(RETAG_OLD_TO_NEW).forEach(oldId => allIds.delete(oldId));
+  entities = [];
+  allIds.forEach(id=>{
+    if(RETAG_OLD_TO_NEW[id]) return;
+    const bucket = logBuckets[id] || { fixes:[] };
+    const masterRow = masterMap[id] || {};
+    const oldId = RETAG_NEW_TO_OLD[id];
+    const oldMasterRow = oldId ? (masterMap[oldId] || {}) : null;
+    const relDateRaw = gc(oldMasterRow||masterRow,
+      'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','Tagging Date');
+    const tagDate = parseTagDate(relDateRaw);
+    const fixes = bucket.fixes.slice().sort((a,b)=>{
+      const ta=a.ts?a.ts.getTime():-Infinity, tb=b.ts?b.ts.getTime():-Infinity;
+      return ta-tb;
+    });
+    const latestFix = fixes.length ? fixes[fixes.length-1] : null;
+    const daysSinceLastFix = latestFix?.ts ? daysSince(latestFix.ts) : null;
+    const status = getPaliStatus(id, daysSinceLastFix);
+    const retagHistory = oldId
+      ? `Previously ${oldId}, retagged on ${RETAG_DATE_STR}.`
+      : null;
+    entities.push({
+      id,
+      category: gc(masterRow,'Category','Type','Tag Type','TagType') || 'Pali FTH 2025',
+      sex:      gc(masterRow,'Sex','Gender','M/F'),
+      tl:       gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length'),
+      tagPlace: gc(masterRow,'Tag Place','TagPlace','Release Site','Location','Site'),
+      remarks:  gc(masterRow,'Remarks','Notes','Comments'),
+      tagDate,
+      retagHistory,
+      oldId,
+      fixes,
+      latestFix,
+      daysSinceLastFix,
+      status,
+      zone: latestFix?.zone || '-'
+    });
+  });
+  entities.sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
+}
+
+/* ═══════════════════════════════════════════════
+   ZONE ASSIGNMENT 
+   ═══════════════════════════════════════════════ */
+function getZoneName(f) {
+  if (!f || !f.properties) return '-';
+  const p = f.properties;
+  
+  if (p.name) return p.name;
+  if (p.Name) return p.Name;
+  if (p.ZONE) return p.ZONE;
+  if (p.zone) return p.zone;
+  if (p.STRETCH) return p.STRETCH;
+  
+  if (p['name ']) return p['name '];
+  
+  const keys = Object.keys(p);
+  if (keys.length > 0) {
+    return keys[0];
+  }
+  
+  return '-';
+}
+
+function assignZones(){
+  if(!geojsonData?.features) return;
+
+  const zoneFeatures = geojsonData.features.filter(f=>f.geometry);
+
+  entities.forEach(entity=>{
+    entity.fixes.forEach(fix=>{
+      if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)){fix.zone='-';return;}
+      const pt = turf.point([fix.lon, fix.lat]);
+      
+      let bestDist = Infinity;
+      let bestName = '-';
+
+      for(const feat of zoneFeatures){
+        try {
+          const type = feat.geometry.type;
+          
+          if((type === 'Polygon' || type === 'MultiPolygon') && turf.booleanPointInPolygon(pt, feat)){
+            bestDist = 0;
+            bestName = getZoneName(feat);
+            break; 
+          }
+          
+          const dist = turf.pointToLineDistance(pt, feat, {units: 'kilometers'});
+          if(dist < bestDist){
+            bestDist = dist;
+            bestName = getZoneName(feat);
+          }
+        } catch(e) {
+          try {
+            const coords = turf.coordAll(feat);
+            coords.forEach(coord => {
+              const d = turf.distance(pt, turf.point(coord), {units: 'kilometers'});
+              if(d < bestDist) {
+                bestDist = d;
+                bestName = getZoneName(feat);
+              }
+            });
+          } catch(e2){}
+        }
+      }
+
+      fix.zone = bestDist <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
+    });
+
+    if(entity.latestFix) entity.zone = entity.latestFix.zone || '-';
+  });
+}
+
+function ensureZoneLayer(){
+  if(zoneGeoLayer||!geojsonData) return;
+  zoneGeoLayer = L.geoJSON(geojsonData,{
+    style: { opacity: 0, fillOpacity: 0 }, // Updated for high visibility
+    onEachFeature(f,layer){layer.bindTooltip(getZoneName(f),{className:'zone-label',direction:'center'});}
+  });
+}
+
+function showZoneLayer(visible){
+  ensureZoneLayer();
+  if(!zoneGeoLayer) return;
+  if(visible){if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);}
+  else if(map.hasLayer(zoneGeoLayer)) map.removeLayer(zoneGeoLayer);
+}
+
+/* ═══════════════════════════════════════════════
+   STATUS BLOCKS
+   ═══════════════════════════════════════════════ */
+function updateStatusBlocks(){
+  const counts = {active:0,recovered:0,water:0,missing_start:0,missing:0};
+  entities.forEach(e=>{ if(counts[e.status]!==undefined) counts[e.status]++; });
+  ['active','missing','missing_start','water','recovered'].forEach(bucket=>{
+    const el = document.getElementById('sbc-'+bucket);
+    if(el) el.textContent = counts[bucket];
+    const btn = document.getElementById('sb-'+bucket);
+    if(btn){ btn.classList.toggle('on', activeBucket===bucket); }
+  });
+}
+
+function toggleBucket(bucket){
+  activeBucket = activeBucket===bucket ? null : bucket;
+  document.querySelectorAll('#msi-status input[type=checkbox]').forEach(inp=>{
+    inp.checked = activeBucket ? inp.value===activeBucket : true;
+  });
+  updateMSBtn('status');
+  updateStatusBlocks();
+  applyFilters();
+}
+
+/* ═══════════════════════════════════════════════
+   LEGEND
+   ═══════════════════════════════════════════════ */
+function toggleLegend(){
+  legendCollapsed = !legendCollapsed;
+  const legendEl = document.getElementById('legend');
+  const toggleBtn = document.getElementById('legend-toggle-btn');
+  legendEl.classList.toggle('collapsed', legendCollapsed);
+  if(toggleBtn) toggleBtn.textContent = legendCollapsed ? '+' : '−';
+}
+
+function renderLegend(){
+  const rows = [
+    {label:'Active (VHF ≤ 14d)',           color:MARKER_COLORS.active},
+    {label:'Missing (> 14d)',               color:MARKER_COLORS.missing},
+    {label:'Missing Soon After Release',    color:MARKER_COLORS.missing_start},
+    {label:'Radio in Water',                color:MARKER_COLORS.water},
+    {label:'Recovered',                     color:MARKER_COLORS.recovered}
+  ];
+  const body = document.getElementById('legend-body');
+  if(body){
+    body.innerHTML = rows.map(r=>
+      `<div class="legend-row"><span class="legend-dot" style="background:${r.color}"></span>${escapeHtml(r.label)}</div>`
+    ).join('');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   FILTER DROPDOWNS
+   ═══════════════════════════════════════════════ */
+function rebuildFilters(){
+  const allIds = [...new Set(entities.map(e=>e.id))].sort((a,b)=>
+    String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMSOptions('rid', allIds);
+
+  const zoneCounts={};
+  entities.forEach(e=>{
+    const z=e.zone||'-';
+    if(z&&z!=='-'&&z!=='Outside Defined Zones') zoneCounts[z]=(zoneCounts[z]||0)+1;
+  });
+  entities.forEach(e=>{
+    if(e.zone==='Outside Defined Zones') zoneCounts['Outside Defined Zones']=(zoneCounts['Outside Defined Zones']||0)+1;
+  });
+  const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
+  buildMSOptions('zone', sortedZones, z=>z+' ('+zoneCounts[z]+')');
+
+  const statuses = ['active','missing','missing_start','water','recovered'];
+  buildMSOptions('status', statuses, s=>statusLabel(s));
+
+  updateStatusBlocks();
+
+  if(isMobile()) rebuildMobileFilters();
+}
+
+function buildMSOptions(key, options, formatter){
+  const btn=document.getElementById('msb-'+key), list=document.getElementById('msi-'+key);
+  btn.classList.remove('disabled');
+  list.innerHTML='';
+  if(!options.length){resetMS(key,'No options');return;}
+  options.forEach(option=>{
+    const label=document.createElement('label'); label.className='ms-item';
+    const input=document.createElement('input'); input.type='checkbox'; input.value=option;
+    input.checked=true;
+    input.addEventListener('change',()=>updateMSBtn(key));
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
+    list.appendChild(label);
+  });
+  updateMSBtn(key);
+}
+
+function resetMS(key, message, disabled=false){
+  const btn=document.getElementById('msb-'+key), list=document.getElementById('msi-'+key), counter=document.getElementById('msc-'+key);
+  if(!btn) return;
+  btn.classList.toggle('disabled',disabled); btn.classList.remove('active');
+  btn.querySelector('.ms-lbl').textContent=message;
+  if(list) list.innerHTML='<div class="ms-empty">'+escapeHtml(message)+'</div>';
+  if(counter) counter.textContent='';
+}
+
+function updateMSBtn(key){
+  const btn=document.getElementById('msb-'+key);
+  if(!btn||btn.classList.contains('disabled')) return;
+  const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')], checked=all.filter(i=>i.checked);
+  const counter=document.getElementById('msc-'+key);
+  if(counter) counter.textContent=checked.length+'/'+all.length;
+  if(!all.length) return;
+  if(checked.length===0){btn.querySelector('.ms-lbl').textContent='None selected';btn.classList.add('active');}
+  else if(checked.length===all.length){btn.querySelector('.ms-lbl').textContent='All';btn.classList.remove('active');}
+  else{btn.querySelector('.ms-lbl').textContent=checked.length+' selected';btn.classList.add('active');}
+}
+
+function toggleMS(key,event){
+  if(event) event.stopPropagation();
+  const btn=document.getElementById('msb-'+key);
+  if(btn.classList.contains('disabled')) return;
+  const drop=document.getElementById('msd-'+key), isOpen=drop.classList.contains('open');
+  document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) drop.classList.add('open');
+}
+function msSelectAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});updateMSBtn(key);}
+function msClearAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMSBtn(key);}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#fbar .ms-wrap')) document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
+});
+
+function selectedSet(key){
+  const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
+  if(!all.length||document.getElementById('msb-'+key).classList.contains('disabled')) return null;
+  const checked=all.filter(i=>i.checked).map(i=>i.value);
+  if(!checked.length||checked.length===all.length) return null;
+  return new Set(checked);
+}
+
+function applyFilters(){
+  const idFilter=selectedSet('rid'), zoneFilter=selectedSet('zone'), statusFilter=selectedSet('status');
+  displayed = entities.filter(e=>{
+    if(idFilter && !idFilter.has(e.id)) return false;
+    if(zoneFilter && !zoneFilter.has(e.zone||'-')) return false;
+    if(statusFilter && !statusFilter.has(e.status)) return false;
+    return true;
+  });
+  displayed.sort((a,b)=>{
+    const ta=a.latestFix?.ts?.getTime()||0, tb=b.latestFix?.ts?.getTime()||0;
+    return tb-ta;
+  });
+  showZoneLayer(displayed.length>0);
+  renderMarkers();
+  renderTable();
+  updateMapFoot();
+}
+
+function clearFilters(){
+  activeBucket = null;
+  document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
+
+  if(heatmapOn || heatLayer){
+    heatmapOn = false;
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+    const hBtn  = document.getElementById('heatBtn');
+    const mhBtn = document.getElementById('mob-heatBtn');
+    if(hBtn)  hBtn.classList.remove('on');
+    if(mhBtn) mhBtn.classList.remove('on');
+  }
+
+  if(kdeOn || kdeLayer){
+    kdeOn = false;
+    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+    const kBtn  = document.getElementById('kdeBtn');
+    const mkBtn = document.getElementById('mob-kdeBtn');
+    if(kBtn)  kBtn.classList.remove('on');
+    if(mkBtn) mkBtn.classList.remove('on');
+  }
+
+  if(markerLayer && !map.hasLayer(markerLayer)) markerLayer.addTo(map);
+
+  rebuildFilters();
+  applyFilters();
+}
+
+/* ═══════════════════════════════════════════════
+   MARKERS & POPUPS
+   ═══════════════════════════════════════════════ */
+function markerIcon(entity){
+  const color = MARKER_COLORS[entity.status] || MARKER_COLORS.missing;
+  const text = entity.id;
+  const fs = text.length>=5?9:text.length>=4?10:12;
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};border:2px solid #fff;color:#fff;font:700 ${fs}px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">${escapeHtml(text.length>5?text.slice(0,5):text)}</div>`,
+    iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-16]
+  });
+}
+
+function popupHtml(entity){
+  const fix = entity.latestFix;
+  const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
+  const daysRelease = entity.tagDate ? daysSince(entity.tagDate)+'d' : 'N/A';
+  const daysFix     = entity.daysSinceLastFix !== null ? entity.daysSinceLastFix+'d' : '-';
+
+  return `<div>
+    <div class="pop-top">
+      <div class="pop-id-badge" style="background:${color}">${escapeHtml(entity.id.length>5?entity.id.slice(0,5):entity.id)}</div>
+      <div>
+        <div class="pop-id">${escapeHtml(entity.id)}</div>
+        <div class="pop-sub">${badgeHtml(entity.status)} | Pali FTH 2025</div>
+      </div>
+    </div>
+    <div class="pop-body">
+      ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
+      <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">${escapeHtml(entity.tl||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Latest VHF Signal</span><span class="pop-value">${escapeHtml(fmtDateTime(fix?.ts))}</span></div>
+      <div class="pop-row"><span class="pop-label">Days Since Release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRelease)}</span></div>
+      <div class="pop-row"><span class="pop-label">Days Since Last Fix</span><span class="pop-value">${escapeHtml(daysFix)}</span></div>
+
+      <div class="pop-telemetry-sep"></div>
+      <div class="pop-row">
+        <span class="pop-label">Zone</span>
+        <span class="pop-value">${escapeHtml(entity.zone||'-')}</span>
+      </div>
+      <div class="pop-row">
+        <span class="pop-label">Current Place</span>
+        <span class="pop-value">${escapeHtml(fix?.place||'-')}</span>
+      </div>
+      <div class="pop-row">
+        <span class="pop-label">Activity</span>
+        <span class="pop-value">${escapeHtml(fix?.activity||'-')}</span>
+      </div>
+      <div class="pop-row">
+        <span class="pop-label">Signal Strength</span>
+        <span class="pop-value">${escapeHtml(fix?.signal||'-')}</span>
+      </div>
+      <div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">${fix?fix.lat.toFixed(5)+', '+fix.lon.toFixed(5):'-'}</span></div>
+      ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
+    </div>
+    <div class="pop-actions">
+      <button class="pab" type="button" onclick="focusEntity('${escapeHtml(entity.id)}')">Focus</button>
+      <button class="pab" type="button" onclick="focusTableRow('${escapeHtml(entity.id)}')">Table</button>
+    </div>
+  </div>`;
+}
+
+function renderMarkers(){
+  markerLayer.clearLayers(); entityMarkerMap={};
+  try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
+  if(!displayed.length){
+    if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+    if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+    return;
+  }
+  displayed.forEach(entity=>{
+    const fix = entity.latestFix;
+    if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)) return;
+    const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity),keyboard:false});
+    marker.bindPopup(popupHtml(entity),{maxWidth:330});
+    marker.on('popupclose',()=>marker.setLatLng([fix.lat,fix.lon]));
+    markerLayer.addLayer(marker);
+    oms.addMarker(marker);
+    entityMarkerMap[entity.id]=marker;
+  });
+  if(heatmapOn) renderHeatmap();
+  else if(kdeOn) renderKDE();
+  else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+  const pts = displayed.filter(e=>e.latestFix&&Number.isFinite(e.latestFix.lat)).map(e=>[e.latestFix.lat,e.latestFix.lon]);
+  if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
+}
+
+function focusEntity(id){
+  const marker = entityMarkerMap[id];
+  if(!marker) return;
+  Object.values(entityMarkerMap).forEach(m=>m.setZIndexOffset(0));
+  marker.setZIndexOffset(9000); map.closePopup();
+  map.flyTo(marker.getLatLng(),16,{duration:1});
+  setTimeout(()=>marker.openPopup(),700);
+  if(isMobile()&&!bottomCollapsed) toggleBottom();
+}
+
+function focusTableRow(id){
+  const row = document.querySelector(`[data-row-id="${CSS.escape(id)}"]`);
+  if(!row) return;
+  row.classList.add('sel');
+  row.scrollIntoView({block:'center',behavior:'smooth'});
+  setTimeout(()=>row.classList.remove('sel'),1600);
+  if(isMobile()&&bottomCollapsed) toggleBottom();
+}
+
+/* ═══════════════════════════════════════════════
+   TABLE
+   ═══════════════════════════════════════════════ */
+function renderTable(){
+  const body = document.getElementById('tableBody');
+  body.innerHTML='';
+  displayRows = displayed;
+  document.getElementById('tableBadge').textContent = displayed.length+' records';
+  if(!displayed.length){
+    body.innerHTML='<tr class="no-data"><td colspan="13">No records match the current filters.</td></tr>';return;
+  }
+  displayed.forEach(entity=>{
+    const fix = entity.latestFix;
+    const daysRelease = entity.tagDate ? daysSince(entity.tagDate) : '-';
+    const daysFix     = entity.daysSinceLastFix !== null ? entity.daysSinceLastFix : '-';
+    const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
+    const tr = document.createElement('tr');
+    tr.dataset.rowId = entity.id;
+    tr.innerHTML =
+      `<td><strong style="color:${color}">${escapeHtml(entity.id)}</strong></td>`+
+      `<td>${escapeHtml(entity.category||'-')}</td>`+
+      `<td>${escapeHtml(entity.sex||'-')}</td>`+
+      `<td>${escapeHtml(entity.tl||'-')}</td>`+
+      `<td>${escapeHtml(entity.tagPlace||'-')}</td>`+
+      `<td>${escapeHtml(fmtDateTime(fix?.ts))}</td>`+
+      `<td>${escapeHtml(String(daysRelease))}</td>`+
+      `<td>${escapeHtml(String(daysFix))}</td>`+
+      `<td>${badgeHtml(entity.status)}</td>`+
+      `<td>${escapeHtml(entity.zone||'-')}</td>`+
+      `<td>${Number.isFinite(fix?.lat)?fix.lat.toFixed(5):'-'}</td>`+
+      `<td>${Number.isFinite(fix?.lon)?fix.lon.toFixed(5):'-'}</td>`+
+      `<td>${escapeHtml(entity.remarks||'-')}</td>`;
+    tr.addEventListener('click',()=>{
+      document.querySelectorAll('#tableBody tr').forEach(r=>r.classList.remove('sel'));
+      tr.classList.add('sel');
+      focusEntity(entity.id);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function updateMapFoot(){
+  if(!displayed.length){
+    document.getElementById('mapFootText').textContent='No visible hatchlings match the current filter set.';
+    document.getElementById('mapFootCount').textContent='0 visible';return;
+  }
+  const latest = displayed.reduce((m,e)=>{
+    if(e.latestFix?.ts&&(!m||e.latestFix.ts>m)) return e.latestFix.ts; return m;
+  },null);
+  document.getElementById('mapFootText').textContent='Latest VHF fix: '+fmtDateTime(latest);
+  document.getElementById('mapFootCount').textContent=displayed.length+' / '+entities.length+' hatchlings';
+}
+
+/* ═══════════════════════════════════════════════
+   OVERLAYS
+   ═══════════════════════════════════════════════ */
+function getAllFixes(){
+  const pts=[];
+  displayed.forEach(e=>e.fixes.forEach(f=>{if(Number.isFinite(f.lat)&&Number.isFinite(f.lon))pts.push(f);}));
+  return pts;
+}
+
+function renderHeatmap(){
+  const fixes=getAllFixes();
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+  if(!fixes.length){heatmapOn=false;document.getElementById('heatBtn').classList.remove('on');return;}
+  heatLayer=L.heatLayer(fixes.map(f=>[f.lat,f.lon,.65]),{radius:22,blur:18,maxZoom:17,gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}}).addTo(map);
+  if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
+}
+
+function renderKDE(){
+  const fixes=getAllFixes();
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(fixes.length<4){kdeOn=false;document.getElementById('kdeBtn').classList.remove('on');return;}
+  const points=fixes.map(f=>[f.lat,f.lon]);
+  const KDE=L.Layer.extend({
+    initialize(){this._pts=points;},
+    onAdd(m){this._map=m;this._canvas=document.createElement('canvas');this._canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';m.getPanes().overlayPane.appendChild(this._canvas);m.on('moveend zoomend resize',this.draw,this);this.draw();},
+    onRemove(m){if(this._canvas?.parentNode)this._canvas.parentNode.removeChild(this._canvas);m.off('moveend zoomend resize',this.draw,this);},
+    draw(){
+      const sz=this._map.getSize(),c=this._canvas;c.width=sz.x;c.height=sz.y;
+      L.DomUtil.setPosition(c,this._map.containerPointToLayerPoint([0,0]));
+      const ctx=c.getContext('2d');ctx.clearRect(0,0,sz.x,sz.y);
+      const px=this._pts.map(p=>this._map.latLngToContainerPoint(L.latLng(p[0],p[1])));
+      const bw=26;
+      px.forEach(p=>{const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,bw);g.addColorStop(0,'rgba(127,29,29,.35)');g.addColorStop(.45,'rgba(239,68,68,.18)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(p.x-bw,p.y-bw,bw*2,bw*2);});
+    }
+  });
+  kdeLayer=new KDE().addTo(map);
+  if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
+}
+
+function toggleHeatmap(){
+  if(!displayed.length){toast('No visible records to generate heatmap.');return;}
+  heatmapOn=!heatmapOn;if(heatmapOn)kdeOn=false;
+  document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
+  document.getElementById('kdeBtn').classList.remove('on');
+  const mh=document.getElementById('mob-heatBtn'),mk=document.getElementById('mob-kdeBtn');
+  if(mh)mh.classList.toggle('on',heatmapOn);if(mk)mk.classList.remove('on');
+  if(!heatmapOn){if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
+  renderHeatmap();
+}
+
+function toggleKDE(){
+  if(!displayed.length){toast('No visible records for KDE.');return;}
+  kdeOn=!kdeOn;if(kdeOn)heatmapOn=false;
+  document.getElementById('kdeBtn').classList.toggle('on',kdeOn);
+  document.getElementById('heatBtn').classList.remove('on');
+  const mh=document.getElementById('mob-heatBtn'),mk=document.getElementById('mob-kdeBtn');
+  if(mk)mk.classList.toggle('on',kdeOn);if(mh)mh.classList.remove('on');
+  if(!kdeOn){if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
+  renderKDE();
+}
+
+/* ═══════════════════════════════════════════════
+   EXPORT
+   ═══════════════════════════════════════════════ */
+function exportCSV(){
+  if(!displayRows.length){toast('No visible records to export.');return;}
+  const header=['Radio_ID','Category','Sex','TL_cm','Tag_Place','Latest_VHF_Signal','Days_Since_Release','Days_Since_Last_Fix','Current_Status','Zone','Place','Activity','Signal_Strength','Latitude','Longitude','Remarks'];
+  const rows = [header];
+  displayRows.forEach(e=>{
+    const fix=e.latestFix;
+    rows.push([
+      e.id, e.category||'-', e.sex||'-', e.tl||'-', e.tagPlace||'-',
+      fmtDateTime(fix?.ts),
+      e.tagDate ? daysSince(e.tagDate) : '-',
+      e.daysSinceLastFix !== null ? e.daysSinceLastFix : '-',
+      statusLabel(e.status),
+      e.zone||'-',
+      fix?.place||'-',
+      fix?.activity||'-',
+      fix?.signal||'-',
+      Number.isFinite(fix?.lat)?fix.lat.toFixed(6):'',
+      Number.isFinite(fix?.lon)?fix.lon.toFixed(6):'',
+      e.remarks||'-'
+    ]);
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  link.download='pali_fth_'+new Date().toISOString().slice(0,10)+'.csv';
+  link.click(); URL.revokeObjectURL(link.href);
+}
+
+/* ═══════════════════════════════════════════════
+   FIELD UPDATES PANEL
+   ═══════════════════════════════════════════════ */
+function getUpdateDate(row){
+  const raw = gc(row,
+    'Date','date','Update Date','UpdateDate','Timestamp','timestamp',
+    'Posted','Field Date','Log Date','Entry Date','Record Date',
+    'Update_Date','FieldDate','Post Date','DatePosted'
+  );
+  if(!raw) return null;
+  return parsePaliDate(raw) || parseTagDate(raw);
+}
+
+function formatUpdateText(text){
+  if(!text) return '';
+  let html=escapeHtml(text);
+  ['Current Status','Pali Release Site Aggregation','Suspected Dropped Radios','Lost Radios','Recently found','Already present'].forEach(b=>{
+    html=html.replace(new RegExp(b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'),'<strong>'+b+'</strong>');
+  });
+  return html;
+}
+
+function loadUpdates(rows){
+  updatesRows = rows||[];
+  const sorted=updatesRows.filter(row=>{
+    const hasDate=!!getUpdateDate(row);
+    const hasText=!!(gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail'));
+    return hasDate||hasText;
+  }).sort((a,b)=>{
+    const ta=getUpdateDate(a)?.getTime()||-Infinity;
+    const tb=getUpdateDate(b)?.getTime()||-Infinity;
+    return tb-ta;
+  });
+
+  const latestDate=document.getElementById('fuDate');
+  const latestText=document.getElementById('fuText');
+  const list=document.getElementById('fuList');
+  list.innerHTML='';
+
+  if(!sorted.length){
+    latestDate.textContent='No updates available';
+    latestText.innerHTML='';
+    list.innerHTML='<div class="fu"><div class="update-content">No field updates available.</div></div>';
+    return;
+  }
+
+  const rd = getUpdateDate(sorted[0]);
+  if(rd){
+    latestDate.textContent = fmtDateOnly(rd);
+  } else {
+    const rawVal = gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date');
+    latestDate.textContent = rawVal || 'Date unavailable';
+  }
+  const textContent = gc(sorted[0],'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
+  latestText.innerHTML = formatUpdateText(textContent);
+
+  sorted.slice(1).forEach(row=>{
+    const rowDate=getUpdateDate(row);
+    const item=document.createElement('div'); item.className='fu';
+    let dateStr;
+    if(rowDate){
+      dateStr = fmtDateOnly(rowDate);
+    } else {
+      dateStr = gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Unknown date';
+    }
+    const rowText = gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
+    item.innerHTML='<div class="fu-date">'+escapeHtml(dateStr)+'</div>'+
+      '<div class="update-content">'+formatUpdateText(rowText)+'</div>';
+    list.appendChild(item);
+  });
+}
+
+function toggleFieldPanel(){ document.getElementById('fp').classList.toggle('open'); document.getElementById('fpBg').classList.toggle('open'); }
+function closeFieldPanel(){ document.getElementById('fp').classList.remove('open'); document.getElementById('fpBg').classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════ */
+function isMobile(){ return window.innerWidth<=767; }
+
+function toggleFilterBar(){
+  filterBarHidden=!filterBarHidden;
+  document.getElementById('fbar').classList.toggle('hidden',filterBarHidden);
+  document.getElementById('filterToggleBtn').classList.toggle('on',!filterBarHidden);
+  document.getElementById('map-wrap').style.top=filterBarHidden?'var(--hdr)':'calc(var(--hdr) + var(--fbar))';
+  const fp = document.getElementById('fp');
+  if(fp && !isMobile()){
+    fp.style.top = filterBarHidden
+      ? 'var(--hdr)'
+      : 'calc(var(--hdr) + var(--fbar))';
+    fp.style.height = filterBarHidden
+      ? 'calc(100vh - var(--hdr))'
+      : 'calc(100vh - var(--hdr) - var(--fbar))';
+  }
+  setTimeout(()=>map.invalidateSize(),220);
+}
+
+function resetView(){ map.setView(MAP_CENTER,MAP_ZOOM); }
+
+function toggleBottom(){
+  bottomCollapsed=!bottomCollapsed;
+  const btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap'),btn=document.getElementById('btmToggleBtn');
+  if(isMobile()){
+    if(bottomCollapsed){btm.style.height='52px';wrap.style.bottom='52px';btn.textContent='Show';btm.classList.remove('mobile-expanded');}
+    else{btm.style.height='55vh';wrap.style.bottom='55vh';btn.textContent='Hide';btm.classList.add('mobile-expanded');}
+  }else{
+    if(bottomCollapsed){btm.style.height='42px';wrap.style.bottom='42px';btn.textContent='Show';}
+    else{btm.style.height=bottomHeight+'px';wrap.style.bottom=bottomHeight+'px';btn.textContent='Hide';}
+  }
+  setTimeout(()=>map.invalidateSize(),220);
+}
+
+function initResize(){
+  const bar=document.getElementById('resizeBar'),btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap');
+  let dragging=false,startY=0,startHeight=0;
+  function begin(y){if(bottomCollapsed||isMobile())return;dragging=true;startY=y;startHeight=btm.offsetHeight;document.body.style.cursor='ns-resize';}
+  function move(y){if(!dragging)return;const h=Math.min(Math.max(120,startHeight+(startY-y)),window.innerHeight*.7);bottomHeight=h;btm.style.height=h+'px';wrap.style.bottom=h+'px';}
+  function end(){dragging=false;document.body.style.cursor='';setTimeout(()=>map.invalidateSize(),100);}
+  bar.addEventListener('mousedown',e=>{begin(e.clientY);e.preventDefault();});
+  document.addEventListener('mousemove',e=>move(e.clientY));
+  document.addEventListener('mouseup',end);
+}
+
+function initMobileBottomPanel(){
+  if(!isMobile()) return;
+  bottomCollapsed=true;
+  document.getElementById('btm').style.height='52px';
+  document.getElementById('map-wrap').style.bottom='52px';
+  document.getElementById('btmToggleBtn').textContent='Show';
+}
+
+/* ═══════════════════════════════════════════════
+   MOBILE DRAWER
+   ═══════════════════════════════════════════════ */
+function openMobileDrawer(){
+  document.getElementById('mobileDrawer').classList.add('open');
+  document.getElementById('drawerBg').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMobileDrawer(){
+  document.getElementById('mobileDrawer').classList.remove('open');
+  document.getElementById('drawerBg').classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(()=>map.invalidateSize(),320);
+}
+
+function rebuildMobileFilters(){
+  const allIds=[...new Set(entities.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMobMSOptions('rid',allIds);
+  const zoneCounts={};
+  entities.forEach(e=>{const z=e.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});
+  const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
+  buildMobMSOptions('zone',sortedZones,z=>z+' ('+zoneCounts[z]+')');
+  const statuses=['active','missing','missing_start','water','recovered'];
+  buildMobMSOptions('status',statuses,s=>statusLabel(s));
+}
+
+function buildMobMSOptions(key,options,formatter){
+  const btn=document.getElementById('mob-msb-'+key), list=document.getElementById('mob-msi-'+key);
+  if(!btn||!list) return;
+  btn.classList.remove('disabled'); list.innerHTML='';
+  if(!options.length){resetMobMS(key,'No options');return;}
+  options.forEach(option=>{
+    const label=document.createElement('label'); label.className='ms-item';
+    const input=document.createElement('input'); input.type='checkbox'; input.value=option; input.checked=true;
+    input.addEventListener('change',()=>updateMobMSBtn(key));
+    label.appendChild(input); label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
+    list.appendChild(label);
+  });
+  updateMobMSBtn(key);
+}
+
+function resetMobMS(key,msg,disabled=false){
+  const btn=document.getElementById('mob-msb-'+key), list=document.getElementById('mob-msi-'+key);
+  if(!btn) return;
+  btn.classList.toggle('disabled',disabled); btn.classList.remove('active');
+  btn.querySelector('.ms-lbl').textContent=msg;
+  if(list) list.innerHTML='<div class="ms-empty">'+escapeHtml(msg)+'</div>';
+}
+
+function updateMobMSBtn(key){
+  const btn=document.getElementById('mob-msb-'+key); if(!btn||btn.classList.contains('disabled')) return;
+  const all=[...document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]')], checked=all.filter(i=>i.checked);
+  const counter=document.getElementById('mob-msc-'+key); if(counter) counter.textContent=checked.length+'/'+all.length;
+  if(!all.length) return;
+  if(checked.length===0){btn.querySelector('.ms-lbl').textContent='None selected';btn.classList.add('active');}
+  else if(checked.length===all.length){btn.querySelector('.ms-lbl').textContent='All';btn.classList.remove('active');}
+  else{btn.querySelector('.ms-lbl').textContent=checked.length+' selected';btn.classList.add('active');}
+}
+
+function toggleMobMS(key,event){
+  if(event) event.stopPropagation();
+  const btn=document.getElementById('mob-msb-'+key);
+  if(btn.classList.contains('disabled')) return;
+  const drop=document.getElementById('mob-msd-'+key), isOpen=drop.classList.contains('open');
+  document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) drop.classList.add('open');
+}
+function mobMsSelectAll(key){document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});updateMobMSBtn(key);}
+function mobMsClearAll(key){document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMobMSBtn(key);}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#mobileDrawer .ms-wrap')) document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
+});
+
+function mobileApplyFilters(){
+  ['rid','zone','status'].forEach(key=>{
+    const mobChecked=new Set([...document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]:checked')].map(i=>i.value));
+    document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(inp=>{inp.checked=mobChecked.has(inp.value);});
+    updateMSBtn(key);
+  });
+  applyFilters(); closeMobileDrawer();
+}
+
+function mobileClearFilters(){
+  activeBucket=null; rebuildFilters(); applyFilters(); closeMobileDrawer();
+}
+
+/* ═══════════════════════════════════════════════
+   MAIN LOAD
+   ═══════════════════════════════════════════════ */
+async function loadAllData(){
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('loading');
+  document.getElementById('loading').classList.remove('hide');
+  ['ld-master','ld-log','ld-updates','ld-zones'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.classList.remove('ok','err');
+  });
+  document.getElementById('loadingCopy').textContent='Fetching Radio Master dictionary...';
+
+  try{
+    const [masterRows, logRows, updateRows] = await Promise.all([
+      fetchCSV(URLS.master).then(d=>{setLD('ld-master',true);return d;}).catch(()=>{setLD('ld-master',false);return[];}),
+      fetchCSV(URLS.radioLog).then(d=>{setLD('ld-log',true);return d;}).catch(()=>{setLD('ld-log',false);return[];}),
+      fetchCSV(URLS.updates).then(d=>{setLD('ld-updates',true);return d;}).catch(()=>{setLD('ld-updates',false);return[];})
+    ]);
+    
+    // Set Zones as OK since it is hardcoded now
+    setLD('ld-zones', true);
+
+    document.getElementById('loadingCopy').textContent='Applying retag transformations...';
+    buildMasterMap(masterRows);
+
+    document.getElementById('loadingCopy').textContent='Merging telemetry records...';
+    const logBuckets = buildEntitiesFromLog(logRows);
+    mergeEntities(logBuckets);
+
+    /* Use Hardcoded GeoJSON */
+    geojsonData = ZONE_GEOJSON_DATA;
+
+    document.getElementById('loadingCopy').textContent='Assigning zones to fixes (map (1).geojson via Turf.js)...';
+    if(geojsonData) assignZones();
+
+    loadUpdates(updateRows);
+    rebuildFilters();
+    renderLegend();
+    applyFilters();
+
+    document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    toast(`Loaded ${entities.length} hatchling entities.`,true);
+
+  } catch(err){
+    console.error(err); toast('Failed to load telemetry data.');
+  } finally{
+    btn.classList.remove('loading');
+    const elapsed=performance.now()-SPLASH_START, wait=Math.max(0,SPLASH_MIN_MS-elapsed);
+    setTimeout(()=>document.getElementById('loading').classList.add('hide'),wait);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   RESIZE & BOOT
+   ═══════════════════════════════════════════════ */
+window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize(),150));
+new ResizeObserver(()=>{
+  const btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap');
+  if(btm&&wrap&&!bottomCollapsed) wrap.style.bottom=btm.offsetHeight+'px';
+  setTimeout(()=>map&&map.invalidateSize(),80);
+}).observe(document.getElementById('btm'));
+
+(function boot(){
+  initMap();
+  initResize();
+  if(isMobile()) initMobileBottomPanel();
+  loadAllData();
+})();
+</script>
+</body>
+</html>
