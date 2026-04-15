@@ -25,7 +25,8 @@
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:126px;
+  /* ── MOD 2: increased header height to 144px to fully contain two-row layout ── */
+  --hdr:144px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
@@ -73,28 +74,57 @@ button{cursor:pointer}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
 /* ─── Header ─── */
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
-.hdr-logos{display:flex;align-items:center;gap:10px}
+/* MOD 2: Two-row grid; height matches --hdr=144px so status blocks never clip into filter bar */
+#hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;
+  display:grid;
+  grid-template-columns:auto auto minmax(180px,1fr) auto auto;
+  grid-template-rows:56px 1fr;
+  align-items:center;
+  row-gap:8px;
+  column-gap:10px;
+  padding:8px 14px 10px;
+  background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);
+  border-bottom:2px solid rgba(126,207,155,.45);
+  box-shadow:0 8px 24px rgba(10,26,18,.28);
+}
+.hdr-logos{display:flex;align-items:center;gap:8px;grid-row:1}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
-.hdr-logos img{height:46px;max-width:110px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.34))}
-.hdr-divider{width:1px;height:36px;background:rgba(255,255,255,.18)}
-.hdr-brand{min-width:0}
-.hdr-logos,.hdr-divider,.hdr-brand,.syncbox,.hdr-actions{grid-row:1}
-/* MOD 2: Increased hdr-title font size ~12% */
-.hdr-title{font:700 1.06rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* MOD 1: Consistent 44px height for all three logos */
+.hdr-logos img{height:44px;max-width:106px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.34))}
+.hdr-divider{width:1px;height:34px;background:rgba(255,255,255,.18);grid-row:1}
+.hdr-brand{min-width:0;grid-row:1}
+.hdr-title{font:700 1.04rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
 
-/* ─── Status Blocks ── */
-#statusBlocks{grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;min-width:0;width:100%}
-.sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease;border-left:3px solid transparent}
+/* ─── Status Blocks – full-width row 2 ── */
+#statusBlocks{
+  grid-row:2;
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:7px;
+  width:100%;
+  align-self:stretch;
+}
+.sblock{
+  padding:6px 10px 7px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.1);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;
+  color:#fff;
+  transition:transform .12s ease,border-color .12s ease,background .12s ease;
+  border-left:3px solid transparent;
+  overflow:hidden;
+}
 .sblock.clickable{cursor:pointer}
 .sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
 .sblock.muted{color:rgba(255,255,255,.42)}
-/* MOD 2: Increased sblock-label font size ~12% */
-.sblock-label{font:700 .65rem var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
-/* MOD 2: Increased sblock-count font size ~12% */
-.sblock-count{font:700 1.1rem var(--mono)}
+/* MOD 2: Legible font sizes that still fit in 144px header */
+.sblock-label{font:700 .6rem var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;line-height:1.2}
+.sblock-count{font:700 1.15rem var(--mono);line-height:1}
 .sblock-sub{font:500 .5rem var(--mono);color:rgba(255,255,255,.52);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
 .sblock[data-bucket="active"]        {border-left-color:var(--col-active)}
 .sblock[data-bucket="missing"]       {border-left-color:var(--col-missing)}
@@ -102,12 +132,12 @@ button{cursor:pointer}
 .sblock[data-bucket="water"]         {border-left-color:var(--col-water)}
 .sblock[data-bucket="recovered"]     {border-left-color:var(--col-recovered)}
 
-/* Header actions */
-.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
-.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
+/* Header actions – row 1 */
+.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative;grid-row:1}
+.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:88px;justify-self:end;grid-row:1}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
 .syncbox span{font:600 .64rem var(--mono);color:#fff}
-.hbtn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
+.hbtn{height:34px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 #mobileMenuBtn{display:none}
@@ -128,11 +158,11 @@ button{cursor:pointer}
 
 /* ─── Multi-select dropdowns ─── */
 .ms-wrap{position:relative;flex-shrink:0}
-.ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
+.ms-btn{min-width:110px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:200px;max-width:290px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -160,38 +190,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
 
 /* ─── Legend – top-right, collapsible ─── */
-#legend{
-  position:absolute;
-  right:12px;
-  top:12px;
-  z-index:500;
-  min-width:0;
-  border-radius:14px;
-  background:rgba(255,255,255,.97);
-  border:1px solid var(--line-2);
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  transition:min-width .18s ease;
-}
-#legend-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  padding:8px 10px;
-  border-bottom:1px solid var(--line);
-  background:var(--panel-2);
-  cursor:pointer;
-  user-select:none;
-}
+#legend{position:absolute;right:12px;top:12px;z-index:500;min-width:0;border-radius:14px;background:rgba(255,255,255,.97);border:1px solid var(--line-2);box-shadow:var(--shadow);overflow:hidden;transition:min-width .18s ease}
+#legend-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--panel-2);cursor:pointer;user-select:none}
 #legend-header:hover{background:#eef8f1}
 .legend-title{font:700 .58rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-#legend-toggle-btn{
-  width:20px;height:20px;border-radius:50%;border:1px solid var(--line-2);
-  background:#fff;color:var(--muted);font:700 .7rem var(--mono);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:all .15s ease;
-}
+#legend-toggle-btn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line-2);background:#fff;color:var(--muted);font:700 .7rem var(--mono);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s ease}
 #legend-toggle-btn:hover{background:#eef8f1;color:var(--forest-2)}
 #legend-body{padding:10px 12px;transition:all .18s ease}
 #legend.collapsed #legend-body{display:none}
@@ -209,41 +212,27 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 /* ─── Popups ─── */
 .pop-top{padding:14px 14px 12px 14px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);border-bottom:2px solid rgba(126,207,155,.45);display:flex;align-items:center;gap:12px}
 .pop-id-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.72);color:#fff;font:700 .8rem var(--mono);flex-shrink:0}
-/* MOD 2: Increased pop-id font size ~13% */
-.pop-id{font:700 1.02rem var(--mono);color:#fff}
+.pop-id{font:700 1.08rem var(--mono);color:#fff}
 .pop-sub{margin-top:3px;font:600 .58rem var(--mono);color:rgba(255,255,255,.74);letter-spacing:.05em}
 .pop-body{padding:12px 14px}
 .pop-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
 .pop-label{font:700 .54rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
-/* MOD 2: Increased pop-value font size ~12% */
 .pop-value{font:600 .74rem var(--mono);color:var(--text);text-align:right}
+/* MOD 3: Animal ID highlight row */
+.pop-animal-id{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pop-animal-id .pop-label{color:#166534}
+.pop-animal-id .pop-value{color:#166534;font-weight:700;font-size:.82rem}
 .pop-retag{margin:6px 0;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde68a;font:600 .62rem var(--mono);color:#78350f}
 .pop-actions{display:flex;gap:6px;padding:10px 14px 14px 14px}
 .pab{flex:1;height:34px;border-radius:10px;border:1px solid var(--line-2);background:#eef8f1;color:var(--forest-2);font:700 .62rem var(--mono)}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
-
-/* ── popup divider for telemetry block ── */
-.pop-telemetry-sep{height:1px;background:var(--line);margin:8px 0 8px 0}
+.pop-telemetry-sep{height:1px;background:var(--line);margin:8px 0}
 
 /* ─── Field Updates Panel ─── */
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-#fp{
-  position:fixed;
-  top:calc(var(--hdr) + var(--fbar));
-  right:-400px;
-  width:400px;
-  height:calc(100vh - var(--hdr) - var(--fbar));
-  z-index:1190;
-  background:#fff;
-  border-left:1px solid var(--line-2);
-  box-shadow:-18px 0 44px rgba(12,24,18,.18);
-  transition:right .24s ease;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
+#fp{position:fixed;top:calc(var(--hdr) + var(--fbar));right:-400px;width:400px;height:calc(100vh - var(--hdr) - var(--fbar));z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 .fp-hdr{padding:16px 20px;background:#2d5a45;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .fp-hdr h3{font:700 .92rem var(--mono);display:flex;align-items:center;gap:10px}
@@ -274,11 +263,15 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .bc{height:28px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.12);color:#fff;font:700 .58rem var(--mono)}
 .bc:hover{background:rgba(255,255,255,.2)}
 #btmScroll{flex:1;overflow:auto;min-height:0}
-/* MOD 2: Increased dtbl font size ~12% */
+/* MOD 5: Table styles with sortable headers */
 .dtbl{width:100%;border-collapse:collapse;font:600 .74rem var(--mono);white-space:nowrap}
 .dtbl th,.dtbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
-/* MOD 2: Increased dtbl th font size ~12% */
-.dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .65rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .65rem var(--mono);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap}
+.dtbl th:hover{background:#e8f4eb;color:var(--forest-2)}
+/* Sort icon spans */
+.sort-icon{display:inline-block;margin-left:4px;opacity:.3;font-size:.58rem;vertical-align:middle;transition:opacity .1s ease}
+.dtbl th.sort-asc .sort-icon,
+.dtbl th.sort-desc .sort-icon{opacity:1;color:var(--forest-3)}
 .dtbl tbody tr{transition:background .12s ease;cursor:pointer}
 .dtbl tbody tr:hover{background:#eff7f1}
 .dtbl tbody tr.sel{background:#dff1e5}
@@ -313,9 +306,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   .hdr-sub{display:none}
 }
 @media(max-width:1024px){
-  :root{--hdr:108px}
-  #statusBlocks{grid-template-columns:repeat(3,1fr)}
-  .sblock:nth-child(4),.sblock:nth-child(5){grid-column:span 1}
+  :root{--hdr:124px}
+  #statusBlocks{grid-template-columns:repeat(3,1fr) repeat(2,1fr)}
   .hdr-sub{display:none}
   .hdr-title{font-size:.8rem}
   .syncbox{display:none}
@@ -325,10 +317,10 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 @media(max-width:767px){
   :root{--hdr:60px;--fbar:0px;--btm:52px}
   #hdr{height:var(--hdr);grid-template-columns:auto auto 1fr auto;grid-template-rows:1fr;row-gap:0;column-gap:8px;padding:8px 12px;align-items:center}
-  .hdr-logos{gap:6px}
-  .hdr-logos img{height:32px;max-width:72px}
-  .hdr-divider{height:24px}
-  .hdr-title{font-size:.72rem;white-space:normal;line-height:1.2}
+  .hdr-logos{gap:5px}
+  .hdr-logos img{height:28px;max-width:64px}
+  .hdr-divider{height:22px}
+  .hdr-title{font-size:.68rem;white-space:normal;line-height:1.2}
   .hdr-sub{display:none}
   .hdr-brand{grid-row:1;grid-column:3}
   #statusBlocks{display:none}
@@ -351,12 +343,13 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   .pop-body{padding:10px 12px}
   .pop-row{flex-direction:column;gap:2px}
   .pop-value{text-align:left}
+  .pop-animal-id{flex-direction:column;gap:2px}
   #btm{height:var(--btm);transition:height .25s ease}
   #resizeBar{display:none}
   #btmHdr{height:52px;padding:0 12px}
   .btm-title{font-size:.66rem}
   #btmScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .dtbl{min-width:860px}
+  .dtbl{min-width:940px}
   .dtbl th,.dtbl td{padding:7px 8px;font-size:.6rem}
   .dtbl tbody tr{min-height:44px}
   #btm.mobile-expanded{height:55vh}
@@ -371,8 +364,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   .loading-card{padding:24px 18px;gap:12px}
 }
 @media(max-width:380px){
-  .hdr-logos img{height:26px;max-width:56px}
-  .hdr-title{font-size:.64rem}
+  .hdr-logos img{height:24px;max-width:50px}
+  .hdr-title{font-size:.62rem}
 }
 </style>
 </head>
@@ -383,14 +376,14 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
   <div class="loading-card">
-    <!-- MOD 7: Added RJFD logo to loading screen -->
     <div class="loading-logos">
       <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
       <div class="loading-divider"></div>
       <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
       <div class="loading-divider"></div>
+      <!-- MOD 1: RJFD logo on loading screen -->
       <a href="https://forest.rajasthan.gov.in/content/raj/forest/en/home.html#" target="_blank" rel="noopener">
-        <img src="image.png - rjfd" alt="RJFD" onerror="this.style.display='none'">
+        <img src="image.png" alt="RJFD" onerror="this.style.display='none'">
       </a>
     </div>
     <div class="loading-ring"></div>
@@ -408,16 +401,19 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <div id="toast"></div>
 
 <header id="hdr">
-  <!-- MOD 7: Added RJFD logo to hdr-logos -->
+  <!-- MOD 1: Three logos with dividers – MCBT | GEP | RJFD -->
   <div class="hdr-logos">
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
       <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
     </a>
+    <div class="hdr-divider"></div>
     <a href="https://www.instagram.com/gharialecologyproject/" target="_blank" rel="noopener" title="Gharial Ecology Project on Instagram">
       <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
     </a>
+    <div class="hdr-divider"></div>
+    <!-- MOD 1: Rajasthan Forest Department logo -->
     <a href="https://forest.rajasthan.gov.in/content/raj/forest/en/home.html#" target="_blank" rel="noopener" title="Rajasthan Forest Department">
-      <img src="image.png - rjfd" alt="RJFD" onerror="this.style.display='none'">
+      <img src="image.png" alt="RJFD" onerror="this.style.display='none'">
     </a>
   </div>
   <div class="hdr-divider"></div>
@@ -426,6 +422,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="hdr-sub">VHF Telemetry Monitor | 30 Individuals</div>
   </div>
 
+  <!-- MOD 2: Status blocks in row 2 with improved legible sizing -->
   <div id="statusBlocks">
     <button class="sblock clickable" id="sb-active" data-bucket="active" type="button" onclick="toggleBucket('active')">
       <span class="sblock-label">Active</span>
@@ -447,7 +444,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <span class="sblock-count" id="sbc-water">3</span>
       <span class="sblock-sub">Static in water</span>
     </button>
-    <!-- MOD 1: Changed label from "Recovered" to "Radios Recovered" -->
     <button class="sblock clickable" id="sb-recovered" data-bucket="recovered" type="button" onclick="toggleBucket('recovered')">
       <span class="sblock-label">Radios Recovered</span>
       <span class="sblock-count" id="sbc-recovered">7</span>
@@ -467,55 +463,10 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </header>
 
-<!-- MOD 4: Added Sr. No and Pen filter groups | MOD 5: Removed Export CSV button -->
+<!-- MOD 4: Filter order: Sr. No → Pen → Radio ID → Zone → Status -->
 <div id="fbar">
   <div id="fbar-inner">
-    <div class="fg">
-      <label>Radio ID</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
-        <div class="ms-drop" id="msd-rid">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">None</button>
-            <span class="ms-count" id="msc-rid"></span>
-          </div>
-          <div class="ms-items" id="msi-rid"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Zone</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
-        <div class="ms-drop" id="msd-zone">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">None</button>
-            <span class="ms-count" id="msc-zone"></span>
-          </div>
-          <div class="ms-items" id="msi-zone"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Status</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
-        <div class="ms-drop" id="msd-status">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">None</button>
-            <span class="ms-count" id="msc-status"></span>
-          </div>
-          <div class="ms-items" id="msi-status"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <!-- MOD 4: Sr. No filter -->
+    <!-- 1. Sr. No -->
     <div class="fg">
       <label>Sr. No</label>
       <div class="ms-wrap">
@@ -531,7 +482,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
-    <!-- MOD 4: Pen filter -->
+    <!-- 2. Pen -->
     <div class="fg">
       <label>Pen</label>
       <div class="ms-wrap">
@@ -547,6 +498,54 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
+    <!-- 3. Radio ID -->
+    <div class="fg">
+      <label>Radio ID</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-rid">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">None</button>
+            <span class="ms-count" id="msc-rid"></span>
+          </div>
+          <div class="ms-items" id="msi-rid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <!-- 4. Zone -->
+    <div class="fg">
+      <label>Zone</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-zone">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">None</button>
+            <span class="ms-count" id="msc-zone"></span>
+          </div>
+          <div class="ms-items" id="msi-zone"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <!-- 5. Status -->
+    <div class="fg">
+      <label>Status</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-status">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">None</button>
+            <span class="ms-count" id="msc-status"></span>
+          </div>
+          <div class="ms-items" id="msi-status"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
     <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
     <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
     <div class="fsep"></div>
@@ -556,7 +555,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 </div>
 
 <div id="drawerBg" onclick="closeMobileDrawer()"></div>
-<!-- MOD 4: Added Sr. No and Pen filter rows | MOD 5: Removed Export CSV row -->
+<!-- MOD 4: Mobile drawer also in order: Sr. No → Pen → Radio ID → Zone → Status -->
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="drawer-handle"></div>
   <div class="drawer-hdr">
@@ -564,55 +563,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
   </div>
   <div class="drawer-body">
-    <div class="drawer-row">
-      <span class="drawer-label">Radio ID</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-rid" type="button" onclick="toggleMobMS('rid',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-rid">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('rid')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('rid')">None</button>
-            <span class="ms-count" id="mob-msc-rid"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-rid"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Zone</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-zone" type="button" onclick="toggleMobMS('zone',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-zone">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('zone')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('zone')">None</button>
-            <span class="ms-count" id="mob-msc-zone"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-zone"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Status</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-status" type="button" onclick="toggleMobMS('status',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-status">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('status')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('status')">None</button>
-            <span class="ms-count" id="mob-msc-status"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-status"></div>
-        </div>
-      </div>
-    </div>
-    <!-- MOD 4: Sr. No filter – mobile -->
+    <!-- 1. Sr. No -->
     <div class="drawer-row">
       <span class="drawer-label">Sr. No</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -629,7 +580,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </div>
       </div>
     </div>
-    <!-- MOD 4: Pen filter – mobile -->
+    <!-- 2. Pen -->
     <div class="drawer-row">
       <span class="drawer-label">Pen</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -643,6 +594,57 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
             <span class="ms-count" id="mob-msc-pen"></span>
           </div>
           <div class="ms-items" id="mob-msi-pen"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 3. Radio ID -->
+    <div class="drawer-row">
+      <span class="drawer-label">Radio ID</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-rid" type="button" onclick="toggleMobMS('rid',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-rid">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('rid')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('rid')">None</button>
+            <span class="ms-count" id="mob-msc-rid"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-rid"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 4. Zone -->
+    <div class="drawer-row">
+      <span class="drawer-label">Zone</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-zone" type="button" onclick="toggleMobMS('zone',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-zone">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('zone')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('zone')">None</button>
+            <span class="ms-count" id="mob-msc-zone"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-zone"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 5. Status -->
+    <div class="drawer-row">
+      <span class="drawer-label">Status</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-status" type="button" onclick="toggleMobMS('status',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-status">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('status')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('status')">None</button>
+            <span class="ms-count" id="mob-msc-status"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-status"></div>
         </div>
       </div>
     </div>
@@ -710,28 +712,30 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
   </div>
   <div id="btmScroll">
+    <!-- MOD 5: Sortable table – each <th> has onclick + a .sort-icon span -->
     <table class="dtbl">
       <thead>
         <tr>
-          <th>Radio ID</th>
-          <th>Sr. No</th>
-          <th>Pen</th>
-          <th>Category</th>
-          <th>Sex</th>
-          <th>T.L (cm)</th>
-          <th>Tag Place</th>
-          <th>Latest VHF Signal</th>
-          <th>Days Since Release</th>
-          <th>Days Since Last Fix</th>
-          <th>Current Status</th>
-          <th>Zone</th>
-          <th>Latitude</th>
-          <th>Longitude</th>
-          <th>Remarks</th>
+          <th onclick="sortTable('srno')"      data-col="srno">      Sr. No <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('pen')"       data-col="pen">       Pen <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('id')"        data-col="id">        Radio ID <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('animalId')"  data-col="animalId">  Animal ID <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('category')"  data-col="category">  Category <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('sex')"       data-col="sex">       Sex <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('tl')"        data-col="tl">        T.L (cm) <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('tagPlace')"  data-col="tagPlace">  Tag Place <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('latestFix')" data-col="latestFix"> Latest VHF Signal <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('daysRel')"   data-col="daysRel">   Days Since Release <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('daysFix')"   data-col="daysFix">   Days Since Last Fix <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('status')"    data-col="status">    Current Status <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('zone')"      data-col="zone">      Zone <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('lat')"       data-col="lat">       Latitude <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('lon')"       data-col="lon">       Longitude <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('remarks')"   data-col="remarks">   Remarks <span class="sort-icon">↕</span></th>
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr class="no-data"><td colspan="15">Loading telemetry data...</td></tr>
+        <tr class="no-data"><td colspan="16">Loading telemetry data...</td></tr>
       </tbody>
     </table>
   </div>
@@ -754,7 +758,7 @@ const URLS = {
   updates: `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=238985281`
 };
 
-/* HARDCODED ZONES TO PREVENT NETWORK ISSUES */
+/* HARDCODED ZONES */
 const ZONE_GEOJSON_DATA = {
   "type": "FeatureCollection",
   "features": [
@@ -762,7 +766,7 @@ const ZONE_GEOJSON_DATA = {
     {"type":"Feature","properties":{"name":"Rapta"},"geometry":{"coordinates":[[[76.51235052425409,25.84163943520221],[76.51389988053916,25.835110814908163],[76.52967514453564,25.841037295984606],[76.53069631117802,25.845695872166175],[76.52949908132064,25.845315587110903],[76.51235052425409,25.84163943520221]]],"type":"Polygon"},"id":2},
     {"type":"Feature","properties":{"name":"Pali Chambal RJ Side"},"geometry":{"coordinates":[[[76.56277661371598,25.852045304847536],[76.55383230047892,25.847871625939007],[76.55091716399698,25.84262436532343],[76.56370583072379,25.84679884043156],[76.56277661371598,25.852045304847536]]],"type":"Polygon"},"id":3},
     {"type":"Feature","properties":{"name":"Pali RJ Side"},"geometry":{"coordinates":[[[76.56345330462017,25.848894990978366],[76.5637182984002,25.847106047251415],[76.57246468793716,25.857958524700905],[76.5706086097614,25.859090722198744],[76.56292275452063,25.85157801402802],[76.56345330462017,25.848894990978366]]],"type":"Polygon"},"id":4},
-    {"type":"Feature","properties":{"name ":"Pali RJ Island"},"geometry":{"coordinates":[[[76.56565613250297,25.852987185412516],[76.56758987042792,25.852328728967265],[76.56970652950736,25.854633310483607],[76.56847834460893,25.855385817168525],[76.56798184433057,25.854962532747663],[76.56565613250297,25.852987185412516]]],"type":"Polygon"},"id":5},
+    {"type":"Feature","properties":{"name":"Pali RJ Island"},"geometry":{"coordinates":[[[76.56565613250297,25.852987185412516],[76.56758987042792,25.852328728967265],[76.56970652950736,25.854633310483607],[76.56847834460893,25.855385817168525],[76.56798184433057,25.854962532747663],[76.56565613250297,25.852987185412516]]],"type":"Polygon"},"id":5},
     {"type":"Feature","properties":{"name":"Pali MP Side"},"geometry":{"coordinates":[[[76.57240157391539,25.857938255709456],[76.56042879106423,25.840746569139853],[76.55871294638723,25.838481609778526],[76.55985684283769,25.837074567734973],[76.56317414254687,25.840986789563416],[76.57125767746487,25.847781393673543],[76.57499440587048,25.856703008281187],[76.57240157391539,25.857938255709456]]],"type":"Polygon"},"id":5},
     {"type":"Feature","properties":{"name":"Parvati Confluence"},"geometry":{"coordinates":[[[76.5717914958073,25.857080446361152],[76.56374609077096,25.847232349247435],[76.56481372745822,25.847163718515546],[76.5717914958073,25.857080446361152]]],"type":"Polygon"},"id":6},
     {"type":"Feature","properties":{"name":"Pada"},"geometry":{"coordinates":[[[76.54716053478143,25.830261138270373],[76.54847720080761,25.828160231620657],[76.55497075824974,25.83141931445394],[76.55781355989683,25.834920708405363],[76.55987833161771,25.837048427970984],[76.5587112867322,25.838395066153865],[76.55790333258022,25.83874518957097],[76.55757416607469,25.838664391951482],[76.54716053478143,25.830261138270373]]],"type":"Polygon"},"id":7},
@@ -777,20 +781,20 @@ const ZONE_GEOJSON_DATA = {
     {"type":"Feature","properties":{"name":"Bohna Upside"},"geometry":{"coordinates":[[[76.62667535486639,25.870448090940926],[76.62435963460513,25.870325576922042],[76.62143112496659,25.873021871376693],[76.61714043117456,25.870632096838605],[76.60079646595858,25.87541160490693],[76.59786828699038,25.87663703114208],[76.59596246522864,25.87198040388705],[76.60447425616405,25.86867162352081],[76.6147569207568,25.865485090329486],[76.62422318761531,25.86646509080508],[76.62538113401706,25.868425926701022],[76.62667535486639,25.870448090940926]]],"type":"Polygon"},"id":16},
     {"type":"Feature","properties":{"name":"Bohna Down"},"geometry":{"coordinates":[[[76.6235164360653,25.880004502250046],[76.62953984005065,25.878295641798914],[76.63078126357743,25.889212003053032],[76.63292694503872,25.898044554998876],[76.62773159725742,25.899899027503153],[76.62575154180712,25.89411085763851],[76.6235164360653,25.880004502250046]]],"type":"Polygon"},"id":17},
     {"type":"Feature","properties":{"name":"Aniyala"},"geometry":{"coordinates":[[[76.67731119026462,25.912579715247517],[76.67744376718724,25.906313872986374],[76.68601678351774,25.9053497533027],[76.69405438841716,25.90161342688512],[76.7057102525165,25.897876523866174],[76.71535771542284,25.89799601954826],[76.71361483328411,25.9024560460539],[76.69619738097151,25.90655489690792],[76.68588334189036,25.911856816210587],[76.67731119026462,25.912579715247517]]],"type":"Polygon"},"id":18},
-    {"type":"Feature","properties":{},"geometry":{"coordinates":[[[76.62764002948273,25.900413310866924],[76.63298571107435,25.897638293902304],[76.6379381106189,25.90305953995579],[76.64543827067689,25.905710115098927],[76.65575478733712,25.907517968946408],[76.65508667301492,25.91197676471579],[76.65106771077257,25.911494772326535],[76.64168968992072,25.910048737582187],[76.63259090680702,25.906074355312953],[76.62764002948273,25.900413310866924]]],"type":"Polygon"},"id":19},
+    {"type":"Feature","properties":{"name":"Unnamed Stretch"},"geometry":{"coordinates":[[[76.62764002948273,25.900413310866924],[76.63298571107435,25.897638293902304],[76.6379381106189,25.90305953995579],[76.64543827067689,25.905710115098927],[76.65575478733712,25.907517968946408],[76.65508667301492,25.91197676471579],[76.65106771077257,25.911494772326535],[76.64168968992072,25.910048737582187],[76.63259090680702,25.906074355312953],[76.62764002948273,25.900413310866924]]],"type":"Polygon"},"id":19},
     {"type":"Feature","properties":{"name":"Sewapur"},"geometry":{"coordinates":[[[76.65468498830916,25.912458747509262],[76.6562904820741,25.907035887785227],[76.67772550446387,25.905951170077756],[76.67718977924454,25.91257924170914],[76.65468498830916,25.912458747509262]]],"type":"Polygon"},"id":20},
     {"type":"Feature","properties":{"name":"Rameshwar"},"geometry":{"coordinates":[[[76.73134463175404,25.9094468003876],[76.72290538409925,25.905590790873404],[76.71393104920145,25.902578921671022],[76.71567158964632,25.897878635533274],[76.72169933997753,25.899083087538813],[76.73308604203743,25.90366297156197],[76.73134463175404,25.9094468003876]]],"type":"Polygon"},"id":21},
     {"type":"Feature","properties":{"name":"Banas Confluence"},"geometry":{"coordinates":[[[76.73120811341624,25.909509080623565],[76.73328482138203,25.9031214770134],[76.7438686059727,25.905171024093647],[76.7568602089766,25.911497467269513],[76.7403852875592,25.915232938389067],[76.73120811341624,25.909509080623565]]],"type":"Polygon"},"id":22},
     {"type":"Feature","properties":{"name":"Lohlai Dam"},"geometry":{"coordinates":[[[76.68196384814559,25.96668492854411],[76.6807572086974,25.96337316583174],[76.68704462404071,25.960232637467286],[76.69384034553389,25.95400821789643],[76.69784158237047,25.956977685783414],[76.6919349656311,25.96365872151081],[76.68628250097754,25.96565719116535],[76.68196384814559,25.96668492854411]]],"type":"Polygon"},"id":23},
     {"type":"Feature","properties":{"name":"Banas River"},"geometry":{"coordinates":[[[76.69772869302841,25.956976111417973],[76.69364959671879,25.953657638699497],[76.69772629923358,25.94186915860459],[76.7049122958768,25.930950571336354],[76.71831802726905,25.917406028927672],[76.7305615292741,25.909800950378],[76.7319217307712,25.909801293662852],[76.7397898330297,25.91487256432609],[76.72997807393091,25.916881046624127],[76.7121977386131,25.92937798130086],[76.70306783084612,25.94003537026903],[76.70064029843667,25.944489509272046],[76.69772869302841,25.956976111417973]]],"type":"Polygon"},"id":24},
     {"type":"Feature","properties":{"name":"Banas Confluence Down"},"geometry":{"coordinates":[[[76.74056631349066,25.91543508244331],[76.75681128713342,25.911662221432906],[76.76384924166268,25.920125188939608],[76.7581642622518,25.929194547580153],[76.74733549737346,25.92742901093824],[76.74056631349066,25.91543508244331]]],"type":"Polygon"},"id":25},
-    {"type":"Feature","properties":{"Bagdiya Upside":""},"geometry":{"coordinates":[[[76.74692946943003,25.94015021840022],[76.74395133008574,25.936741999982658],[76.74483114134455,25.92986384328816],[76.74632020842694,25.92682023804906],[76.75586329028954,25.92895102422483],[76.74963671605974,25.938506843049595],[76.74692946943003,25.94015021840022]]],"type":"Polygon"},"id":26},
+    {"type":"Feature","properties":{"name":"Bagdiya Upside"},"geometry":{"coordinates":[[[76.74692946943003,25.94015021840022],[76.74395133008574,25.936741999982658],[76.74483114134455,25.92986384328816],[76.74632020842694,25.92682023804906],[76.75586329028954,25.92895102422483],[76.74963671605974,25.938506843049595],[76.74692946943003,25.94015021840022]]],"type":"Polygon"},"id":26},
     {"type":"Feature","properties":{"name":"Bagdiya Nesting Site"},"geometry":{"coordinates":[[[76.7469266874242,25.940221348428366],[76.75054832128609,25.937899841928555],[76.75405852026137,25.93931947364011],[76.75494999936643,25.941640952160526],[76.75329704852658,25.94187476760409],[76.74874679059576,25.942058479413788],[76.7469266874242,25.940221348428366]]],"type":"Polygon"},"id":27},
     {"type":"Feature","properties":{"name":"Bagdiya Down"},"geometry":{"coordinates":[[[76.75494401641015,25.94168736325412],[76.75330621365009,25.935572322997686],[76.78289501834433,25.932867791482792],[76.77323712302729,25.940899186418378],[76.76353518258168,25.94126699873715],[76.75494401641015,25.94168736325412]]],"type":"Polygon"},"id":28},
     {"type":"Feature","properties":{"name":"Rijheta"},"geometry":{"coordinates":[[[76.89809587694555,26.094308392447616],[76.90845620479422,26.086889488815345],[76.92044220036951,26.093855064596838],[76.93937138605605,26.0960250774138],[76.93403541698115,26.10325915890411],[76.91319073185525,26.100907880189197],[76.89809587694555,26.094308392447616]]],"type":"Polygon"},"id":29},
     {"type":"Feature","properties":{"name":"Baroli Island"},"geometry":{"coordinates":[[[76.93403543452558,26.103440037900825],[76.9392706663865,26.095934671335314],[76.9546815586798,26.098737265932556],[76.9485416786531,26.107601653839026],[76.93403543452558,26.103440037900825]]],"type":"Polygon"},"id":31},
     {"type":"Feature","properties":{"name":"Baroli Down"},"geometry":{"coordinates":[[[76.9486440018639,26.10796422550669],[76.95478948102709,26.0983789305744],[76.95680346365907,26.102989786917334],[76.96869402645422,26.115020124287383],[76.96546629910222,26.12017488946485],[76.95730679200551,26.116829257737052],[76.9486440018639,26.10796422550669]]],"type":"Polygon"},"id":32},
-    {"type":"Feature","properties":{"Jamurdi":""},"geometry":{"coordinates":[[[76.96566014474303,26.12053298083471],[76.96907799804433,26.11473973763715],[76.97784708678466,26.11998934082446],[76.97422671418309,26.125959197634884],[76.96566014474303,26.12053298083471]]],"type":"Polygon"},"id":33},
+    {"type":"Feature","properties":{"name":"Jamurdi"},"geometry":{"coordinates":[[[76.96566014474303,26.12053298083471],[76.96907799804433,26.11473973763715],[76.97784708678466,26.11998934082446],[76.97422671418309,26.125959197634884],[76.96566014474303,26.12053298083471]]],"type":"Polygon"},"id":33},
     {"type":"Feature","properties":{"name":"Dubawali"},"geometry":{"coordinates":[[[76.97459550006585,26.126040703642445],[76.97830556547558,26.119986669725833],[76.98544937434622,26.12323930022366],[76.99772323133374,26.12441051385923],[77.0060747476407,26.12784437805155],[76.9963141480489,26.13191005723054],[76.98323914980836,26.13064433335883],[76.97982438456307,26.12992197189402],[76.97459550006585,26.126040703642445]]],"type":"Polygon"},"id":34},
     {"type":"Feature","properties":{"name":"Nadigaon Main Channel"},"geometry":{"coordinates":[[[76.9997015043611,26.13472792149085],[77.00418900546293,26.13346089233586],[77.00520233243412,26.14395448084383],[77.01059426089574,26.15334249877793],[77.00285027571897,26.15418715496962],[76.99944852585708,26.14210320776793],[76.9997015043611,26.13472792149085]]],"type":"Polygon"},"id":35},
     {"type":"Feature","properties":{"name":"Nadigaon Channel"},"geometry":{"coordinates":[[[77.00420459826813,26.133534446708552],[77.00865620597557,26.132884674715726],[77.01603917658076,26.148901644886934],[77.01632867859519,26.154326234162724],[77.0106106719931,26.15338427089499],[77.00518195915748,26.14396323445594],[77.00420459826813,26.133534446708552]]],"type":"Polygon"},"id":36},
@@ -803,7 +807,7 @@ const ZONE_GEOJSON_DATA = {
   ]
 };
 
-/* ── Retagging: April 4 2026 ── */
+/* ── Retagging ── */
 const RETAG_DATE_STR = 'April 4th';
 const RETAG_DATE = new Date(2026, 3, 4);
 const RETAG_OLD_TO_NEW = { '68':'65', '84':'67', '86':'69', '88':'71' };
@@ -816,8 +820,7 @@ const WATER_IDS          = new Set(['31','38','72']);
 const HARD_MISSING_IDS   = new Set(['39','40','62','82']);
 const HARD_ACTIVE_IDS    = new Set(['32','37','65','67','69','71','74','78','80','90','92','94']);
 
-/* MOD 4: Sr. No & Pen mapping dictionary
-   Keys are the CANONICAL radio IDs (use OLD id for retagged radios) */
+/* MOD 3/4: Sr. No & Pen mapping – canonical key = OLD Radio ID for retagged */
 const SR_NO_MAP = {
   '30':{ srNo:1,  pen:'P3', animal:'P3-G3' },
   '31':{ srNo:2,  pen:'P3', animal:'P3-G1' },
@@ -833,7 +836,7 @@ const SR_NO_MAP = {
   '62':{ srNo:12, pen:'P5', animal:'P5-G1' },
   '64':{ srNo:13, pen:'P5', animal:'P5-G5' },
   '66':{ srNo:14, pen:'P5', animal:'P5-G2' },
-  '68':{ srNo:15, pen:'P5', animal:'P5-G4' }, /* Retagged as 65 */
+  '68':{ srNo:15, pen:'P5', animal:'P5-G4' },   /* now Radio 65 */
   '70':{ srNo:16, pen:'P6', animal:'P6-G5' },
   '72':{ srNo:17, pen:'P6', animal:'P6-G1' },
   '74':{ srNo:18, pen:'P6', animal:'P6-G4' },
@@ -841,9 +844,9 @@ const SR_NO_MAP = {
   '78':{ srNo:20, pen:'P6', animal:'P6-G2' },
   '80':{ srNo:21, pen:'P7', animal:'P7-G2' },
   '82':{ srNo:22, pen:'P7', animal:'P7-G1' },
-  '84':{ srNo:23, pen:'P7', animal:'P7-G5' }, /* Retagged as 67 */
-  '86':{ srNo:24, pen:'P7', animal:'P7-G4' }, /* Retagged as 69 */
-  '88':{ srNo:25, pen:'P7', animal:'P7-G3' }, /* Retagged as 71 */
+  '84':{ srNo:23, pen:'P7', animal:'P7-G5' },   /* now Radio 67 */
+  '86':{ srNo:24, pen:'P7', animal:'P7-G4' },   /* now Radio 69 */
+  '88':{ srNo:25, pen:'P7', animal:'P7-G3' },   /* now Radio 71 */
   '90':{ srNo:26, pen:'P8', animal:'P8-G2' },
   '92':{ srNo:27, pen:'P8', animal:'P8-G3' },
   '94':{ srNo:28, pen:'P8', animal:'P8-G1' },
@@ -893,6 +896,10 @@ let updatesRows = [];
 let geojsonData = null;
 let zonePolygons = [];
 let entityMarkerMap = {};
+
+/* MOD 5: Table sort state */
+let sortColumn = null;   /* key string e.g. 'srno', 'id', 'latestFix' */
+let sortDir    = 'asc';  /* 'asc' | 'desc' */
 
 /* ═══════════════════════════════════════════════
    UTILITY
@@ -974,12 +981,10 @@ function toast(msg,ok=false){
   clearTimeout(el._t); el._t=setTimeout(()=>{el.className='';},3600);
 }
 
-/* MOD 4: Helper – resolve Sr. No info for an entity (handles retags) */
+/* MOD 3/4: Resolve Sr. No info (handles retagged radios) */
 function getSrNoInfo(entity){
-  // Try current id first
   let info = SR_NO_MAP[entity.id];
   if(!info){
-    // For retagged radios, entity.id is the NEW id; look up via old id
     const oldId = RETAG_NEW_TO_OLD[entity.id] || entity.oldId;
     if(oldId) info = SR_NO_MAP[oldId];
   }
@@ -1016,9 +1021,6 @@ function initMap(){
   L.control.zoom({position:'bottomright'}).addTo(map);
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
-  /* MOD 3: Increased nearbyDistance to 60 for wider spiderfying dispersion;
-     raised legWeight to 2.5 and adjusted circleSpiralSwitchover.
-     NEVER clusters – keepSpiderfied:true is maintained. */
   oms = new OverlappingMarkerSpiderfier(map,{
     keepSpiderfied: true,
     nearbyDistance: 60,
@@ -1243,10 +1245,24 @@ function renderLegend(){
    FILTER DROPDOWNS
    ═══════════════════════════════════════════════ */
 function rebuildFilters(){
+  /* MOD 4: Sr. No options – raw numbers only, no prefix */
+  const srnoOptions=[...new Set(entities.map(e=>{
+    const i=getSrNoInfo(e); return i?String(i.srNo):null;
+  }).filter(Boolean))].sort((a,b)=>+a-+b);
+  buildMSOptions('srno', srnoOptions);   /* no formatter → raw number displayed */
+
+  /* MOD 4: Pen options */
+  const penOptions=[...new Set(entities.map(e=>{
+    const i=getSrNoInfo(e); return i?i.pen:null;
+  }).filter(Boolean))].sort();
+  buildMSOptions('pen', penOptions);
+
+  /* Radio IDs */
   const allIds = [...new Set(entities.map(e=>e.id))].sort((a,b)=>
     String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
   buildMSOptions('rid', allIds);
 
+  /* Zones */
   const zoneCounts={};
   entities.forEach(e=>{
     const z=e.zone||'-';
@@ -1258,18 +1274,11 @@ function rebuildFilters(){
   const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
   buildMSOptions('zone', sortedZones, z=>z+' ('+zoneCounts[z]+')');
 
+  /* Status */
   const statuses = ['active','missing','missing_start','water','recovered'];
   buildMSOptions('status', statuses, s=>statusLabel(s));
 
-  /* MOD 4: Sr. No and Pen filters */
-  const srnoOptions=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
-  buildMSOptions('srno', srnoOptions, n=>'Sr. No '+n);
-
-  const penOptions=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
-  buildMSOptions('pen', penOptions);
-
   updateStatusBlocks();
-
   if(isMobile()) rebuildMobileFilters();
 }
 
@@ -1335,14 +1344,12 @@ function selectedSet(key){
   return new Set(checked);
 }
 
-/* MOD 6: Bulletproof applyFilters with Sr. No and Pen support */
 function applyFilters(){
-  const idFilter=selectedSet('rid');
-  const zoneFilter=selectedSet('zone');
-  const statusFilter=selectedSet('status');
-  /* MOD 4: Sr. No and Pen filters */
-  const srnoFilter=selectedSet('srno');
-  const penFilter=selectedSet('pen');
+  const idFilter     = selectedSet('rid');
+  const zoneFilter   = selectedSet('zone');
+  const statusFilter = selectedSet('status');
+  const srnoFilter   = selectedSet('srno');
+  const penFilter    = selectedSet('pen');
 
   displayed = entities.filter(e=>{
     if(idFilter && !idFilter.has(e.id)) return false;
@@ -1355,86 +1362,166 @@ function applyFilters(){
     }
     return true;
   });
-  displayed.sort((a,b)=>{
-    const ta=a.latestFix?.ts?.getTime()||0, tb=b.latestFix?.ts?.getTime()||0;
-    return tb-ta;
-  });
+
+  /* Default sort by latest fix date desc */
+  if(!sortColumn){
+    displayed.sort((a,b)=>{
+      const ta=a.latestFix?.ts?.getTime()||0, tb=b.latestFix?.ts?.getTime()||0;
+      return tb-ta;
+    });
+  } else {
+    applySortToDisplayed();
+  }
+
   showZoneLayer(displayed.length>0);
   renderMarkers();
   renderTable();
   updateMapFoot();
 }
 
-/* MOD 6: Bulletproof clearFilters – resets every piece of state completely */
 function clearFilters(){
   activeBucket = null;
-
-  /* Close all open dropdowns */
   document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
-
-  /* Reset overlay states */
   if(heatmapOn || heatLayer){
     heatmapOn = false;
     if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    const hBtn  = document.getElementById('heatBtn');
-    const mhBtn = document.getElementById('mob-heatBtn');
-    if(hBtn)  hBtn.classList.remove('on');
+    const hBtn=document.getElementById('heatBtn'), mhBtn=document.getElementById('mob-heatBtn');
+    if(hBtn) hBtn.classList.remove('on');
     if(mhBtn) mhBtn.classList.remove('on');
   }
   if(kdeOn || kdeLayer){
     kdeOn = false;
     if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    const kBtn  = document.getElementById('kdeBtn');
-    const mkBtn = document.getElementById('mob-kdeBtn');
-    if(kBtn)  kBtn.classList.remove('on');
+    const kBtn=document.getElementById('kdeBtn'), mkBtn=document.getElementById('mob-kdeBtn');
+    if(kBtn) kBtn.classList.remove('on');
     if(mkBtn) mkBtn.classList.remove('on');
   }
-  /* Ensure marker layer is visible */
   if(markerLayer && !map.hasLayer(markerLayer)) markerLayer.addTo(map);
-
-  /* Rebuild all filter options (all boxes checked = no filter) */
+  /* Reset sort */
+  sortColumn = null; sortDir = 'asc';
+  updateSortHeaders();
   rebuildFilters();
-  /* Re-render full dataset */
   applyFilters();
+}
+
+/* ═══════════════════════════════════════════════
+   MOD 5: TABLE SORT
+   ═══════════════════════════════════════════════ */
+/* Map column keys to sort-value extractors */
+function getSortValue(entity, col){
+  const info = getSrNoInfo(entity);
+  switch(col){
+    case 'srno':      return info ? info.srNo : 9999;
+    case 'pen':       return info ? info.pen : 'ZZZ';
+    case 'id':        return parseInt(entity.id, 10) || entity.id;
+    case 'animalId':  return info ? info.animal : 'ZZZ';
+    case 'category':  return (entity.category||'').toLowerCase();
+    case 'sex':       return (entity.sex||'').toLowerCase();
+    case 'tl':        return parseFloat(entity.tl) || 0;
+    case 'tagPlace':  return (entity.tagPlace||'').toLowerCase();
+    case 'latestFix': return entity.latestFix?.ts?.getTime() || 0;
+    case 'daysRel':   return entity.tagDate ? daysSince(entity.tagDate) : 99999;
+    case 'daysFix':   return entity.daysSinceLastFix !== null ? entity.daysSinceLastFix : 99999;
+    case 'status':    return (entity.status||'').toLowerCase();
+    case 'zone':      return (entity.zone||'').toLowerCase();
+    case 'lat':       return entity.latestFix?.lat || 0;
+    case 'lon':       return entity.latestFix?.lon || 0;
+    case 'remarks':   return (entity.remarks||'').toLowerCase();
+    default:          return 0;
+  }
+}
+
+function applySortToDisplayed(){
+  if(!sortColumn) return;
+  const dir = sortDir === 'asc' ? 1 : -1;
+  displayed.sort((a, b) => {
+    const va = getSortValue(a, sortColumn);
+    const vb = getSortValue(b, sortColumn);
+    if(va < vb) return -1 * dir;
+    if(va > vb) return  1 * dir;
+    return 0;
+  });
+}
+
+function sortTable(col){
+  if(sortColumn === col){
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortColumn = col;
+    sortDir = 'asc';
+  }
+  updateSortHeaders();
+  applySortToDisplayed();
+  renderTable();
+}
+
+function updateSortHeaders(){
+  document.querySelectorAll('.dtbl th').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    const icon = th.querySelector('.sort-icon');
+    if(icon) icon.textContent = '↕';
+  });
+  if(!sortColumn) return;
+  const activeTh = document.querySelector(`.dtbl th[data-col="${CSS.escape(sortColumn)}"]`);
+  if(activeTh){
+    activeTh.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    const icon = activeTh.querySelector('.sort-icon');
+    if(icon) icon.textContent = sortDir === 'asc' ? '▲' : '▼';
+  }
 }
 
 /* ═══════════════════════════════════════════════
    MARKERS & POPUPS
    ═══════════════════════════════════════════════ */
-/* MOD 4: Marker displays Sr. No instead of Radio ID */
+/* MOD 3: Marker shows Sr. No (1–30) instead of Radio ID */
 function markerIcon(entity){
   const color = MARKER_COLORS[entity.status] || MARKER_COLORS.missing;
   const info = getSrNoInfo(entity);
-  /* Display Sr. No if available, fall back to Radio ID */
   const displayText = info ? String(info.srNo) : entity.id;
-  const text = displayText;
-  const fs = text.length>=5?9:text.length>=4?10:12;
+  const fs = displayText.length >= 3 ? 11 : 13;
   return L.divIcon({
     className:'',
-    html:`<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};border:2px solid #fff;color:#fff;font:700 ${fs}px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">${escapeHtml(text.length>5?text.slice(0,5):text)}</div>`,
+    html:`<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};border:2px solid #fff;color:#fff;font:700 ${fs}px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">${escapeHtml(displayText.length>5?displayText.slice(0,5):displayText)}</div>`,
     iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-16]
   });
 }
 
+/* MOD 3: Popup prominently shows Sr. No, Animal ID, and Radio ID */
 function popupHtml(entity){
   const fix = entity.latestFix;
   const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
   const daysRelease = entity.tagDate ? daysSince(entity.tagDate)+'d' : 'N/A';
   const daysFix     = entity.daysSinceLastFix !== null ? entity.daysSinceLastFix+'d' : '-';
-  /* MOD 4: Show Sr. No and Pen in popup header for context */
   const srInfo = getSrNoInfo(entity);
-  const srLabel = srInfo ? `Sr. No ${srInfo.srNo} | Pen ${srInfo.pen} | ` : '';
+
+  /* Badge display in header */
+  const badgeParts = [];
+  if(srInfo) badgeParts.push(`#${srInfo.srNo}`);
+  if(srInfo) badgeParts.push(`Pen ${srInfo.pen}`);
+  badgeParts.push('Pali FTH 2025');
+  const subLine = badgeParts.join(' | ');
+
+  /* Sr. No badge shown inside the circular icon */
+  const badgeText = srInfo ? String(srInfo.srNo) : entity.id;
 
   return `<div>
     <div class="pop-top">
-      <div class="pop-id-badge" style="background:${color}">${escapeHtml(entity.id.length>5?entity.id.slice(0,5):entity.id)}</div>
+      <div class="pop-id-badge" style="background:${color}">${escapeHtml(badgeText)}</div>
       <div>
-        <div class="pop-id">${escapeHtml(entity.id)}</div>
-        <div class="pop-sub">${badgeHtml(entity.status)} | ${srLabel}Pali FTH 2025</div>
+        <div class="pop-id">Radio ID: ${escapeHtml(entity.id)}</div>
+        <div class="pop-sub">${badgeHtml(entity.status)} | ${escapeHtml(subLine)}</div>
       </div>
     </div>
     <div class="pop-body">
       ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
+      ${srInfo ? `
+      <div class="pop-animal-id">
+        <span class="pop-label">Animal ID</span>
+        <span class="pop-value">${escapeHtml(srInfo.animal)}</span>
+      </div>
+      <div class="pop-row"><span class="pop-label">Sr. No</span><span class="pop-value">${escapeHtml(String(srInfo.srNo))}</span></div>
+      <div class="pop-row"><span class="pop-label">Pen</span><span class="pop-value">${escapeHtml(srInfo.pen)}</span></div>
+      ` : ''}
       <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
       <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
       <div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">${escapeHtml(entity.tl||'-')}</span></div>
@@ -1469,7 +1556,7 @@ function renderMarkers(){
     const fix = entity.latestFix;
     if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)) return;
     const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity),keyboard:false});
-    marker.bindPopup(popupHtml(entity),{maxWidth:330});
+    marker.bindPopup(popupHtml(entity),{maxWidth:340});
     marker.on('popupclose',()=>marker.setLatLng([fix.lat,fix.lon]));
     markerLayer.addLayer(marker);
     oms.addMarker(marker);
@@ -1502,7 +1589,7 @@ function focusTableRow(id){
 }
 
 /* ═══════════════════════════════════════════════
-   TABLE  (MOD 4: adds Sr. No and Pen columns)
+   TABLE  (MOD 3/4/5: Animal ID col, Sr.No, Pen, sortable)
    ═══════════════════════════════════════════════ */
 function renderTable(){
   const body = document.getElementById('tableBody');
@@ -1510,7 +1597,7 @@ function renderTable(){
   displayRows = displayed;
   document.getElementById('tableBadge').textContent = displayed.length+' records';
   if(!displayed.length){
-    body.innerHTML='<tr class="no-data"><td colspan="15">No records match the current filters.</td></tr>';return;
+    body.innerHTML='<tr class="no-data"><td colspan="16">No records match the current filters.</td></tr>';return;
   }
   displayed.forEach(entity=>{
     const fix = entity.latestFix;
@@ -1518,14 +1605,16 @@ function renderTable(){
     const daysFix     = entity.daysSinceLastFix !== null ? entity.daysSinceLastFix : '-';
     const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
     const srInfo = getSrNoInfo(entity);
-    const srNoDisplay = srInfo ? String(srInfo.srNo) : '-';
-    const penDisplay  = srInfo ? srInfo.pen : '-';
+    const srNoDisplay  = srInfo ? String(srInfo.srNo)  : '-';
+    const penDisplay   = srInfo ? srInfo.pen           : '-';
+    const animalDisplay= srInfo ? srInfo.animal        : '-';
     const tr = document.createElement('tr');
     tr.dataset.rowId = entity.id;
     tr.innerHTML =
-      `<td><strong style="color:${color}">${escapeHtml(entity.id)}</strong></td>`+
       `<td>${escapeHtml(srNoDisplay)}</td>`+
       `<td>${escapeHtml(penDisplay)}</td>`+
+      `<td><strong style="color:${color}">${escapeHtml(entity.id)}</strong></td>`+
+      `<td><strong style="color:var(--forest-2)">${escapeHtml(animalDisplay)}</strong></td>`+
       `<td>${escapeHtml(entity.category||'-')}</td>`+
       `<td>${escapeHtml(entity.sex||'-')}</td>`+
       `<td>${escapeHtml(entity.tl||'-')}</td>`+
@@ -1545,6 +1634,8 @@ function renderTable(){
     });
     body.appendChild(tr);
   });
+  /* Re-apply sort header state visually after render */
+  updateSortHeaders();
 }
 
 function updateMapFoot(){
@@ -1669,24 +1760,14 @@ function loadUpdates(rows){
   }
 
   const rd = getUpdateDate(sorted[0]);
-  if(rd){
-    latestDate.textContent = fmtDateOnly(rd);
-  } else {
-    const rawVal = gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date');
-    latestDate.textContent = rawVal || 'Date unavailable';
-  }
+  latestDate.textContent = rd ? fmtDateOnly(rd) : (gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Date unavailable');
   const textContent = gc(sorted[0],'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
   latestText.innerHTML = formatUpdateText(textContent);
 
   sorted.slice(1).forEach(row=>{
     const rowDate=getUpdateDate(row);
     const item=document.createElement('div'); item.className='fu';
-    let dateStr;
-    if(rowDate){
-      dateStr = fmtDateOnly(rowDate);
-    } else {
-      dateStr = gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Unknown date';
-    }
+    const dateStr = rowDate ? fmtDateOnly(rowDate) : (gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Unknown date');
     const rowText = gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
     item.innerHTML='<div class="fu-date">'+escapeHtml(dateStr)+'</div>'+
       '<div class="update-content">'+formatUpdateText(rowText)+'</div>';
@@ -1709,12 +1790,8 @@ function toggleFilterBar(){
   document.getElementById('map-wrap').style.top=filterBarHidden?'var(--hdr)':'calc(var(--hdr) + var(--fbar))';
   const fp = document.getElementById('fp');
   if(fp && !isMobile()){
-    fp.style.top = filterBarHidden
-      ? 'var(--hdr)'
-      : 'calc(var(--hdr) + var(--fbar))';
-    fp.style.height = filterBarHidden
-      ? 'calc(100vh - var(--hdr))'
-      : 'calc(100vh - var(--hdr) - var(--fbar))';
+    fp.style.top = filterBarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
+    fp.style.height = filterBarHidden ? 'calc(100vh - var(--hdr))' : 'calc(100vh - var(--hdr) - var(--fbar))';
   }
   setTimeout(()=>map.invalidateSize(),220);
 }
@@ -1769,23 +1846,27 @@ function closeMobileDrawer(){
 }
 
 function rebuildMobileFilters(){
-  const allIds=[...new Set(entities.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
-  buildMobMSOptions('rid',allIds);
+  /* Sr. No – raw numbers */
+  const srnoOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
+  buildMobMSOptions('srno', srnoOpts);  /* no formatter */
 
+  /* Pen */
+  const penOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
+  buildMobMSOptions('pen', penOpts);
+
+  /* Radio IDs */
+  const allIds=[...new Set(entities.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMobMSOptions('rid', allIds);
+
+  /* Zones */
   const zoneCounts={};
   entities.forEach(e=>{const z=e.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});
   const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
-  buildMobMSOptions('zone',sortedZones,z=>z+' ('+zoneCounts[z]+')');
+  buildMobMSOptions('zone', sortedZones, z=>z+' ('+zoneCounts[z]+')');
 
+  /* Status */
   const statuses=['active','missing','missing_start','water','recovered'];
-  buildMobMSOptions('status',statuses,s=>statusLabel(s));
-
-  /* MOD 4: Sr. No and Pen for mobile */
-  const srnoOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
-  buildMobMSOptions('srno',srnoOpts,n=>'Sr. No '+n);
-
-  const penOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
-  buildMobMSOptions('pen',penOpts);
+  buildMobMSOptions('status', statuses, s=>statusLabel(s));
 }
 
 function buildMobMSOptions(key,options,formatter){
@@ -1836,9 +1917,8 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#mobileDrawer .ms-wrap')) document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
 });
 
-/* MOD 6: mobileApplyFilters syncs all 5 filter keys including srno and pen */
 function mobileApplyFilters(){
-  ['rid','zone','status','srno','pen'].forEach(key=>{
+  ['srno','pen','rid','zone','status'].forEach(key=>{
     const mobChecked=new Set([...document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]:checked')].map(i=>i.value));
     const desktopInputs=document.querySelectorAll('#msi-'+key+' input[type=checkbox]');
     if(desktopInputs.length){
@@ -1849,9 +1929,10 @@ function mobileApplyFilters(){
   applyFilters(); closeMobileDrawer();
 }
 
-/* MOD 6: mobileClearFilters fully resets all state including activeBucket */
 function mobileClearFilters(){
   activeBucket = null;
+  sortColumn = null; sortDir = 'asc';
+  updateSortHeaders();
   document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
   rebuildFilters();
   applyFilters();
