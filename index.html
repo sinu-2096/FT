@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025</title>
+<!-- CHANGE 2: Updated document title -->
+<title>Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025 in Pali FTH 2025 Hatchlings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -25,15 +26,12 @@
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  /* ── MOD 2: increased header height to 144px to fully contain two-row layout ── */
   --hdr:144px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
   --mono:'IBM Plex Mono',monospace;
   --font:'Space Grotesk',sans-serif;
-
-  /* ── Status bucket accent colours ── */
   --col-active:#16a34a;
   --col-missing:#d97706;
   --col-missing-start:#7c3aed;
@@ -73,8 +71,57 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
+/* CHANGE 4: Help Modal styles */
+#helpModalBg{
+  display:none;position:fixed;inset:0;z-index:99000;
+  background:rgba(9,22,15,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;animation:fadeIn .2s ease;
+}
+#helpModalBg.open{display:flex}
+.help-card{
+  position:relative;width:min(600px,92vw);max-height:88vh;overflow-y:auto;
+  border-radius:20px;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,.3);
+  display:flex;flex-direction:column;
+}
+.help-card-hdr{
+  padding:20px 22px 16px;
+  background:linear-gradient(110deg,#163a2e 0%,#215742 100%);
+  border-bottom:2px solid rgba(126,207,155,.45);
+  border-radius:20px 20px 0 0;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  color:#fff;flex-shrink:0;
+}
+.help-card-hdr h2{font:700 1rem var(--mono);letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.help-card-close{
+  width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .14s ease;
+}
+.help-card-close:hover{background:rgba(255,255,255,.24);color:#fff}
+.help-card-body{padding:22px 22px 26px;display:flex;flex-direction:column;gap:16px}
+.help-intro{font:500 .82rem/1.6 var(--font);color:var(--muted)}
+.help-list{list-style:none;display:flex;flex-direction:column;gap:12px}
+.help-list li{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-radius:12px;
+  background:var(--panel-2);border:1px solid var(--line);
+}
+.help-list li .help-num{
+  width:26px;height:26px;border-radius:50%;background:var(--forest-2);color:#fff;
+  font:700 .7rem var(--mono);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.help-list li .help-text{font:500 .8rem/1.55 var(--font);color:var(--text)}
+.help-list li .help-text strong{font-weight:700;color:var(--forest-2)}
+@media(max-width:767px){
+  .help-card-hdr h2{font-size:.82rem}
+  .help-card-body{padding:16px 16px 22px}
+  .help-list li{padding:10px 12px}
+  .help-list li .help-text{font-size:.74rem}
+}
+
 /* ─── Header ─── */
-/* MOD 2: Two-row grid; height matches --hdr=144px so status blocks never clip into filter bar */
 #hdr{
   position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;
   display:grid;
@@ -91,14 +138,13 @@ button{cursor:pointer}
 .hdr-logos{display:flex;align-items:center;gap:8px;grid-row:1}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
-/* MOD 1: Consistent 44px height for all three logos */
 .hdr-logos img{height:44px;max-width:106px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.34))}
 .hdr-divider{width:1px;height:34px;background:rgba(255,255,255,.18);grid-row:1}
 .hdr-brand{min-width:0;grid-row:1}
 .hdr-title{font:700 1.04rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
 
-/* ─── Status Blocks – full-width row 2 ── */
+/* ─── Status Blocks ── */
 #statusBlocks{
   grid-row:2;
   grid-column:1/-1;
@@ -122,7 +168,6 @@ button{cursor:pointer}
 .sblock.clickable{cursor:pointer}
 .sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
 .sblock.muted{color:rgba(255,255,255,.42)}
-/* MOD 2: Legible font sizes that still fit in 144px header */
 .sblock-label{font:700 .6rem var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;line-height:1.2}
 .sblock-count{font:700 1.15rem var(--mono);line-height:1}
 .sblock-sub{font:500 .5rem var(--mono);color:rgba(255,255,255,.52);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
@@ -132,7 +177,6 @@ button{cursor:pointer}
 .sblock[data-bucket="water"]         {border-left-color:var(--col-water)}
 .sblock[data-bucket="recovered"]     {border-left-color:var(--col-recovered)}
 
-/* Header actions – row 1 */
 .hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative;grid-row:1}
 .syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:88px;justify-self:end;grid-row:1}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
@@ -175,7 +219,8 @@ button{cursor:pointer}
 
 /* ─── Map ─── */
 #map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1}
-#map{width:100%;height:100%}
+/* CHANGE 1: Blank basemap – background set to sand */
+#map{width:100%;height:100%;background:var(--sand)}
 .leaflet-control-attribution{display:none}
 .leaflet-popup-content-wrapper{border-radius:16px;border:1px solid var(--line-2);box-shadow:var(--shadow-lg)}
 .leaflet-popup-content{margin:0}
@@ -185,11 +230,13 @@ button{cursor:pointer}
 path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .leaflet-interactive:active{outline:none!important}
 .leaflet-container a.leaflet-popup-close-button:focus{outline:none}
+/* CHANGE 1: Override Leaflet's default grey tile container background */
+.leaflet-container{background:var(--sand)!important}
 .map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
 .fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
 .fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
 
-/* ─── Legend – top-right, collapsible ─── */
+/* ─── Legend ─── */
 #legend{position:absolute;right:12px;top:12px;z-index:500;min-width:0;border-radius:14px;background:rgba(255,255,255,.97);border:1px solid var(--line-2);box-shadow:var(--shadow);overflow:hidden;transition:min-width .18s ease}
 #legend-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--panel-2);cursor:pointer;user-select:none}
 #legend-header:hover{background:#eef8f1}
@@ -218,7 +265,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pop-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
 .pop-label{font:700 .54rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
 .pop-value{font:600 .74rem var(--mono);color:var(--text);text-align:right}
-/* MOD 3: Animal ID highlight row */
 .pop-animal-id{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pop-animal-id .pop-label{color:#166534}
 .pop-animal-id .pop-value{color:#166534;font-weight:700;font-size:.82rem}
@@ -263,12 +309,10 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .bc{height:28px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.12);color:#fff;font:700 .58rem var(--mono)}
 .bc:hover{background:rgba(255,255,255,.2)}
 #btmScroll{flex:1;overflow:auto;min-height:0}
-/* MOD 5: Table styles with sortable headers */
 .dtbl{width:100%;border-collapse:collapse;font:600 .74rem var(--mono);white-space:nowrap}
 .dtbl th,.dtbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 .dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .65rem var(--mono);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;user-select:none;white-space:nowrap}
 .dtbl th:hover{background:#e8f4eb;color:var(--forest-2)}
-/* Sort icon spans */
 .sort-icon{display:inline-block;margin-left:4px;opacity:.3;font-size:.58rem;vertical-align:middle;transition:opacity .1s ease}
 .dtbl th.sort-asc .sort-icon,
 .dtbl th.sort-desc .sort-icon{opacity:1;color:var(--forest-3)}
@@ -362,6 +406,9 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   .loading-logos .loading-divider{height:44px}
   .loading-list{grid-template-columns:1fr}
   .loading-card{padding:24px 18px;gap:12px}
+  /* Help modal mobile */
+  .help-card{border-radius:20px 20px 0 0;max-height:90vh;position:fixed;bottom:0;left:0;right:0;width:100%}
+  #helpModalBg{align-items:flex-end}
 }
 @media(max-width:380px){
   .hdr-logos img{height:24px;max-width:50px}
@@ -381,13 +428,13 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <div class="loading-divider"></div>
       <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
       <div class="loading-divider"></div>
-      <!-- MOD 1: RJFD logo on loading screen -->
       <a href="https://forest.rajasthan.gov.in/content/raj/forest/en/home.html#" target="_blank" rel="noopener">
         <img src="image.png" alt="RJFD" onerror="this.style.display='none'">
       </a>
     </div>
     <div class="loading-ring"></div>
-    <div class="loading-title">Pali FTH 2025 Hatchlings</div>
+    <!-- CHANGE 2: Updated loading screen title -->
+    <div class="loading-title">Palighat Fast-Track Head-Start 2025 in Pali FTH 2025 Hatchlings</div>
     <div class="loading-copy" id="loadingCopy">Loading hatchling telemetry data...</div>
     <div class="loading-list">
       <div class="loading-item" id="ld-master">Radio Master Dictionary</div>
@@ -400,8 +447,42 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 
 <div id="toast"></div>
 
+<!-- CHANGE 4: Help Modal -->
+<div id="helpModalBg" onclick="closeHelpModal(event)">
+  <div class="help-card" role="dialog" aria-modal="true" aria-label="Help - How to use this tool">
+    <div class="help-card-hdr">
+      <h2>❓ How to Use This Tool</h2>
+      <button class="help-card-close" type="button" onclick="toggleHelpModal()" aria-label="Close help">✕</button>
+    </div>
+    <div class="help-card-body">
+      <p class="help-intro">This dashboard visualises post-release telemetry for Pali FTH 2025 gharial hatchlings. Here's a quick guide to get started:</p>
+      <ol class="help-list">
+        <li>
+          <span class="help-num">1</span>
+          <span class="help-text"><strong>Filter Data</strong> — Use the dropdowns in the top filter bar (or the mobile ☰ menu) to narrow results by Animal_ID, Pen, Radio ID, Zone, or Status. Hit <em>Apply</em> to refresh the map and table.</span>
+        </li>
+        <li>
+          <span class="help-num">2</span>
+          <span class="help-text"><strong>View Details</strong> — Click any circular marker on the blank map to open a popup showing telemetry data, Enclosure_ID, coordinates, days since last fix, and more.</span>
+        </li>
+        <li>
+          <span class="help-num">3</span>
+          <span class="help-text"><strong>Locate on Map</strong> — Click any row in the bottom data table to automatically fly the map to that individual's marker and highlight it.</span>
+        </li>
+        <li>
+          <span class="help-num">4</span>
+          <span class="help-text"><strong>Analyze Density</strong> — Toggle the <em>Heatmap</em> or <em>KDE</em> buttons in the filter bar to visualise where animals are clustering across the river stretch.</span>
+        </li>
+        <li>
+          <span class="help-num">5</span>
+          <span class="help-text"><strong>Track Updates</strong> — Click <em>Field Updates</em> in the header to open a panel with the latest manual logs and notes submitted by the ground team.</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+
 <header id="hdr">
-  <!-- MOD 1: Three logos with dividers – MCBT | GEP | RJFD -->
   <div class="hdr-logos">
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
       <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
@@ -411,18 +492,17 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
     </a>
     <div class="hdr-divider"></div>
-    <!-- MOD 1: Rajasthan Forest Department logo -->
     <a href="https://forest.rajasthan.gov.in/content/raj/forest/en/home.html#" target="_blank" rel="noopener" title="Rajasthan Forest Department">
       <img src="image.png" alt="RJFD" onerror="this.style.display='none'">
     </a>
   </div>
   <div class="hdr-divider"></div>
   <div class="hdr-brand">
-    <div class="hdr-title">Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025</div>
+    <!-- CHANGE 2: Updated header title -->
+    <div class="hdr-title">Palighat Fast-Track Head-Start 2025 in Pali FTH 2025 Hatchlings</div>
     <div class="hdr-sub">Post Release Monitoring | 30 Individuals</div>
   </div>
 
-  <!-- MOD 2: Status blocks in row 2 with improved legible sizing -->
   <div id="statusBlocks">
     <button class="sblock clickable" id="sb-active" data-bucket="active" type="button" onclick="toggleBucket('active')">
       <span class="sblock-label">Active</span>
@@ -456,6 +536,9 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <span id="syncTime">-</span>
   </div>
   <div class="hdr-actions">
+    <!-- CHANGE 4: Info and Help buttons added before Refresh -->
+    <button class="hbtn" type="button" aria-label="Information" title="Gharial Ecology Project – Post-Release Telemetry Dashboard v2025">ℹ️</button>
+    <button class="hbtn" type="button" onclick="toggleHelpModal()" aria-label="Help">❓</button>
     <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">↺</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
     <button class="hbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()">Field Updates</button>
@@ -463,12 +546,12 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </header>
 
-<!-- MOD 4: Filter order: Sr. No → Pen → Radio ID → Zone → Status -->
+<!-- CHANGE 3: "Sr. No" label → "Animal_ID" in desktop filter bar -->
 <div id="fbar">
   <div id="fbar-inner">
-    <!-- 1. Sr. No -->
+    <!-- 1. Animal_ID (was Sr. No) -->
     <div class="fg">
-      <label>Sr. No</label>
+      <label>Animal_ID</label>
       <div class="ms-wrap">
         <button class="ms-btn disabled" id="msb-srno" type="button" onclick="toggleMS('srno',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-srno">
@@ -555,7 +638,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 </div>
 
 <div id="drawerBg" onclick="closeMobileDrawer()"></div>
-<!-- MOD 4: Mobile drawer also in order: Sr. No → Pen → Radio ID → Zone → Status -->
+<!-- CHANGE 3: "Sr. No" → "Animal_ID" in mobile drawer -->
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="drawer-handle"></div>
   <div class="drawer-hdr">
@@ -563,9 +646,9 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
   </div>
   <div class="drawer-body">
-    <!-- 1. Sr. No -->
+    <!-- 1. Animal_ID (was Sr. No) -->
     <div class="drawer-row">
-      <span class="drawer-label">Sr. No</span>
+      <span class="drawer-label">Animal_ID</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
         <button class="ms-btn disabled" id="mob-msb-srno" type="button" onclick="toggleMobMS('srno',event)">
           <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
@@ -712,14 +795,14 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
   </div>
   <div id="btmScroll">
-    <!-- MOD 5: Sortable table – each <th> has onclick + a .sort-icon span -->
+    <!-- CHANGE 3: "Sr. No" → "Animal_ID", "Animal ID" → "Enclosure_ID" in table headers -->
     <table class="dtbl">
       <thead>
         <tr>
-          <th onclick="sortTable('srno')"      data-col="srno">      Sr. No <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('srno')"      data-col="srno">      Animal_ID <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('pen')"       data-col="pen">       Pen <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('id')"        data-col="id">        Radio ID <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable('animalId')"  data-col="animalId">  Animal ID <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable('animalId')"  data-col="animalId">  Enclosure_ID <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('category')"  data-col="category">  Category <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('sex')"       data-col="sex">       Sex <span class="sort-icon">↕</span></th>
           <th onclick="sortTable('tl')"        data-col="tl">        T.L (cm) <span class="sort-icon">↕</span></th>
@@ -820,7 +903,6 @@ const WATER_IDS          = new Set(['31','38','72']);
 const HARD_MISSING_IDS   = new Set(['39','40','62','82']);
 const HARD_ACTIVE_IDS    = new Set(['32','37','65','67','69','71','74','78','80','90','92','94']);
 
-/* MOD 3/4: Sr. No & Pen mapping – canonical key = OLD Radio ID for retagged */
 const SR_NO_MAP = {
   '30':{ srNo:1,  pen:'P3', animal:'P3-G3' },
   '31':{ srNo:2,  pen:'P3', animal:'P3-G1' },
@@ -836,7 +918,7 @@ const SR_NO_MAP = {
   '62':{ srNo:12, pen:'P5', animal:'P5-G1' },
   '64':{ srNo:13, pen:'P5', animal:'P5-G5' },
   '66':{ srNo:14, pen:'P5', animal:'P5-G2' },
-  '68':{ srNo:15, pen:'P5', animal:'P5-G4' },   /* now Radio 65 */
+  '68':{ srNo:15, pen:'P5', animal:'P5-G4' },
   '70':{ srNo:16, pen:'P6', animal:'P6-G5' },
   '72':{ srNo:17, pen:'P6', animal:'P6-G1' },
   '74':{ srNo:18, pen:'P6', animal:'P6-G4' },
@@ -844,9 +926,9 @@ const SR_NO_MAP = {
   '78':{ srNo:20, pen:'P6', animal:'P6-G2' },
   '80':{ srNo:21, pen:'P7', animal:'P7-G2' },
   '82':{ srNo:22, pen:'P7', animal:'P7-G1' },
-  '84':{ srNo:23, pen:'P7', animal:'P7-G5' },   /* now Radio 67 */
-  '86':{ srNo:24, pen:'P7', animal:'P7-G4' },   /* now Radio 69 */
-  '88':{ srNo:25, pen:'P7', animal:'P7-G3' },   /* now Radio 71 */
+  '84':{ srNo:23, pen:'P7', animal:'P7-G5' },
+  '86':{ srNo:24, pen:'P7', animal:'P7-G4' },
+  '88':{ srNo:25, pen:'P7', animal:'P7-G3' },
   '90':{ srNo:26, pen:'P8', animal:'P8-G2' },
   '92':{ srNo:27, pen:'P8', animal:'P8-G3' },
   '94':{ srNo:28, pen:'P8', animal:'P8-G1' },
@@ -897,9 +979,8 @@ let geojsonData = null;
 let zonePolygons = [];
 let entityMarkerMap = {};
 
-/* MOD 5: Table sort state */
-let sortColumn = null;   /* key string e.g. 'srno', 'id', 'latestFix' */
-let sortDir    = 'asc';  /* 'asc' | 'desc' */
+let sortColumn = null;
+let sortDir    = 'asc';
 
 /* ═══════════════════════════════════════════════
    UTILITY
@@ -981,7 +1062,6 @@ function toast(msg,ok=false){
   clearTimeout(el._t); el._t=setTimeout(()=>{el.className='';},3600);
 }
 
-/* MOD 3/4: Resolve Sr. No info (handles retagged radios) */
 function getSrNoInfo(entity){
   let info = SR_NO_MAP[entity.id];
   if(!info){
@@ -1019,7 +1099,7 @@ function badgeHtml(bucket){
 function initMap(){
   map = L.map('map',{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,bounceAtZoomLimits:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
+  // CHANGE 1: Google Satellite tile layer removed — map is now blank (sand background)
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{
     keepSpiderfied: true,
@@ -1245,24 +1325,20 @@ function renderLegend(){
    FILTER DROPDOWNS
    ═══════════════════════════════════════════════ */
 function rebuildFilters(){
-  /* MOD 4: Sr. No options – raw numbers only, no prefix */
   const srnoOptions=[...new Set(entities.map(e=>{
     const i=getSrNoInfo(e); return i?String(i.srNo):null;
   }).filter(Boolean))].sort((a,b)=>+a-+b);
-  buildMSOptions('srno', srnoOptions);   /* no formatter → raw number displayed */
+  buildMSOptions('srno', srnoOptions);
 
-  /* MOD 4: Pen options */
   const penOptions=[...new Set(entities.map(e=>{
     const i=getSrNoInfo(e); return i?i.pen:null;
   }).filter(Boolean))].sort();
   buildMSOptions('pen', penOptions);
 
-  /* Radio IDs */
   const allIds = [...new Set(entities.map(e=>e.id))].sort((a,b)=>
     String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
   buildMSOptions('rid', allIds);
 
-  /* Zones */
   const zoneCounts={};
   entities.forEach(e=>{
     const z=e.zone||'-';
@@ -1274,7 +1350,6 @@ function rebuildFilters(){
   const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
   buildMSOptions('zone', sortedZones, z=>z+' ('+zoneCounts[z]+')');
 
-  /* Status */
   const statuses = ['active','missing','missing_start','water','recovered'];
   buildMSOptions('status', statuses, s=>statusLabel(s));
 
@@ -1363,7 +1438,6 @@ function applyFilters(){
     return true;
   });
 
-  /* Default sort by latest fix date desc */
   if(!sortColumn){
     displayed.sort((a,b)=>{
       const ta=a.latestFix?.ts?.getTime()||0, tb=b.latestFix?.ts?.getTime()||0;
@@ -1397,7 +1471,6 @@ function clearFilters(){
     if(mkBtn) mkBtn.classList.remove('on');
   }
   if(markerLayer && !map.hasLayer(markerLayer)) markerLayer.addTo(map);
-  /* Reset sort */
   sortColumn = null; sortDir = 'asc';
   updateSortHeaders();
   rebuildFilters();
@@ -1405,9 +1478,8 @@ function clearFilters(){
 }
 
 /* ═══════════════════════════════════════════════
-   MOD 5: TABLE SORT
+   TABLE SORT
    ═══════════════════════════════════════════════ */
-/* Map column keys to sort-value extractors */
 function getSortValue(entity, col){
   const info = getSrNoInfo(entity);
   switch(col){
@@ -1473,7 +1545,6 @@ function updateSortHeaders(){
 /* ═══════════════════════════════════════════════
    MARKERS & POPUPS
    ═══════════════════════════════════════════════ */
-/* MOD 3: Marker shows Sr. No (1–30) instead of Radio ID */
 function markerIcon(entity){
   const color = MARKER_COLORS[entity.status] || MARKER_COLORS.missing;
   const info = getSrNoInfo(entity);
@@ -1486,7 +1557,7 @@ function markerIcon(entity){
   });
 }
 
-/* MOD 3: Popup prominently shows Sr. No, Animal ID, and Radio ID */
+/* CHANGE 3: Popup strings updated — "Sr. No" → "Animal_ID", "Animal ID" → "Enclosure_ID" */
 function popupHtml(entity){
   const fix = entity.latestFix;
   const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
@@ -1494,14 +1565,12 @@ function popupHtml(entity){
   const daysFix     = entity.daysSinceLastFix !== null ? entity.daysSinceLastFix+'d' : '-';
   const srInfo = getSrNoInfo(entity);
 
-  /* Badge display in header */
   const badgeParts = [];
   if(srInfo) badgeParts.push(`#${srInfo.srNo}`);
   if(srInfo) badgeParts.push(`Pen ${srInfo.pen}`);
   badgeParts.push('Pali FTH 2025');
   const subLine = badgeParts.join(' | ');
 
-  /* Sr. No badge shown inside the circular icon */
   const badgeText = srInfo ? String(srInfo.srNo) : entity.id;
 
   return `<div>
@@ -1516,10 +1585,10 @@ function popupHtml(entity){
       ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
       ${srInfo ? `
       <div class="pop-animal-id">
-        <span class="pop-label">Animal ID</span>
+        <span class="pop-label">Enclosure_ID</span>
         <span class="pop-value">${escapeHtml(srInfo.animal)}</span>
       </div>
-      <div class="pop-row"><span class="pop-label">Sr. No</span><span class="pop-value">${escapeHtml(String(srInfo.srNo))}</span></div>
+      <div class="pop-row"><span class="pop-label">Animal_ID</span><span class="pop-value">${escapeHtml(String(srInfo.srNo))}</span></div>
       <div class="pop-row"><span class="pop-label">Pen</span><span class="pop-value">${escapeHtml(srInfo.pen)}</span></div>
       ` : ''}
       <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
@@ -1589,7 +1658,7 @@ function focusTableRow(id){
 }
 
 /* ═══════════════════════════════════════════════
-   TABLE  (MOD 3/4/5: Animal ID col, Sr.No, Pen, sortable)
+   TABLE
    ═══════════════════════════════════════════════ */
 function renderTable(){
   const body = document.getElementById('tableBody');
@@ -1634,7 +1703,6 @@ function renderTable(){
     });
     body.appendChild(tr);
   });
-  /* Re-apply sort header state visually after render */
   updateSortHeaders();
 }
 
@@ -1779,6 +1847,23 @@ function toggleFieldPanel(){ document.getElementById('fp').classList.toggle('ope
 function closeFieldPanel(){ document.getElementById('fp').classList.remove('open'); document.getElementById('fpBg').classList.remove('open'); }
 
 /* ═══════════════════════════════════════════════
+   CHANGE 4: Help Modal JS
+   ═══════════════════════════════════════════════ */
+function toggleHelpModal(){
+  document.getElementById('helpModalBg').classList.toggle('open');
+}
+function closeHelpModal(event){
+  /* Only close when clicking the dark overlay itself, not the card */
+  if(event.target === document.getElementById('helpModalBg')){
+    document.getElementById('helpModalBg').classList.remove('open');
+  }
+}
+/* Close help modal on Escape key */
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') document.getElementById('helpModalBg').classList.remove('open');
+});
+
+/* ═══════════════════════════════════════════════
    LAYOUT
    ═══════════════════════════════════════════════ */
 function isMobile(){ return window.innerWidth<=767; }
@@ -1846,25 +1931,20 @@ function closeMobileDrawer(){
 }
 
 function rebuildMobileFilters(){
-  /* Sr. No – raw numbers */
   const srnoOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
-  buildMobMSOptions('srno', srnoOpts);  /* no formatter */
+  buildMobMSOptions('srno', srnoOpts);
 
-  /* Pen */
   const penOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
   buildMobMSOptions('pen', penOpts);
 
-  /* Radio IDs */
   const allIds=[...new Set(entities.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
   buildMobMSOptions('rid', allIds);
 
-  /* Zones */
   const zoneCounts={};
   entities.forEach(e=>{const z=e.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});
   const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
   buildMobMSOptions('zone', sortedZones, z=>z+' ('+zoneCounts[z]+')');
 
-  /* Status */
   const statuses=['active','missing','missing_start','water','recovered'];
   buildMobMSOptions('status', statuses, s=>statusLabel(s));
 }
