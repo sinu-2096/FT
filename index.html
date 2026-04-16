@@ -269,6 +269,24 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pop-animal-id .pop-label{color:#166534}
 .pop-animal-id .pop-value{color:#166534;font-weight:700;font-size:.82rem}
 .pop-retag{margin:6px 0;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde68a;font:600 .62rem var(--mono);color:#78350f}
+.pop-details-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--panel-2);
+  color: var(--forest-2);
+  font: 700 .62rem var(--mono);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: all .15s ease;
+}
+.pop-details-btn:hover {
+  background: #eef8f1;
+  border-color: #8ab99a;
+}
 .pop-actions{display:flex;gap:6px;padding:10px 14px 14px 14px}
 .pab{flex:1;height:34px;border-radius:10px;border:1px solid var(--line-2);background:#eef8f1;color:var(--forest-2);font:700 .62rem var(--mono)}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
@@ -1095,6 +1113,16 @@ function getSrNoInfo(entity){
   }
   return info || null;
 }
+  function togglePopDetails(btn) {
+  const extra = btn.nextElementSibling;
+  if (extra.style.display === 'none' || !extra.style.display) {
+    extra.style.display = 'block';
+    btn.textContent = 'Hide Details ▴';
+  } else {
+    extra.style.display = 'none';
+    btn.textContent = 'View More Details ▾';
+  }
+}
 
 /* ═══════════════════════════════════════════════
    STATUS LOGIC
@@ -1691,6 +1719,7 @@ function markerIcon(entity){
 }
 
 /* CHANGE 3: Popup uses "Animal_ID" and "Enclosure_ID" labels */
+/* CHANGE: Popup split into Basic and Detailed views */
 function popupHtml(entity){
   const fix = entity.latestFix;
   const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
@@ -1715,29 +1744,35 @@ function popupHtml(entity){
       </div>
     </div>
     <div class="pop-body">
-      ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
+      
       ${srInfo ? `
       <div class="pop-animal-id">
         <span class="pop-label">Enclosure_ID</span>
         <span class="pop-value">${escapeHtml(srInfo.animal)}</span>
       </div>
       <div class="pop-row"><span class="pop-label">Animal_ID</span><span class="pop-value">${escapeHtml(String(srInfo.srNo))}</span></div>
-      <div class="pop-row"><span class="pop-label">Pen</span><span class="pop-value">${escapeHtml(srInfo.pen)}</span></div>
       ` : ''}
       <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">${escapeHtml(entity.tl||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
       <div class="pop-row"><span class="pop-label">Latest VHF Signal</span><span class="pop-value">${escapeHtml(fmtDateTime(fix?.ts))}</span></div>
-      <div class="pop-row"><span class="pop-label">Days Since Release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRelease)}</span></div>
       <div class="pop-row"><span class="pop-label">Days Since Last Fix</span><span class="pop-value">${escapeHtml(daysFix)}</span></div>
-      <div class="pop-telemetry-sep"></div>
-      <div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">${escapeHtml(entity.zone||'-')}</span></div>
       <div class="pop-row"><span class="pop-label">Current Place</span><span class="pop-value">${escapeHtml(fix?.place||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">${escapeHtml(fix?.activity||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Signal Strength</span><span class="pop-value">${escapeHtml(fix?.signal||'-')}</span></div>
       <div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">${fix?fix.lat.toFixed(5)+', '+fix.lon.toFixed(5):'-'}</span></div>
-      ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
+
+      <button class="pop-details-btn" type="button" onclick="togglePopDetails(this)">View More Details ▾</button>
+
+      <div class="pop-extra" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);">
+        ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
+        ${srInfo ? `<div class="pop-row"><span class="pop-label">Pen</span><span class="pop-value">${escapeHtml(srInfo.pen)}</span></div>` : ''}
+        <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">${escapeHtml(entity.tl||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">Days Since Release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRelease)}</span></div>
+        <div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">${escapeHtml(entity.zone||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">${escapeHtml(fix?.activity||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">Signal Strength</span><span class="pop-value">${escapeHtml(fix?.signal||'-')}</span></div>
+        ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
+      </div>
+      
     </div>
     <div class="pop-actions">
       <button class="pab" type="button" onclick="focusEntity('${escapeHtml(entity.id)}')">Focus</button>
