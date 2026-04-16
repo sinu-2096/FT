@@ -1466,19 +1466,32 @@ function msClearAll(key){document.querySelectorAll('#msi-'+key+' input[type=chec
 document.addEventListener('click',e=>{
   if(!e.target.closest('#fbar .ms-wrap')) document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
 });
-  function clearOtherIdFilters(activeKey) {
-  const idKeys = ['srno', 'enc', 'rid']; // Animal ID, Enclosure ID, Radio ID
-  if (!idKeys.includes(activeKey)) return;
-  idKeys.forEach(k => {
-    if (k !== activeKey) {
-      // Clear desktop
-      document.querySelectorAll('#msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
-      updateMSBtn(k);
-      // Clear mobile
-      document.querySelectorAll('#mob-msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
-      const mobBtn = document.getElementById('mob-msb-'+k);
-      if (mobBtn) updateMobMSBtn(k);
-    }
+ function clearOtherIdFilters(activeKey) {
+  // Group 1: Specific Individual Identifiers
+  const specificIds = ['srno', 'enc', 'rid'];
+  // Group 2: Broad Location/Group Categories
+  const broadCats = ['pen', 'zone'];
+
+  let keysToClear = [];
+
+  if (specificIds.includes(activeKey)) {
+    // If user clicks a specific animal, clear Pen, Zone, and the other IDs
+    keysToClear = ['srno', 'enc', 'rid', 'pen', 'zone'].filter(k => k !== activeKey);
+  } else if (broadCats.includes(activeKey)) {
+    // If user clicks Pen or Zone, clear only the specific IDs so the map doesn't go blank
+    // (This still allows you to mix and match Pen + Zone + Status!)
+    keysToClear = specificIds;
+  }
+
+  keysToClear.forEach(k => {
+    // Clear desktop dropdowns
+    document.querySelectorAll('#msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
+    updateMSBtn(k);
+    
+    // Clear mobile dropdowns
+    document.querySelectorAll('#mob-msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
+    const mobBtn = document.getElementById('mob-msb-'+k);
+    if (mobBtn) updateMobMSBtn(k);
   });
 }
 
