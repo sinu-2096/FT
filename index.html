@@ -1724,7 +1724,7 @@ function renderMarkers(){
   if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
 }
 
-ffunction focusEntity(id){
+function focusEntity(id){
   const marker = entityMarkerMap[id];
   if(!marker) return;
   Object.values(entityMarkerMap).forEach(m=>m.setZIndexOffset(0));
