@@ -1125,7 +1125,11 @@ function initMap(){
   map = L.map('map',{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,bounceAtZoomLimits:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
   // Tile layer retained (CHANGE 1 note: tiles load normally; markers start hidden via filter logic)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+ L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+  maxZoom:20,
+  subdomains:['mt0','mt1','mt2','mt3'],
+  attribution:'© <a href="https://maps.google.com" target="_blank">Google Maps</a>'
+}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{
     keepSpiderfied: true,
@@ -1461,9 +1465,8 @@ function selectedSet(key){
   const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
   if(!all.length||document.getElementById('msb-'+key)?.classList.contains('disabled')) return null;
   const checked=all.filter(i=>i.checked).map(i=>i.value);
-  // All selected → no filter
-  if(checked.length===all.length) return null;
-  // Return Set (may be empty = 0 selected = block all)
+  // Both extremes (none or all) → no constraint for this dimension
+  if(checked.length===0||checked.length===all.length) return null;
   return new Set(checked);
 }
 
@@ -1473,27 +1476,24 @@ function applyFilters(){
   const statusFilter = selectedSet('status');
   const srnoFilter   = selectedSet('srno');
   const penFilter    = selectedSet('pen');
-  const encFilter    = selectedSet('enc'); // CHANGE 3: new filter
+  const encFilter    = selectedSet('enc');
 
-  // CHANGE 1: If any active filter has 0 selections, show nothing
-  const activeFilters = [idFilter, zoneFilter, statusFilter, srnoFilter, penFilter, encFilter].filter(f => f !== null);
-  if(activeFilters.some(f => f.size === 0)){
-    displayed = [];
-    showZoneLayer(false);
-    renderMarkers();
-    renderTable();
-    updateMapFoot();
-    return;
-  }
+  // Clear existing markers and overlays before re-rendering
+  markerLayer.clearLayers();
+  entityMarkerMap = {};
+  try{ oms.clearMarkers && oms.clearMarkers(); }catch(e){}
+  if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
+  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer=null; }
 
+  // A null filter means "no constraint" — only a non-null Set filters to its members
   displayed = entities.filter(e=>{
-    if(idFilter && !idFilter.has(e.id)) return false;
-    if(zoneFilter && !zoneFilter.has(e.zone||'-')) return false;
-    if(statusFilter && !statusFilter.has(e.status)) return false;
+    if(idFilter     && !idFilter.has(e.id))                             return false;
+    if(zoneFilter   && !zoneFilter.has(e.zone||'-'))                    return false;
+    if(statusFilter && !statusFilter.has(e.status))                     return false;
     const info = getSrNoInfo(e);
-    if(srnoFilter && (!info || !srnoFilter.has(String(info.srNo)))) return false;
-    if(penFilter  && (!info || !penFilter.has(info.pen)))           return false;
-    if(encFilter  && (!info || !encFilter.has(info.animal)))        return false;
+    if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))   return false;
+    if(penFilter    && (!info || !penFilter.has(info.pen)))             return false;
+    if(encFilter    && (!info || !encFilter.has(info.animal)))          return false;
     return true;
   });
 
@@ -1790,8 +1790,99 @@ function renderHeatmap(){
   const fixes=getAllFixes();
   if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
   if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
-  if(!fixes.length){heatmapOn=false;document.getElementById('heatBtn').classList.remove('on');return;}
-  heatLayer=L.heatLayer(fixes.map(f=>[f.lat,f.lon,.65]),{radius:22,blur:18,maxZoom:17,gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}}).addTo(map);
+  if(!fixes.length){
+    heatmapOn=false;
+    const hBtn=document.getElementById('heatBtn'),mhBtn=document.getElementById('mob-heatBtn');
+    if(hBtn)hBtn.classList.remove('on');
+    if(mhBtn)mhBtn.classList.remove('on');
+    return;
+  }
+
+  /* ── Custom river-clipped heatmap layer ─────────────────────────────────
+     Renders Gaussian heat blobs onto a canvas that is clipped to the union
+     of all river-zone polygons from ZONE_GEOJSON_DATA, so the gradient
+     never spills onto land.
+  ──────────────────────────────────────────────────────────────────────── */
+  const ClippedHeat = L.Layer.extend({
+    initialize(pts){ this._pts = pts; },
+
+    onAdd(m){
+      this._map = m;
+      const c = document.createElement('canvas');
+      c.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;opacity:.78;z-index:220';
+      m.getPanes().overlayPane.appendChild(c);
+      this._canvas = c;
+      m.on('moveend zoomend resize', this._draw, this);
+      this._draw();
+    },
+
+    onRemove(m){
+      if(this._canvas && this._canvas.parentNode)
+        this._canvas.parentNode.removeChild(this._canvas);
+      m.off('moveend zoomend resize', this._draw, this);
+    },
+
+    _buildClipPath(ctx){
+      /* Convert every river-zone polygon ring to canvas coordinates and
+         trace a single compound path that will be used as the clip region. */
+      if(!geojsonData || !geojsonData.features || !geojsonData.features.length) return false;
+      let hasPoly = false;
+      ctx.beginPath();
+      geojsonData.features.forEach(f=>{
+        if(!f.geometry) return;
+        let rings = null;
+        if(f.geometry.type === 'Polygon')      rings = f.geometry.coordinates;
+        else if(f.geometry.type === 'MultiPolygon')
+          rings = f.geometry.coordinates.reduce((a,p)=>[...a,...p],[]);
+        if(!rings) return;
+        rings.forEach(ring=>{
+          if(ring.length < 3) return;
+          ring.forEach((coord, i)=>{
+            const cp = this._map.latLngToContainerPoint(L.latLng(coord[1], coord[0]));
+            i === 0 ? ctx.moveTo(cp.x, cp.y) : ctx.lineTo(cp.x, cp.y);
+          });
+          ctx.closePath();
+          hasPoly = true;
+        });
+      });
+      return hasPoly;
+    },
+
+    _draw(){
+      const sz  = this._map.getSize();
+      const c   = this._canvas;
+      c.width   = sz.x;
+      c.height  = sz.y;
+      L.DomUtil.setPosition(c, this._map.containerPointToLayerPoint([0, 0]));
+
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, sz.x, sz.y);
+      ctx.save();
+
+      /* Apply river-polygon clip before drawing a single pixel of heat */
+      const clipped = this._buildClipPath(ctx);
+      if(clipped) ctx.clip('evenodd');
+
+      /* Draw a radial gradient "blob" for every fix point.
+         Small radius + tight blur keeps heat hugging the thalweg. */
+      const R = 16, BLUR = 12;
+      this._pts.forEach(p=>{
+        const cp = this._map.latLngToContainerPoint(L.latLng(p[0], p[1]));
+        const g  = ctx.createRadialGradient(cp.x, cp.y, 0, cp.x, cp.y, R + BLUR);
+        g.addColorStop(0.00, 'rgba(127, 29, 29, 0.90)');
+        g.addColorStop(0.20, 'rgba(220, 38, 38, 0.72)');
+        g.addColorStop(0.45, 'rgba(253,141, 60, 0.48)');
+        g.addColorStop(0.72, 'rgba(254,217,142, 0.22)');
+        g.addColorStop(1.00, 'rgba(255,255,178, 0.00)');
+        ctx.fillStyle = g;
+        ctx.fillRect(cp.x-(R+BLUR), cp.y-(R+BLUR), (R+BLUR)*2, (R+BLUR)*2);
+      });
+
+      ctx.restore();
+    }
+  });
+
+  heatLayer = new ClippedHeat(fixes.map(f=>[f.lat, f.lon])).addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
@@ -1864,42 +1955,42 @@ function formatUpdateText(text){
 
 function loadUpdates(rows){
   updatesRows = rows||[];
-  const sorted=updatesRows.filter(row=>{
-    const hasDate=!!getUpdateDate(row);
-    const hasText=!!(gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail'));
-    return hasDate||hasText;
+
+  // Sort all rows by date descending; keep only entries that have a date or text
+  const sorted = updatesRows.filter(row=>{
+    const hasDate = !!getUpdateDate(row);
+    const hasText = !!(gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail'));
+    return hasDate || hasText;
   }).sort((a,b)=>{
-    const ta=getUpdateDate(a)?.getTime()||-Infinity;
-    const tb=getUpdateDate(b)?.getTime()||-Infinity;
-    return tb-ta;
+    const ta = getUpdateDate(a)?.getTime() ?? -Infinity;
+    const tb = getUpdateDate(b)?.getTime() ?? -Infinity;
+    return tb - ta; // most-recent first
   });
 
-  const latestDate=document.getElementById('fuDate');
-  const latestText=document.getElementById('fuText');
-  const list=document.getElementById('fuList');
-  list.innerHTML='';
+  const latestDate = document.getElementById('fuDate');
+  const latestText = document.getElementById('fuText');
+  const list       = document.getElementById('fuList');
+
+  // Always hide the previous-updates section — we display only the single latest entry
+  const fpScroll = document.querySelector('.fp-scroll');
+  if(fpScroll) fpScroll.style.display = 'none';
+  if(list) list.innerHTML = '';
 
   if(!sorted.length){
-    latestDate.textContent='No updates available';
-    latestText.innerHTML='';
-    list.innerHTML='<div class="fu"><div class="update-content">No field updates available.</div></div>';
+    latestDate.textContent = 'No updates available';
+    latestText.innerHTML   = '';
     return;
   }
 
-  const rd = getUpdateDate(sorted[0]);
-  latestDate.textContent = rd ? fmtDateOnly(rd) : (gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Date unavailable');
-  const textContent = gc(sorted[0],'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
-  latestText.innerHTML = formatUpdateText(textContent);
+  // Render the single most-recent entry
+  const latest  = sorted[0];
+  const rd      = getUpdateDate(latest);
+  latestDate.textContent = rd
+    ? fmtDateOnly(rd)
+    : (gc(latest,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Date unavailable');
 
-  sorted.slice(1).forEach(row=>{
-    const rowDate=getUpdateDate(row);
-    const item=document.createElement('div'); item.className='fu';
-    const dateStr = rowDate ? fmtDateOnly(rowDate) : (gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','Field Date') || 'Unknown date');
-    const rowText = gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
-    item.innerHTML='<div class="fu-date">'+escapeHtml(dateStr)+'</div>'+
-      '<div class="update-content">'+formatUpdateText(rowText)+'</div>';
-    list.appendChild(item);
-  });
+  const textContent = gc(latest,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail');
+  latestText.innerHTML = formatUpdateText(textContent);
 }
 
 function toggleFieldPanel(){ document.getElementById('fp').classList.toggle('open'); document.getElementById('fpBg').classList.toggle('open'); }
