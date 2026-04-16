@@ -1137,7 +1137,12 @@ function initMap(){
     circleSpiralSwitchover: 9,
     legWeight: 2.5
   });
-  oms.addListener('click', m => m.openPopup());
+ oms.addListener('click', m => {
+    L.popup({maxWidth:340})
+     .setLatLng(m.getLatLng())
+     .setContent(m._popupContent)
+     .openOn(map);
+  });
   map.on('click',()=>{ document.querySelectorAll('.leaflet-interactive').forEach(el=>el.blur()); });
 }
 
@@ -1473,10 +1478,27 @@ function selectedSet(key){
 function applyFilters(){
   const idFilter     = selectedSet('rid');
   const zoneFilter   = selectedSet('zone');
-  const statusFilter = selectedSet('status');
+  let statusFilter   = selectedSet('status'); // Changed to let
   const srnoFilter   = selectedSet('srno');
   const penFilter    = selectedSet('pen');
   const encFilter    = selectedSet('enc');
+
+  // Requirement 3: Clear active status bucket if a specific animal/pen identity is searched
+  if ((idFilter || srnoFilter || encFilter || penFilter) && activeBucket) {
+     activeBucket = null;
+     document.querySelectorAll('#msi-status input[type=checkbox], #mob-msi-status input[type=checkbox]').forEach(inp=>inp.checked=true);
+     updateMSBtn('status');
+     const mobBtn = document.getElementById('mob-msb-status');
+     if (mobBtn) updateMobMSBtn('status');
+     updateStatusBlocks();
+     statusFilter = selectedSet('status'); // Re-evaluate status
+  }
+
+  // Requirement 1: Empty map by default (no markers until a filter is applied)
+  let totalChecked = 0;
+  ['rid','zone','status','srno','pen','enc'].forEach(k => {
+     totalChecked += document.querySelectorAll('#msi-'+k+' input[type=checkbox]:checked').length;
+  });
 
   // Clear existing markers and overlays before re-rendering
   markerLayer.clearLayers();
@@ -1485,18 +1507,24 @@ function applyFilters(){
   if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
   if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer=null; }
 
-  // A null filter means "no constraint" — only a non-null Set filters to its members
-  displayed = entities.filter(e=>{
-    if(idFilter     && !idFilter.has(e.id))                             return false;
-    if(zoneFilter   && !zoneFilter.has(e.zone||'-'))                    return false;
-    if(statusFilter && !statusFilter.has(e.status))                     return false;
-    const info = getSrNoInfo(e);
-    if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))   return false;
-    if(penFilter    && (!info || !penFilter.has(info.pen)))             return false;
-    if(encFilter    && (!info || !encFilter.has(info.animal)))          return false;
-    return true;
-  });
+  // If literally nothing is checked, show an empty map. Otherwise, process filters.
+  if(totalChecked === 0){
+     displayed = [];
+  } else {
+     // A null filter means "no constraint" — only a non-null Set filters to its members
+     displayed = entities.filter(e=>{
+       if(idFilter     && !idFilter.has(e.id))                            return false;
+       if(zoneFilter   && !zoneFilter.has(e.zone||'-'))                   return false;
+       if(statusFilter && !statusFilter.has(e.status))                    return false;
+       const info = getSrNoInfo(e);
+       if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))  return false;
+       if(penFilter    && (!info || !penFilter.has(info.pen)))            return false;
+       if(encFilter    && (!info || !encFilter.has(info.animal)))         return false;
+       return true;
+     });
+  }
 
+  // Preserve the sorting and rendering logic
   if(!sortColumn){
     displayed.sort((a,b)=>{
       const ta=a.latestFix?.ts?.getTime()||0, tb=b.latestFix?.ts?.getTime()||0;
@@ -1684,8 +1712,7 @@ function renderMarkers(){
     const fix = entity.latestFix;
     if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)) return;
     const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity),keyboard:false});
-    marker.bindPopup(popupHtml(entity),{maxWidth:340});
-    marker.on('popupclose',()=>marker.setLatLng([fix.lat,fix.lon]));
+    marker._popupContent = popupHtml(entity); // Store HTML instead of binding
     markerLayer.addLayer(marker);
     oms.addMarker(marker);
     entityMarkerMap[entity.id]=marker;
@@ -1697,13 +1724,18 @@ function renderMarkers(){
   if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
 }
 
-function focusEntity(id){
+ffunction focusEntity(id){
   const marker = entityMarkerMap[id];
   if(!marker) return;
   Object.values(entityMarkerMap).forEach(m=>m.setZIndexOffset(0));
   marker.setZIndexOffset(9000); map.closePopup();
   map.flyTo(marker.getLatLng(),16,{duration:1});
-  setTimeout(()=>marker.openPopup(),700);
+  setTimeout(()=>{
+    L.popup({maxWidth:340})
+     .setLatLng(marker.getLatLng())
+     .setContent(marker._popupContent)
+     .openOn(map);
+  },700);
   if(isMobile()&&!bottomCollapsed) toggleBottom();
 }
 
