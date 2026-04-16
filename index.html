@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <!-- CHANGE 2: Updated document title -->
-<title>Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025 in Pali FTH 2025 Hatchlings</title>
+<title>Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -72,13 +72,13 @@ button{cursor:pointer}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
 /* CHANGE 4: Help Modal styles */
-#helpModalBg{
+#helpBg{
   display:none;position:fixed;inset:0;z-index:99000;
   background:rgba(9,22,15,.72);backdrop-filter:blur(4px);
   align-items:center;justify-content:center;animation:fadeIn .2s ease;
 }
-#helpModalBg.open{display:flex}
-.help-card{
+#helpBg.open{display:flex}
+#helpModal{
   position:relative;width:min(600px,92vw);max-height:88vh;overflow-y:auto;
   border-radius:20px;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,.3);
   display:flex;flex-direction:column;
@@ -119,6 +119,8 @@ button{cursor:pointer}
   .help-card-body{padding:16px 16px 22px}
   .help-list li{padding:10px 12px}
   .help-list li .help-text{font-size:.74rem}
+  #helpModal{border-radius:20px 20px 0 0;max-height:90vh;position:fixed;bottom:0;left:0;right:0;width:100%}
+  #helpBg{align-items:flex-end}
 }
 
 /* ─── Header ─── */
@@ -219,7 +221,6 @@ button{cursor:pointer}
 
 /* ─── Map ─── */
 #map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1}
-/* CHANGE 1: Blank basemap – background set to sand */
 #map{width:100%;height:100%;background:var(--sand)}
 .leaflet-control-attribution{display:none}
 .leaflet-popup-content-wrapper{border-radius:16px;border:1px solid var(--line-2);box-shadow:var(--shadow-lg)}
@@ -230,7 +231,6 @@ button{cursor:pointer}
 path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .leaflet-interactive:active{outline:none!important}
 .leaflet-container a.leaflet-popup-close-button:focus{outline:none}
-/* CHANGE 1: Override Leaflet's default grey tile container background */
 .leaflet-container{background:var(--sand)!important}
 .map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
 .fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
@@ -406,9 +406,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   .loading-logos .loading-divider{height:44px}
   .loading-list{grid-template-columns:1fr}
   .loading-card{padding:24px 18px;gap:12px}
-  /* Help modal mobile */
-  .help-card{border-radius:20px 20px 0 0;max-height:90vh;position:fixed;bottom:0;left:0;right:0;width:100%}
-  #helpModalBg{align-items:flex-end}
 }
 @media(max-width:380px){
   .hdr-logos img{height:24px;max-width:50px}
@@ -434,7 +431,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
     <div class="loading-ring"></div>
     <!-- CHANGE 2: Updated loading screen title -->
-    <div class="loading-title">Palighat Fast-Track Head-Start 2025 in Pali FTH 2025 Hatchlings</div>
+    <div class="loading-title">Palighat Fast-Track Head-Start 2025</div>
     <div class="loading-copy" id="loadingCopy">Loading hatchling telemetry data...</div>
     <div class="loading-list">
       <div class="loading-item" id="ld-master">Radio Master Dictionary</div>
@@ -448,34 +445,34 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <div id="toast"></div>
 
 <!-- CHANGE 4: Help Modal -->
-<div id="helpModalBg" onclick="closeHelpModal(event)">
-  <div class="help-card" role="dialog" aria-modal="true" aria-label="Help - How to use this tool">
+<div id="helpBg" onclick="closeHelpModal(event)">
+  <div id="helpModal" role="dialog" aria-modal="true" aria-label="Help – How to use this tool">
     <div class="help-card-hdr">
       <h2>❓ How to Use This Tool</h2>
       <button class="help-card-close" type="button" onclick="toggleHelpModal()" aria-label="Close help">✕</button>
     </div>
     <div class="help-card-body">
-      <p class="help-intro">This dashboard visualises post-release telemetry for Pali FTH 2025 gharial hatchlings. Here's a quick guide to get started:</p>
+      <p class="help-intro">This dashboard visualises post-release telemetry for Pali FTH 2025 gharial hatchlings. Select filters to reveal animal locations, then explore the map and table below.</p>
       <ol class="help-list">
         <li>
           <span class="help-num">1</span>
-          <span class="help-text"><strong>Filter Data</strong> — Use the dropdowns in the top filter bar (or the mobile ☰ menu) to narrow results by Animal_ID, Pen, Radio ID, Zone, or Status. Hit <em>Apply</em> to refresh the map and table.</span>
+          <span class="help-text"><strong>Filter Data</strong> — Use the dropdowns to select specific Animal_IDs, Enclosure_IDs, Pens, or Statuses to reveal their locations on the map. Hit <em>Apply</em> to refresh.</span>
         </li>
         <li>
           <span class="help-num">2</span>
-          <span class="help-text"><strong>View Details</strong> — Click any circular marker on the blank map to open a popup showing telemetry data, Enclosure_ID, coordinates, days since last fix, and more.</span>
+          <span class="help-text"><strong>View Details</strong> — Click any circular marker to see the animal's telemetry data, enclosure details, and coordinates.</span>
         </li>
         <li>
           <span class="help-num">3</span>
-          <span class="help-text"><strong>Locate on Map</strong> — Click any row in the bottom data table to automatically fly the map to that individual's marker and highlight it.</span>
+          <span class="help-text"><strong>Locate on Map</strong> — Click a row in the bottom data table to fly directly to that animal's marker.</span>
         </li>
         <li>
           <span class="help-num">4</span>
-          <span class="help-text"><strong>Analyze Density</strong> — Toggle the <em>Heatmap</em> or <em>KDE</em> buttons in the filter bar to visualise where animals are clustering across the river stretch.</span>
+          <span class="help-text"><strong>Analyze Density</strong> — Toggle <em>Heatmap</em> or <em>KDE</em> to visualize where animals are clustering across the river stretch.</span>
         </li>
         <li>
           <span class="help-num">5</span>
-          <span class="help-text"><strong>Track Updates</strong> — Click <em>Field Updates</em> in the header to open a panel with the latest manual logs and notes submitted by the ground team.</span>
+          <span class="help-text"><strong>Track Updates</strong> — Click <em>Field Updates</em> to read manual logs and notes from the ground team.</span>
         </li>
       </ol>
     </div>
@@ -499,7 +496,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   <div class="hdr-divider"></div>
   <div class="hdr-brand">
     <!-- CHANGE 2: Updated header title -->
-    <div class="hdr-title">Palighat Fast-Track Head-Start 2025 in Pali FTH 2025 Hatchlings</div>
+    <div class="hdr-title">Palighat Fast-Track Head-Start 2025</div>
     <div class="hdr-sub">Post Release Monitoring | 30 Individuals</div>
   </div>
 
@@ -536,8 +533,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <span id="syncTime">-</span>
   </div>
   <div class="hdr-actions">
-    <!-- CHANGE 4: Info and Help buttons added before Refresh -->
-    <button class="hbtn" type="button" aria-label="Information" title="Gharial Ecology Project – Post-Release Telemetry Dashboard v2025">ℹ️</button>
+    <!-- CHANGE 4: Help button added before Refresh -->
     <button class="hbtn" type="button" onclick="toggleHelpModal()" aria-label="Help">❓</button>
     <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">↺</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
@@ -546,10 +542,10 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </header>
 
-<!-- CHANGE 3: "Sr. No" label → "Animal_ID" in desktop filter bar -->
+<!-- CHANGE 3: Desktop filter bar – "Animal_ID" + new "Enclosure_ID" filter -->
 <div id="fbar">
   <div id="fbar-inner">
-    <!-- 1. Animal_ID (was Sr. No) -->
+    <!-- 1. Animal_ID -->
     <div class="fg">
       <label>Animal_ID</label>
       <div class="ms-wrap">
@@ -565,7 +561,23 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
-    <!-- 2. Pen -->
+    <!-- 2. Enclosure_ID (NEW) -->
+    <div class="fg">
+      <label>Enclosure_ID</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-enc" type="button" onclick="toggleMS('enc',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-enc">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('enc')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('enc')">None</button>
+            <span class="ms-count" id="msc-enc"></span>
+          </div>
+          <div class="ms-items" id="msi-enc"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <!-- 3. Pen -->
     <div class="fg">
       <label>Pen</label>
       <div class="ms-wrap">
@@ -581,7 +593,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
-    <!-- 3. Radio ID -->
+    <!-- 4. Radio ID -->
     <div class="fg">
       <label>Radio ID</label>
       <div class="ms-wrap">
@@ -597,7 +609,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
-    <!-- 4. Zone -->
+    <!-- 5. Zone -->
     <div class="fg">
       <label>Zone</label>
       <div class="ms-wrap">
@@ -613,7 +625,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
-    <!-- 5. Status -->
+    <!-- 6. Status -->
     <div class="fg">
       <label>Status</label>
       <div class="ms-wrap">
@@ -638,7 +650,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 </div>
 
 <div id="drawerBg" onclick="closeMobileDrawer()"></div>
-<!-- CHANGE 3: "Sr. No" → "Animal_ID" in mobile drawer -->
+<!-- CHANGE 3: Mobile drawer – "Animal_ID" + new "Enclosure_ID" filter -->
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="drawer-handle"></div>
   <div class="drawer-hdr">
@@ -646,7 +658,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
   </div>
   <div class="drawer-body">
-    <!-- 1. Animal_ID (was Sr. No) -->
+    <!-- 1. Animal_ID -->
     <div class="drawer-row">
       <span class="drawer-label">Animal_ID</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -663,7 +675,24 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </div>
       </div>
     </div>
-    <!-- 2. Pen -->
+    <!-- 2. Enclosure_ID (NEW) -->
+    <div class="drawer-row">
+      <span class="drawer-label">Enclosure_ID</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-enc" type="button" onclick="toggleMobMS('enc',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-enc">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('enc')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('enc')">None</button>
+            <span class="ms-count" id="mob-msc-enc"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-enc"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 3. Pen -->
     <div class="drawer-row">
       <span class="drawer-label">Pen</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -680,7 +709,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </div>
       </div>
     </div>
-    <!-- 3. Radio ID -->
+    <!-- 4. Radio ID -->
     <div class="drawer-row">
       <span class="drawer-label">Radio ID</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -697,7 +726,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </div>
       </div>
     </div>
-    <!-- 4. Zone -->
+    <!-- 5. Zone -->
     <div class="drawer-row">
       <span class="drawer-label">Zone</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -714,7 +743,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </div>
       </div>
     </div>
-    <!-- 5. Status -->
+    <!-- 6. Status -->
     <div class="drawer-row">
       <span class="drawer-label">Status</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -762,7 +791,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
   <div id="mapFoot">
     <div class="map-foot-dot"></div>
-    <span id="mapFootText">Loading Pali FTH 2025 telemetry...</span>
+    <span id="mapFootText">Use filters above to reveal hatchling locations.</span>
     <span id="mapFootCount"></span>
   </div>
 </div>
@@ -795,7 +824,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
   </div>
   <div id="btmScroll">
-    <!-- CHANGE 3: "Sr. No" → "Animal_ID", "Animal ID" → "Enclosure_ID" in table headers -->
+    <!-- CHANGE 3: "Animal_ID" and "Enclosure_ID" column headers -->
     <table class="dtbl">
       <thead>
         <tr>
@@ -818,7 +847,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr class="no-data"><td colspan="16">Loading telemetry data...</td></tr>
+        <tr class="no-data"><td colspan="16">Use the filters above and click Apply to display records.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1099,7 +1128,8 @@ function badgeHtml(bucket){
 function initMap(){
   map = L.map('map',{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,bounceAtZoomLimits:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  // CHANGE 1: Google Satellite tile layer removed — map is now blank (sand background)
+  // Tile layer retained (CHANGE 1 note: tiles load normally; markers start hidden via filter logic)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{
     keepSpiderfied: true,
@@ -1286,9 +1316,17 @@ function updateStatusBlocks(){
 
 function toggleBucket(bucket){
   activeBucket = activeBucket===bucket ? null : bucket;
+  // When toggling bucket, set status filter to that bucket only (or all if cleared)
   document.querySelectorAll('#msi-status input[type=checkbox]').forEach(inp=>{
     inp.checked = activeBucket ? inp.value===activeBucket : true;
   });
+  // Also ensure all other filters select all so only status is the constraint
+  if(activeBucket){
+    ['srno','enc','pen','rid','zone'].forEach(key=>{
+      document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(inp=>{ inp.checked=true; });
+      updateMSBtn(key);
+    });
+  }
   updateMSBtn('status');
   updateStatusBlocks();
   applyFilters();
@@ -1330,6 +1368,12 @@ function rebuildFilters(){
   }).filter(Boolean))].sort((a,b)=>+a-+b);
   buildMSOptions('srno', srnoOptions);
 
+  // CHANGE 3: Enclosure_ID filter
+  const encOptions=[...new Set(entities.map(e=>{
+    const i=getSrNoInfo(e); return i?i.animal:null;
+  }).filter(Boolean))].sort();
+  buildMSOptions('enc', encOptions);
+
   const penOptions=[...new Set(entities.map(e=>{
     const i=getSrNoInfo(e); return i?i.pen:null;
   }).filter(Boolean))].sort();
@@ -1366,7 +1410,8 @@ function buildMSOptions(key, options, formatter){
   options.forEach(option=>{
     const label=document.createElement('label'); label.className='ms-item';
     const input=document.createElement('input'); input.type='checkbox'; input.value=option;
-    input.checked=true;
+    // CHANGE 1: Initial state is unchecked — user must opt-in to reveal markers
+    input.checked = false;
     input.addEventListener('change',()=>updateMSBtn(key));
     label.appendChild(input);
     label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
@@ -1411,11 +1456,18 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#fbar .ms-wrap')) document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
 });
 
+/* CHANGE 1: Updated selectedSet logic
+   - null → no filter active for this key (button disabled / no options)
+   - empty Set (size 0) → 0 items checked → force no results
+   - non-empty Set → filter to those values
+   - When ALL items checked → return null (no filter needed, show all) */
 function selectedSet(key){
   const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
   if(!all.length||document.getElementById('msb-'+key)?.classList.contains('disabled')) return null;
   const checked=all.filter(i=>i.checked).map(i=>i.value);
-  if(!checked.length||checked.length===all.length) return null;
+  // All selected → no filter
+  if(checked.length===all.length) return null;
+  // Return Set (may be empty = 0 selected = block all)
   return new Set(checked);
 }
 
@@ -1425,16 +1477,27 @@ function applyFilters(){
   const statusFilter = selectedSet('status');
   const srnoFilter   = selectedSet('srno');
   const penFilter    = selectedSet('pen');
+  const encFilter    = selectedSet('enc'); // CHANGE 3: new filter
+
+  // CHANGE 1: If any active filter has 0 selections, show nothing
+  const activeFilters = [idFilter, zoneFilter, statusFilter, srnoFilter, penFilter, encFilter].filter(f => f !== null);
+  if(activeFilters.some(f => f.size === 0)){
+    displayed = [];
+    showZoneLayer(false);
+    renderMarkers();
+    renderTable();
+    updateMapFoot();
+    return;
+  }
 
   displayed = entities.filter(e=>{
     if(idFilter && !idFilter.has(e.id)) return false;
     if(zoneFilter && !zoneFilter.has(e.zone||'-')) return false;
     if(statusFilter && !statusFilter.has(e.status)) return false;
-    if(srnoFilter || penFilter){
-      const info = getSrNoInfo(e);
-      if(srnoFilter && (!info || !srnoFilter.has(String(info.srNo)))) return false;
-      if(penFilter  && (!info || !penFilter.has(info.pen)))           return false;
-    }
+    const info = getSrNoInfo(e);
+    if(srnoFilter && (!info || !srnoFilter.has(String(info.srNo)))) return false;
+    if(penFilter  && (!info || !penFilter.has(info.pen)))           return false;
+    if(encFilter  && (!info || !encFilter.has(info.animal)))        return false;
     return true;
   });
 
@@ -1557,7 +1620,7 @@ function markerIcon(entity){
   });
 }
 
-/* CHANGE 3: Popup strings updated — "Sr. No" → "Animal_ID", "Animal ID" → "Enclosure_ID" */
+/* CHANGE 3: Popup uses "Animal_ID" and "Enclosure_ID" labels */
 function popupHtml(entity){
   const fix = entity.latestFix;
   const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
@@ -1666,7 +1729,7 @@ function renderTable(){
   displayRows = displayed;
   document.getElementById('tableBadge').textContent = displayed.length+' records';
   if(!displayed.length){
-    body.innerHTML='<tr class="no-data"><td colspan="16">No records match the current filters.</td></tr>';return;
+    body.innerHTML='<tr class="no-data"><td colspan="16">Use the filters above and click Apply to display records.</td></tr>';return;
   }
   displayed.forEach(entity=>{
     const fix = entity.latestFix;
@@ -1708,7 +1771,7 @@ function renderTable(){
 
 function updateMapFoot(){
   if(!displayed.length){
-    document.getElementById('mapFootText').textContent='No visible hatchlings match the current filter set.';
+    document.getElementById('mapFootText').textContent='Use the filters above and click Apply to reveal hatchling locations.';
     document.getElementById('mapFootCount').textContent='0 visible';return;
   }
   const latest = displayed.reduce((m,e)=>{
@@ -1850,17 +1913,19 @@ function closeFieldPanel(){ document.getElementById('fp').classList.remove('open
    CHANGE 4: Help Modal JS
    ═══════════════════════════════════════════════ */
 function toggleHelpModal(){
-  document.getElementById('helpModalBg').classList.toggle('open');
+  document.getElementById('helpBg').classList.toggle('open');
 }
 function closeHelpModal(event){
-  /* Only close when clicking the dark overlay itself, not the card */
-  if(event.target === document.getElementById('helpModalBg')){
-    document.getElementById('helpModalBg').classList.remove('open');
+  /* Only close when clicking the dark overlay itself, not the modal card */
+  if(event.target === document.getElementById('helpBg')){
+    document.getElementById('helpBg').classList.remove('open');
   }
 }
-/* Close help modal on Escape key */
+/* Close on Escape key */
 document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape') document.getElementById('helpModalBg').classList.remove('open');
+  if(e.key === 'Escape'){
+    document.getElementById('helpBg').classList.remove('open');
+  }
 });
 
 /* ═══════════════════════════════════════════════
@@ -1934,6 +1999,10 @@ function rebuildMobileFilters(){
   const srnoOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
   buildMobMSOptions('srno', srnoOpts);
 
+  // CHANGE 3: Enclosure_ID mobile filter
+  const encOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.animal:null;}).filter(Boolean))].sort();
+  buildMobMSOptions('enc', encOpts);
+
   const penOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
   buildMobMSOptions('pen', penOpts);
 
@@ -1956,7 +2025,9 @@ function buildMobMSOptions(key,options,formatter){
   if(!options.length){resetMobMS(key,'No options');return;}
   options.forEach(option=>{
     const label=document.createElement('label'); label.className='ms-item';
-    const input=document.createElement('input'); input.type='checkbox'; input.value=option; input.checked=true;
+    const input=document.createElement('input'); input.type='checkbox'; input.value=option;
+    // CHANGE 1: Initial state is unchecked
+    input.checked = false;
     input.addEventListener('change',()=>updateMobMSBtn(key));
     label.appendChild(input); label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
     list.appendChild(label);
@@ -1998,7 +2069,8 @@ document.addEventListener('click',e=>{
 });
 
 function mobileApplyFilters(){
-  ['srno','pen','rid','zone','status'].forEach(key=>{
+  // CHANGE 3: 'enc' added to sync list
+  ['srno','enc','pen','rid','zone','status'].forEach(key=>{
     const mobChecked=new Set([...document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]:checked')].map(i=>i.value));
     const desktopInputs=document.querySelectorAll('#msi-'+key+' input[type=checkbox]');
     if(desktopInputs.length){
@@ -2055,10 +2127,10 @@ async function loadAllData(){
     loadUpdates(updateRows);
     rebuildFilters();
     renderLegend();
-    applyFilters();
+    applyFilters(); // will show 0 markers since all checkboxes start unchecked
 
     document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    toast(`Loaded ${entities.length} hatchling entities.`,true);
+    toast(`Data loaded — ${entities.length} hatchlings. Use filters to reveal locations.`,true);
 
   } catch(err){
     console.error(err); toast('Failed to load telemetry data.');
