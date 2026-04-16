@@ -1415,9 +1415,11 @@ function buildMSOptions(key, options, formatter){
   options.forEach(option=>{
     const label=document.createElement('label'); label.className='ms-item';
     const input=document.createElement('input'); input.type='checkbox'; input.value=option;
-    // CHANGE 1: Initial state is unchecked — user must opt-in to reveal markers
     input.checked = false;
-    input.addEventListener('change',()=>updateMSBtn(key));
+    input.addEventListener('change',(e)=>{
+       if(e.target.checked) clearOtherIdFilters(key); // Clear conflicts on check
+       updateMSBtn(key);
+    });
     label.appendChild(input);
     label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
     list.appendChild(label);
@@ -1454,12 +1456,31 @@ function toggleMS(key,event){
   document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
   if(!isOpen) drop.classList.add('open');
 }
-function msSelectAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});updateMSBtn(key);}
+function msSelectAll(key){
+  clearOtherIdFilters(key); // Clear conflicts when "All" is clicked
+  document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});
+  updateMSBtn(key);
+}
 function msClearAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMSBtn(key);}
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('#fbar .ms-wrap')) document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
 });
+  function clearOtherIdFilters(activeKey) {
+  const idKeys = ['srno', 'enc', 'rid']; // Animal ID, Enclosure ID, Radio ID
+  if (!idKeys.includes(activeKey)) return;
+  idKeys.forEach(k => {
+    if (k !== activeKey) {
+      // Clear desktop
+      document.querySelectorAll('#msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
+      updateMSBtn(k);
+      // Clear mobile
+      document.querySelectorAll('#mob-msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
+      const mobBtn = document.getElementById('mob-msb-'+k);
+      if (mobBtn) updateMobMSBtn(k);
+    }
+  });
+}
 
 /* CHANGE 1: Updated selectedSet logic
    - null → no filter active for this key (button disabled / no options)
@@ -1558,10 +1579,22 @@ function clearFilters(){
     if(mkBtn) mkBtn.classList.remove('on');
   }
   if(markerLayer && !map.hasLayer(markerLayer)) markerLayer.addTo(map);
+  map.closePopup(); // Closes the active popup
   sortColumn = null; sortDir = 'asc';
   updateSortHeaders();
   rebuildFilters();
   applyFilters();
+}
+
+function mobileClearFilters(){
+  activeBucket = null;
+  sortColumn = null; sortDir = 'asc';
+  updateSortHeaders();
+  document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
+  map.closePopup(); // Closes the active popup
+  rebuildFilters();
+  applyFilters();
+  closeMobileDrawer();
 }
 
 /* ═══════════════════════════════════════════════
