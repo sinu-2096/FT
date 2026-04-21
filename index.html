@@ -1986,12 +1986,7 @@ function renderHeatmap(){
   heatLayer = new ClippedHeat(fixes.map(f=>[f.lat, f.lon])).addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
-  });
-  kdeLayer=new KDE().addTo(map);
-  if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
-}
-
-function toggleHeatmap(){
+ function toggleHeatmap(){
   if(!displayed.length){toast('No visible records to generate heatmap.');return;}
  heatmapOn=!heatmapOn;
 document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
