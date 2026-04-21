@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<!-- CHANGE 2: Updated document title -->
 <title>Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,7 +70,7 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-/* CHANGE 4: Help Modal styles */
+/* ─── Help Modal ─── */
 #helpBg{
   display:none;position:fixed;inset:0;z-index:99000;
   background:rgba(9,22,15,.72);backdrop-filter:blur(4px);
@@ -146,7 +145,7 @@ button{cursor:pointer}
 .hdr-title{font:700 1.04rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
 
-/* ─── Status Blocks ── */
+/* ─── Status Blocks ─── */
 #statusBlocks{
   grid-row:2;
   grid-column:1/-1;
@@ -269,24 +268,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pop-animal-id .pop-label{color:#166534}
 .pop-animal-id .pop-value{color:#166534;font-weight:700;font-size:.82rem}
 .pop-retag{margin:6px 0;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde68a;font:600 .62rem var(--mono);color:#78350f}
-.pop-details-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--line-2);
-  background: var(--panel-2);
-  color: var(--forest-2);
-  font: 700 .62rem var(--mono);
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  transition: all .15s ease;
-}
-.pop-details-btn:hover {
-  background: #eef8f1;
-  border-color: #8ab99a;
-}
+.pop-details-btn{width:100%;margin-top:8px;padding:6px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--forest-2);font:700 .62rem var(--mono);cursor:pointer;text-transform:uppercase;letter-spacing:.04em;transition:all .15s ease}
+.pop-details-btn:hover{background:#eef8f1;border-color:#8ab99a}
 .pop-actions{display:flex;gap:6px;padding:10px 14px 14px 14px}
 .pab{flex:1;height:34px;border-radius:10px;border:1px solid var(--line-2);background:#eef8f1;color:var(--forest-2);font:700 .62rem var(--mono)}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
@@ -448,7 +431,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </a>
     </div>
     <div class="loading-ring"></div>
-    <!-- CHANGE 2: Updated loading screen title -->
     <div class="loading-title">Palighat Fast-Track Head-Start 2025</div>
     <div class="loading-copy" id="loadingCopy">Loading hatchling telemetry data...</div>
     <div class="loading-list">
@@ -462,7 +444,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 
 <div id="toast"></div>
 
-<!-- CHANGE 4: Help Modal -->
+<!-- ─── Help Modal ─── -->
 <div id="helpBg" onclick="closeHelpModal(event)">
   <div id="helpModal" role="dialog" aria-modal="true" aria-label="Help – How to use this tool">
     <div class="help-card-hdr">
@@ -509,7 +491,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
   <div class="hdr-divider"></div>
   <div class="hdr-brand">
-    <!-- CHANGE 2: Updated header title -->
     <div class="hdr-title">Gharial Ecology Project – Rajasthan Forest Department - Palighat Fast-Track Head-Start 2025</div>
     <div class="hdr-sub">Post Release Monitoring | 30 Individuals</div>
   </div>
@@ -547,7 +528,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <span id="syncTime">-</span>
   </div>
   <div class="hdr-actions">
-    <!-- CHANGE 4: Help button added before Refresh -->
     <button class="hbtn" type="button" onclick="toggleHelpModal()" aria-label="Help">❓</button>
     <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">↺</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
@@ -556,7 +536,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </header>
 
-<!-- CHANGE 3: Desktop filter bar – "Animal_ID" + new "Enclosure_ID" filter -->
+<!-- ─── Desktop filter bar ─── -->
 <div id="fbar">
   <div id="fbar-inner">
     <!-- 1. Animal_ID -->
@@ -575,7 +555,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
     <div class="fsep"></div>
-    <!-- 2. Enclosure_ID (NEW) -->
+    <!-- 2. Enclosure_ID -->
     <div class="fg">
       <label>Enclosure_ID</label>
       <div class="ms-wrap">
@@ -663,7 +643,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 </div>
 
 <div id="drawerBg" onclick="closeMobileDrawer()"></div>
-<!-- CHANGE 3: Mobile drawer – "Animal_ID" + new "Enclosure_ID" filter -->
+<!-- ─── Mobile Drawer ─── -->
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="drawer-handle"></div>
   <div class="drawer-hdr">
@@ -688,7 +668,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </div>
       </div>
     </div>
-    <!-- 2. Enclosure_ID (NEW) -->
+    <!-- 2. Enclosure_ID -->
     <div class="drawer-row">
       <span class="drawer-label">Enclosure_ID</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -836,7 +816,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
   </div>
   <div id="btmScroll">
-    <!-- CHANGE 3: "Animal_ID" and "Enclosure_ID" column headers -->
     <table class="dtbl">
       <thead>
         <tr>
@@ -882,7 +861,6 @@ const URLS = {
   updates: `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=238985281`
 };
 
-/* HARDCODED ZONES */
 const ZONE_GEOJSON_DATA = {
   "type": "FeatureCollection",
   "features": [
@@ -977,7 +955,6 @@ const SR_NO_MAP = {
   '98':{ srNo:30, pen:'P8', animal:'P8-G4' }
 };
 
-/* ── Status display metadata ── */
 const STATUS_COLORS = {
   active:        { color:'#fff', bg:'#16a34a',  border:'#16a34a',  label:'Active'                    },
   missing:       { color:'#fff', bg:'#d97706',  border:'#d97706',  label:'Missing'                   },
@@ -1004,8 +981,8 @@ const ZONE_SNAP_MAX_KM = 0.5;
 /* ── State ── */
 let map, oms, markerLayer;
 let zoneGeoLayer = null;
-let heatLayer = null;
-let heatmapOn = false;
+let heatLayer    = null;   // Only heatLayer — no kdeLayer
+let heatmapOn    = false;  // Only heatmapOn  — no kdeOn
 let bottomCollapsed = false, bottomHeight = 250;
 let filterBarHidden = false;
 let legendCollapsed = false;
@@ -1111,9 +1088,10 @@ function getSrNoInfo(entity){
   }
   return info || null;
 }
-  function togglePopDetails(btn) {
+
+function togglePopDetails(btn){
   const extra = btn.nextElementSibling;
-  if (extra.style.display === 'none' || !extra.style.display) {
+  if(extra.style.display === 'none' || !extra.style.display){
     extra.style.display = 'block';
     btn.textContent = 'Hide Details ▴';
   } else {
@@ -1150,12 +1128,11 @@ function badgeHtml(bucket){
 function initMap(){
   map = L.map('map',{zoomControl:false,attributionControl:false,tap:true,tapTolerance:15,bounceAtZoomLimits:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  // Tile layer retained (CHANGE 1 note: tiles load normally; markers start hidden via filter logic)
- L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-  maxZoom:20,
-  subdomains:['mt0','mt1','mt2','mt3'],
-  attribution:'© <a href="https://maps.google.com" target="_blank">Google Maps</a>'
-}).addTo(map);
+  L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+    maxZoom:20,
+    subdomains:['mt0','mt1','mt2','mt3'],
+    attribution:'© <a href="https://maps.google.com" target="_blank">Google Maps</a>'
+  }).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{
     keepSpiderfied: true,
@@ -1163,7 +1140,7 @@ function initMap(){
     circleSpiralSwitchover: 9,
     legWeight: 2.5
   });
- oms.addListener('click', m => {
+  oms.addListener('click', m => {
     L.popup({maxWidth:340})
      .setLatLng(m.getLatLng())
      .setContent(m._popupContent)
@@ -1267,17 +1244,17 @@ function mergeEntities(logBuckets){
 /* ═══════════════════════════════════════════════
    ZONE ASSIGNMENT
    ═══════════════════════════════════════════════ */
-function getZoneName(f) {
-  if (!f || !f.properties) return '-';
+function getZoneName(f){
+  if(!f || !f.properties) return '-';
   const p = f.properties;
-  if (p.name) return p.name;
-  if (p.Name) return p.Name;
-  if (p.ZONE) return p.ZONE;
-  if (p.zone) return p.zone;
-  if (p.STRETCH) return p.STRETCH;
-  if (p['name ']) return p['name '];
+  if(p.name) return p.name;
+  if(p.Name) return p.Name;
+  if(p.ZONE) return p.ZONE;
+  if(p.zone) return p.zone;
+  if(p.STRETCH) return p.STRETCH;
+  if(p['name ']) return p['name '];
   const keys = Object.keys(p);
-  if (keys.length > 0) return keys[0];
+  if(keys.length > 0) return keys[0];
   return '-';
 }
 
@@ -1291,23 +1268,23 @@ function assignZones(){
       let bestDist = Infinity;
       let bestName = '-';
       for(const feat of zoneFeatures){
-        try {
+        try{
           const type = feat.geometry.type;
           if((type === 'Polygon' || type === 'MultiPolygon') && turf.booleanPointInPolygon(pt, feat)){
             bestDist = 0;
             bestName = getZoneName(feat);
             break;
           }
-          const dist = turf.pointToLineDistance(pt, feat, {units: 'kilometers'});
+          const dist = turf.pointToLineDistance(pt, feat, {units:'kilometers'});
           if(dist < bestDist){ bestDist = dist; bestName = getZoneName(feat); }
-        } catch(e) {
-          try {
+        }catch(e){
+          try{
             const coords = turf.coordAll(feat);
-            coords.forEach(coord => {
-              const d = turf.distance(pt, turf.point(coord), {units: 'kilometers'});
+            coords.forEach(coord=>{
+              const d = turf.distance(pt, turf.point(coord), {units:'kilometers'});
               if(d < bestDist){ bestDist = d; bestName = getZoneName(feat); }
             });
-          } catch(e2){}
+          }catch(e2){}
         }
       }
       fix.zone = bestDist <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
@@ -1319,15 +1296,15 @@ function assignZones(){
 function ensureZoneLayer(){
   if(zoneGeoLayer||!geojsonData) return;
   zoneGeoLayer = L.geoJSON(geojsonData,{
-    style: { opacity: 0, fillOpacity: 0 },
-    onEachFeature(f,layer){layer.bindTooltip(getZoneName(f),{className:'zone-label',direction:'center'});}
+    style:{ opacity:0, fillOpacity:0 },
+    onEachFeature(f,layer){ layer.bindTooltip(getZoneName(f),{className:'zone-label',direction:'center'}); }
   });
 }
 
 function showZoneLayer(visible){
   ensureZoneLayer();
   if(!zoneGeoLayer) return;
-  if(visible){if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);}
+  if(visible){ if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map); }
   else if(map.hasLayer(zoneGeoLayer)) map.removeLayer(zoneGeoLayer);
 }
 
@@ -1341,17 +1318,15 @@ function updateStatusBlocks(){
     const el = document.getElementById('sbc-'+bucket);
     if(el) el.textContent = counts[bucket];
     const btn = document.getElementById('sb-'+bucket);
-    if(btn){ btn.classList.toggle('on', activeBucket===bucket); }
+    if(btn) btn.classList.toggle('on', activeBucket===bucket);
   });
 }
 
 function toggleBucket(bucket){
   activeBucket = activeBucket===bucket ? null : bucket;
-  // When toggling bucket, set status filter to that bucket only (or all if cleared)
   document.querySelectorAll('#msi-status input[type=checkbox]').forEach(inp=>{
     inp.checked = activeBucket ? inp.value===activeBucket : true;
   });
-  // Also ensure all other filters select all so only status is the constraint
   if(activeBucket){
     ['srno','enc','pen','rid','zone'].forEach(key=>{
       document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(inp=>{ inp.checked=true; });
@@ -1399,7 +1374,6 @@ function rebuildFilters(){
   }).filter(Boolean))].sort((a,b)=>+a-+b);
   buildMSOptions('srno', srnoOptions);
 
-  // CHANGE 3: Enclosure_ID filter
   const encOptions=[...new Set(entities.map(e=>{
     const i=getSrNoInfo(e); return i?i.animal:null;
   }).filter(Boolean))].sort();
@@ -1443,8 +1417,8 @@ function buildMSOptions(key, options, formatter){
     const input=document.createElement('input'); input.type='checkbox'; input.value=option;
     input.checked = false;
     input.addEventListener('change',(e)=>{
-       if(e.target.checked) clearOtherIdFilters(key); // Clear conflicts on check
-       updateMSBtn(key);
+      if(e.target.checked) clearOtherIdFilters(key);
+      updateMSBtn(key);
     });
     label.appendChild(input);
     label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
@@ -1483,107 +1457,90 @@ function toggleMS(key,event){
   if(!isOpen) drop.classList.add('open');
 }
 function msSelectAll(key){
-  clearOtherIdFilters(key); // Clear conflicts when "All" is clicked
+  clearOtherIdFilters(key);
   document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});
   updateMSBtn(key);
 }
-function msClearAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMSBtn(key);}
+function msClearAll(key){ document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;}); updateMSBtn(key); }
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('#fbar .ms-wrap')) document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
 });
- function clearOtherIdFilters(activeKey) {
-  // Group 1: Specific Individual Identifiers
-  const specificIds = ['srno', 'enc', 'rid'];
-  // Group 2: Broad Location/Group Categories
-  const broadCats = ['pen', 'zone'];
 
+function clearOtherIdFilters(activeKey){
+  const specificIds = ['srno','enc','rid'];
+  const broadCats   = ['pen','zone'];
   let keysToClear = [];
-
-  if (specificIds.includes(activeKey)) {
-    // If user clicks a specific animal, clear Pen, Zone, and the other IDs
-    keysToClear = ['srno', 'enc', 'rid', 'pen', 'zone'].filter(k => k !== activeKey);
-  } else if (broadCats.includes(activeKey)) {
-    // If user clicks Pen or Zone, clear only the specific IDs so the map doesn't go blank
-    // (This still allows you to mix and match Pen + Zone + Status!)
+  if(specificIds.includes(activeKey)){
+    keysToClear = ['srno','enc','rid','pen','zone'].filter(k=>k!==activeKey);
+  } else if(broadCats.includes(activeKey)){
     keysToClear = specificIds;
   }
-
-  keysToClear.forEach(k => {
-    // Clear desktop dropdowns
+  keysToClear.forEach(k=>{
     document.querySelectorAll('#msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
     updateMSBtn(k);
-    
-    // Clear mobile dropdowns
     document.querySelectorAll('#mob-msi-'+k+' input[type=checkbox]').forEach(i=>i.checked=false);
     const mobBtn = document.getElementById('mob-msb-'+k);
-    if (mobBtn) updateMobMSBtn(k);
+    if(mobBtn) updateMobMSBtn(k);
   });
 }
 
-/* CHANGE 1: Updated selectedSet logic
-   - null → no filter active for this key (button disabled / no options)
-   - empty Set (size 0) → 0 items checked → force no results
-   - non-empty Set → filter to those values
-   - When ALL items checked → return null (no filter needed, show all) */
 function selectedSet(key){
   const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
   if(!all.length||document.getElementById('msb-'+key)?.classList.contains('disabled')) return null;
   const checked=all.filter(i=>i.checked).map(i=>i.value);
-  // Both extremes (none or all) → no constraint for this dimension
   if(checked.length===0||checked.length===all.length) return null;
   return new Set(checked);
 }
 
+/* ═══════════════════════════════════════════════
+   APPLY / CLEAR FILTERS
+   — All kdeLayer / kdeOn references removed here —
+   ═══════════════════════════════════════════════ */
 function applyFilters(){
   const idFilter     = selectedSet('rid');
   const zoneFilter   = selectedSet('zone');
-  let statusFilter   = selectedSet('status'); // Changed to let
+  let statusFilter   = selectedSet('status');
   const srnoFilter   = selectedSet('srno');
   const penFilter    = selectedSet('pen');
   const encFilter    = selectedSet('enc');
 
-  // Requirement 3: Clear active status bucket if a specific animal/pen identity is searched
-  if ((idFilter || srnoFilter || encFilter || penFilter) && activeBucket) {
-     activeBucket = null;
-     document.querySelectorAll('#msi-status input[type=checkbox], #mob-msi-status input[type=checkbox]').forEach(inp=>inp.checked=true);
-     updateMSBtn('status');
-     const mobBtn = document.getElementById('mob-msb-status');
-     if (mobBtn) updateMobMSBtn('status');
-     updateStatusBlocks();
-     statusFilter = selectedSet('status'); // Re-evaluate status
+  if((idFilter || srnoFilter || encFilter || penFilter) && activeBucket){
+    activeBucket = null;
+    document.querySelectorAll('#msi-status input[type=checkbox], #mob-msi-status input[type=checkbox]').forEach(inp=>inp.checked=true);
+    updateMSBtn('status');
+    const mobBtn = document.getElementById('mob-msb-status');
+    if(mobBtn) updateMobMSBtn('status');
+    updateStatusBlocks();
+    statusFilter = selectedSet('status');
   }
 
-  // Requirement 1: Empty map by default (no markers until a filter is applied)
   let totalChecked = 0;
-  ['rid','zone','status','srno','pen','enc'].forEach(k => {
-     totalChecked += document.querySelectorAll('#msi-'+k+' input[type=checkbox]:checked').length;
+  ['rid','zone','status','srno','pen','enc'].forEach(k=>{
+    totalChecked += document.querySelectorAll('#msi-'+k+' input[type=checkbox]:checked').length;
   });
 
-  // Clear existing markers and overlays before re-rendering
+  /* Clear existing markers and heat overlay before re-rendering */
   markerLayer.clearLayers();
   entityMarkerMap = {};
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(e){}
   if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
 
-  // If literally nothing is checked, show an empty map. Otherwise, process filters.
   if(totalChecked === 0){
-     displayed = [];
+    displayed = [];
   } else {
-     // A null filter means "no constraint" — only a non-null Set filters to its members
-     displayed = entities.filter(e=>{
-       if(idFilter     && !idFilter.has(e.id))                            return false;
-       if(zoneFilter   && !zoneFilter.has(e.zone||'-'))                   return false;
-       if(statusFilter && !statusFilter.has(e.status))                    return false;
-       const info = getSrNoInfo(e);
-       if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))  return false;
-       if(penFilter    && (!info || !penFilter.has(info.pen)))            return false;
-       if(encFilter    && (!info || !encFilter.has(info.animal)))         return false;
-       return true;
-     });
+    displayed = entities.filter(e=>{
+      if(idFilter     && !idFilter.has(e.id))                            return false;
+      if(zoneFilter   && !zoneFilter.has(e.zone||'-'))                   return false;
+      if(statusFilter && !statusFilter.has(e.status))                    return false;
+      const info = getSrNoInfo(e);
+      if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))  return false;
+      if(penFilter    && (!info || !penFilter.has(info.pen)))            return false;
+      if(encFilter    && (!info || !encFilter.has(info.animal)))         return false;
+      return true;
+    });
   }
 
-  // Preserve the sorting and rendering logic
   if(!sortColumn){
     displayed.sort((a,b)=>{
       const ta=a.latestFix?.ts?.getTime()||0, tb=b.latestFix?.ts?.getTime()||0;
@@ -1602,6 +1559,8 @@ function applyFilters(){
 function clearFilters(){
   activeBucket = null;
   document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
+
+  /* Clean up heatmap — no kdeLayer/kdeOn block */
   if(heatmapOn || heatLayer){
     heatmapOn = false;
     if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
@@ -1609,8 +1568,9 @@ function clearFilters(){
     if(hBtn) hBtn.classList.remove('on');
     if(mhBtn) mhBtn.classList.remove('on');
   }
+
   if(markerLayer && !map.hasLayer(markerLayer)) markerLayer.addTo(map);
-  map.closePopup(); // Closes the active popup
+  map.closePopup();
   sortColumn = null; sortDir = 'asc';
   updateSortHeaders();
   rebuildFilters();
@@ -1622,7 +1582,7 @@ function mobileClearFilters(){
   sortColumn = null; sortDir = 'asc';
   updateSortHeaders();
   document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
-  map.closePopup(); // Closes the active popup
+  map.closePopup();
   rebuildFilters();
   applyFilters();
   closeMobileDrawer();
@@ -1708,8 +1668,6 @@ function markerIcon(entity){
   });
 }
 
-/* CHANGE 3: Popup uses "Animal_ID" and "Enclosure_ID" labels */
-/* CHANGE: Popup split into Basic and Detailed views */
 function popupHtml(entity){
   const fix = entity.latestFix;
   const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
@@ -1734,7 +1692,6 @@ function popupHtml(entity){
       </div>
     </div>
     <div class="pop-body">
-      
       ${srInfo ? `
       <div class="pop-animal-id">
         <span class="pop-label">Enclosure_ID</span>
@@ -1762,7 +1719,6 @@ function popupHtml(entity){
         <div class="pop-row"><span class="pop-label">Signal Strength</span><span class="pop-value">${escapeHtml(fix?.signal||'-')}</span></div>
         ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
       </div>
-      
     </div>
     <div class="pop-actions">
       <button class="pab" type="button" onclick="focusEntity('${escapeHtml(entity.id)}')">Focus</button>
@@ -1773,16 +1729,16 @@ function popupHtml(entity){
 
 function renderMarkers(){
   markerLayer.clearLayers(); entityMarkerMap={};
-  try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
+  try{ oms.clearMarkers && oms.clearMarkers(); }catch(e){}
   if(!displayed.length){
-    if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
     return;
   }
   displayed.forEach(entity=>{
     const fix = entity.latestFix;
     if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)) return;
     const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity),keyboard:false});
-    marker._popupContent = popupHtml(entity); // Store HTML instead of binding
+    marker._popupContent = popupHtml(entity);
     markerLayer.addLayer(marker);
     oms.addMarker(marker);
     entityMarkerMap[entity.id]=marker;
@@ -1834,9 +1790,9 @@ function renderTable(){
     const daysFix     = entity.daysSinceLastFix !== null ? entity.daysSinceLastFix : '-';
     const color = MARKER_COLORS[entity.status]||MARKER_COLORS.missing;
     const srInfo = getSrNoInfo(entity);
-    const srNoDisplay  = srInfo ? String(srInfo.srNo)  : '-';
-    const penDisplay   = srInfo ? srInfo.pen           : '-';
-    const animalDisplay= srInfo ? srInfo.animal        : '-';
+    const srNoDisplay   = srInfo ? String(srInfo.srNo) : '-';
+    const penDisplay    = srInfo ? srInfo.pen          : '-';
+    const animalDisplay = srInfo ? srInfo.animal       : '-';
     const tr = document.createElement('tr');
     tr.dataset.rowId = entity.id;
     tr.innerHTML =
@@ -1879,7 +1835,8 @@ function updateMapFoot(){
 }
 
 /* ═══════════════════════════════════════════════
-   OVERLAYS
+   HEATMAP OVERLAY
+   — renderHeatmap & toggleHeatmap have zero KDE refs —
    ═══════════════════════════════════════════════ */
 function getAllFixes(){
   const pts=[];
@@ -1889,20 +1846,15 @@ function getAllFixes(){
 
 function renderHeatmap(){
   const fixes=getAllFixes();
-  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
   if(!fixes.length){
     heatmapOn=false;
-    const hBtn=document.getElementById('heatBtn'),mhBtn=document.getElementById('mob-heatBtn');
-    if(hBtn)hBtn.classList.remove('on');
-    if(mhBtn)mhBtn.classList.remove('on');
+    const hBtn=document.getElementById('heatBtn'), mhBtn=document.getElementById('mob-heatBtn');
+    if(hBtn) hBtn.classList.remove('on');
+    if(mhBtn) mhBtn.classList.remove('on');
     return;
   }
 
-  /* ── Custom river-clipped heatmap layer ─────────────────────────────────
-     Renders Gaussian heat blobs onto a canvas that is clipped to the union
-     of all river-zone polygons from ZONE_GEOJSON_DATA, so the gradient
-     never spills onto land.
-  ──────────────────────────────────────────────────────────────────────── */
   const ClippedHeat = L.Layer.extend({
     initialize(pts){ this._pts = pts; },
 
@@ -1923,17 +1875,14 @@ function renderHeatmap(){
     },
 
     _buildClipPath(ctx){
-      /* Convert every river-zone polygon ring to canvas coordinates and
-         trace a single compound path that will be used as the clip region. */
       if(!geojsonData || !geojsonData.features || !geojsonData.features.length) return false;
       let hasPoly = false;
       ctx.beginPath();
       geojsonData.features.forEach(f=>{
         if(!f.geometry) return;
         let rings = null;
-        if(f.geometry.type === 'Polygon')      rings = f.geometry.coordinates;
-        else if(f.geometry.type === 'MultiPolygon')
-          rings = f.geometry.coordinates.reduce((a,p)=>[...a,...p],[]);
+        if(f.geometry.type === 'Polygon')           rings = f.geometry.coordinates;
+        else if(f.geometry.type === 'MultiPolygon') rings = f.geometry.coordinates.reduce((a,p)=>[...a,...p],[]);
         if(!rings) return;
         rings.forEach(ring=>{
           if(ring.length < 3) return;
@@ -1949,22 +1898,19 @@ function renderHeatmap(){
     },
 
     _draw(){
-      const sz  = this._map.getSize();
-      const c   = this._canvas;
-      c.width   = sz.x;
-      c.height  = sz.y;
-      L.DomUtil.setPosition(c, this._map.containerPointToLayerPoint([0, 0]));
+      const sz = this._map.getSize();
+      const c  = this._canvas;
+      c.width  = sz.x;
+      c.height = sz.y;
+      L.DomUtil.setPosition(c, this._map.containerPointToLayerPoint([0,0]));
 
       const ctx = c.getContext('2d');
       ctx.clearRect(0, 0, sz.x, sz.y);
       ctx.save();
 
-      /* Apply river-polygon clip before drawing a single pixel of heat */
       const clipped = this._buildClipPath(ctx);
       if(clipped) ctx.clip('evenodd');
 
-      /* Draw a radial gradient "blob" for every fix point.
-         Small radius + tight blur keeps heat hugging the thalweg. */
       const R = 16, BLUR = 12;
       this._pts.forEach(p=>{
         const cp = this._map.latLngToContainerPoint(L.latLng(p[0], p[1]));
@@ -1985,15 +1931,21 @@ function renderHeatmap(){
   heatLayer = new ClippedHeat(fixes.map(f=>[f.lat, f.lon])).addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
- function toggleHeatmap(){
-  if(!displayed.length){toast('No visible records to generate heatmap.');return;}
- heatmapOn=!heatmapOn;
-document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
-const mh=document.getElementById('mob-heatBtn');
-if(mh)mh.classList.toggle('on',heatmapOn);
-  if(!heatmapOn){if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
+
+function toggleHeatmap(){
+  if(!displayed.length){ toast('No visible records to generate heatmap.'); return; }
+  heatmapOn = !heatmapOn;
+  document.getElementById('heatBtn').classList.toggle('on', heatmapOn);
+  const mh = document.getElementById('mob-heatBtn');
+  if(mh) mh.classList.toggle('on', heatmapOn);
+  if(!heatmapOn){
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
+    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+    return;
+  }
   renderHeatmap();
 }
+
 /* ═══════════════════════════════════════════════
    FIELD UPDATES PANEL
    ═══════════════════════════════════════════════ */
@@ -2018,8 +1970,6 @@ function formatUpdateText(text){
 
 function loadUpdates(rows){
   updatesRows = rows||[];
-
-  // Sort all rows by date descending; keep only entries that have a date or text
   const sorted = updatesRows.filter(row=>{
     const hasDate = !!getUpdateDate(row);
     const hasText = !!(gc(row,'Update','update','Notes','Text','notes','Content','content','Update_Text','UpdateText','Details','detail'));
@@ -2027,14 +1977,13 @@ function loadUpdates(rows){
   }).sort((a,b)=>{
     const ta = getUpdateDate(a)?.getTime() ?? -Infinity;
     const tb = getUpdateDate(b)?.getTime() ?? -Infinity;
-    return tb - ta; // most-recent first
+    return tb - ta;
   });
 
   const latestDate = document.getElementById('fuDate');
   const latestText = document.getElementById('fuText');
   const list       = document.getElementById('fuList');
 
-  // Always hide the previous-updates section — we display only the single latest entry
   const fpScroll = document.querySelector('.fp-scroll');
   if(fpScroll) fpScroll.style.display = 'none';
   if(list) list.innerHTML = '';
@@ -2045,7 +1994,6 @@ function loadUpdates(rows){
     return;
   }
 
-  // Render the single most-recent entry
   const latest  = sorted[0];
   const rd      = getUpdateDate(latest);
   latestDate.textContent = rd
@@ -2060,22 +2008,18 @@ function toggleFieldPanel(){ document.getElementById('fp').classList.toggle('ope
 function closeFieldPanel(){ document.getElementById('fp').classList.remove('open'); document.getElementById('fpBg').classList.remove('open'); }
 
 /* ═══════════════════════════════════════════════
-   CHANGE 4: Help Modal JS
+   HELP MODAL
    ═══════════════════════════════════════════════ */
 function toggleHelpModal(){
   document.getElementById('helpBg').classList.toggle('open');
 }
 function closeHelpModal(event){
-  /* Only close when clicking the dark overlay itself, not the modal card */
   if(event.target === document.getElementById('helpBg')){
     document.getElementById('helpBg').classList.remove('open');
   }
 }
-/* Close on Escape key */
 document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape'){
-    document.getElementById('helpBg').classList.remove('open');
-  }
+  if(e.key === 'Escape') document.getElementById('helpBg').classList.remove('open');
 });
 
 /* ═══════════════════════════════════════════════
@@ -2090,7 +2034,7 @@ function toggleFilterBar(){
   document.getElementById('map-wrap').style.top=filterBarHidden?'var(--hdr)':'calc(var(--hdr) + var(--fbar))';
   const fp = document.getElementById('fp');
   if(fp && !isMobile()){
-    fp.style.top = filterBarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
+    fp.style.top    = filterBarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
     fp.style.height = filterBarHidden ? 'calc(100vh - var(--hdr))' : 'calc(100vh - var(--hdr) - var(--fbar))';
   }
   setTimeout(()=>map.invalidateSize(),220);
@@ -2149,7 +2093,6 @@ function rebuildMobileFilters(){
   const srnoOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
   buildMobMSOptions('srno', srnoOpts);
 
-  // CHANGE 3: Enclosure_ID mobile filter
   const encOpts=[...new Set(entities.map(e=>{const i=getSrNoInfo(e);return i?i.animal:null;}).filter(Boolean))].sort();
   buildMobMSOptions('enc', encOpts);
 
@@ -2176,7 +2119,6 @@ function buildMobMSOptions(key,options,formatter){
   options.forEach(option=>{
     const label=document.createElement('label'); label.className='ms-item';
     const input=document.createElement('input'); input.type='checkbox'; input.value=option;
-    // CHANGE 1: Initial state is unchecked
     input.checked = false;
     input.addEventListener('change',()=>updateMobMSBtn(key));
     label.appendChild(input); label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
@@ -2211,15 +2153,14 @@ function toggleMobMS(key,event){
   document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
   if(!isOpen) drop.classList.add('open');
 }
-function mobMsSelectAll(key){document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});updateMobMSBtn(key);}
-function mobMsClearAll(key){document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMobMSBtn(key);}
+function mobMsSelectAll(key){ document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;}); updateMobMSBtn(key); }
+function mobMsClearAll(key)  { document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;}); updateMobMSBtn(key); }
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('#mobileDrawer .ms-wrap')) document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
 });
 
 function mobileApplyFilters(){
-  // CHANGE 3: 'enc' added to sync list
   ['srno','enc','pen','rid','zone','status'].forEach(key=>{
     const mobChecked=new Set([...document.querySelectorAll('#mob-msi-'+key+' input[type=checkbox]:checked')].map(i=>i.value));
     const desktopInputs=document.querySelectorAll('#msi-'+key+' input[type=checkbox]');
@@ -2229,16 +2170,6 @@ function mobileApplyFilters(){
     }
   });
   applyFilters(); closeMobileDrawer();
-}
-
-function mobileClearFilters(){
-  activeBucket = null;
-  sortColumn = null; sortDir = 'asc';
-  updateSortHeaders();
-  document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
-  rebuildFilters();
-  applyFilters();
-  closeMobileDrawer();
 }
 
 /* ═══════════════════════════════════════════════
@@ -2277,14 +2208,14 @@ async function loadAllData(){
     loadUpdates(updateRows);
     rebuildFilters();
     renderLegend();
-    applyFilters(); // will show 0 markers since all checkboxes start unchecked
+    applyFilters();
 
     document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     toast(`Data loaded — ${entities.length} hatchlings. Use filters to reveal locations.`,true);
 
-  } catch(err){
+  }catch(err){
     console.error(err); toast('Failed to load telemetry data.');
-  } finally{
+  }finally{
     btn.classList.remove('loading');
     const elapsed=performance.now()-SPLASH_START, wait=Math.max(0,SPLASH_MIN_MS-elapsed);
     setTimeout(()=>document.getElementById('loading').classList.add('hide'),wait);
