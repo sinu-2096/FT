@@ -1565,7 +1565,6 @@ function applyFilters(){
   entityMarkerMap = {};
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(e){}
   if(heatLayer){ map.removeLayer(heatLayer); heatLayer=null; }
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer=null; }
 
   // If literally nothing is checked, show an empty map. Otherwise, process filters.
   if(totalChecked === 0){
