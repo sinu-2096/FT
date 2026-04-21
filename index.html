@@ -659,7 +659,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
     <div class="fsep"></div>
     <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
-    <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
   </div>
 </div>
 
@@ -778,7 +777,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <span class="drawer-label">Map Overlays</span>
       <div class="drawer-toggles">
         <button class="fbtn" id="mob-heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
-        <button class="fbtn" id="mob-kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
       </div>
     </div>
     <div class="drawer-row">
@@ -1006,8 +1004,8 @@ const ZONE_SNAP_MAX_KM = 0.5;
 /* ── State ── */
 let map, oms, markerLayer;
 let zoneGeoLayer = null;
-let heatLayer = null, kdeLayer = null;
-let heatmapOn = false, kdeOn = false;
+let heatLayer = null;
+let heatmapOn = false;
 let bottomCollapsed = false, bottomHeight = 250;
 let filterBarHidden = false;
 let legendCollapsed = false;
@@ -1612,13 +1610,6 @@ function clearFilters(){
     if(hBtn) hBtn.classList.remove('on');
     if(mhBtn) mhBtn.classList.remove('on');
   }
-  if(kdeOn || kdeLayer){
-    kdeOn = false;
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    const kBtn=document.getElementById('kdeBtn'), mkBtn=document.getElementById('mob-kdeBtn');
-    if(kBtn) kBtn.classList.remove('on');
-    if(mkBtn) mkBtn.classList.remove('on');
-  }
   if(markerLayer && !map.hasLayer(markerLayer)) markerLayer.addTo(map);
   map.closePopup(); // Closes the active popup
   sortColumn = null; sortDir = 'asc';
@@ -1786,7 +1777,6 @@ function renderMarkers(){
   try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
   if(!displayed.length){
     if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-    if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
     return;
   }
   displayed.forEach(entity=>{
@@ -1799,7 +1789,6 @@ function renderMarkers(){
     entityMarkerMap[entity.id]=marker;
   });
   if(heatmapOn) renderHeatmap();
-  else if(kdeOn) renderKDE();
   else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
   const pts = displayed.filter(e=>e.latestFix&&Number.isFinite(e.latestFix.lat)).map(e=>[e.latestFix.lat,e.latestFix.lon]);
   if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
@@ -1902,7 +1891,6 @@ function getAllFixes(){
 function renderHeatmap(){
   const fixes=getAllFixes();
   if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
   if(!fixes.length){
     heatmapOn=false;
     const hBtn=document.getElementById('heatBtn'),mhBtn=document.getElementById('mob-heatBtn');
@@ -1998,25 +1986,6 @@ function renderHeatmap(){
   heatLayer = new ClippedHeat(fixes.map(f=>[f.lat, f.lon])).addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
-
-function renderKDE(){
-  const fixes=getAllFixes();
-  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
-  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-  if(fixes.length<4){kdeOn=false;document.getElementById('kdeBtn').classList.remove('on');return;}
-  const points=fixes.map(f=>[f.lat,f.lon]);
-  const KDE=L.Layer.extend({
-    initialize(){this._pts=points;},
-    onAdd(m){this._map=m;this._canvas=document.createElement('canvas');this._canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';m.getPanes().overlayPane.appendChild(this._canvas);m.on('moveend zoomend resize',this.draw,this);this.draw();},
-    onRemove(m){if(this._canvas?.parentNode)this._canvas.parentNode.removeChild(this._canvas);m.off('moveend zoomend resize',this.draw,this);},
-    draw(){
-      const sz=this._map.getSize(),c=this._canvas;c.width=sz.x;c.height=sz.y;
-      L.DomUtil.setPosition(c,this._map.containerPointToLayerPoint([0,0]));
-      const ctx=c.getContext('2d');ctx.clearRect(0,0,sz.x,sz.y);
-      const px=this._pts.map(p=>this._map.latLngToContainerPoint(L.latLng(p[0],p[1])));
-      const bw=26;
-      px.forEach(p=>{const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,bw);g.addColorStop(0,'rgba(127,29,29,.35)');g.addColorStop(.45,'rgba(239,68,68,.18)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(p.x-bw,p.y-bw,bw*2,bw*2);});
-    }
   });
   kdeLayer=new KDE().addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
@@ -2024,26 +1993,13 @@ function renderKDE(){
 
 function toggleHeatmap(){
   if(!displayed.length){toast('No visible records to generate heatmap.');return;}
-  heatmapOn=!heatmapOn;if(heatmapOn)kdeOn=false;
-  document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
-  document.getElementById('kdeBtn').classList.remove('on');
-  const mh=document.getElementById('mob-heatBtn'),mk=document.getElementById('mob-kdeBtn');
-  if(mh)mh.classList.toggle('on',heatmapOn);if(mk)mk.classList.remove('on');
+ heatmapOn=!heatmapOn;
+document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
+const mh=document.getElementById('mob-heatBtn');
+if(mh)mh.classList.toggle('on',heatmapOn);
   if(!heatmapOn){if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
   renderHeatmap();
 }
-
-function toggleKDE(){
-  if(!displayed.length){toast('No visible records for KDE.');return;}
-  kdeOn=!kdeOn;if(kdeOn)heatmapOn=false;
-  document.getElementById('kdeBtn').classList.toggle('on',kdeOn);
-  document.getElementById('heatBtn').classList.remove('on');
-  const mh=document.getElementById('mob-heatBtn'),mk=document.getElementById('mob-kdeBtn');
-  if(mk)mk.classList.toggle('on',kdeOn);if(mh)mh.classList.remove('on');
-  if(!kdeOn){if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
-  renderKDE();
-}
-
 /* ═══════════════════════════════════════════════
    FIELD UPDATES PANEL
    ═══════════════════════════════════════════════ */
